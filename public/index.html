@@ -1,46 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>SkyBlock Bazaar Tracker</title>
   <style>
     body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-image: url('/bgimage.jpeg');
-  background-size: cover;
-  background-attachment: fixed;
-  background-position: center;
-  color: #fff;
-}
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url('bgimage.jpeg');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      color: #fff;
+    }
 
-
-    .container {
+    .content {
       max-width: 900px;
-      margin: 0 auto;
-      background: rgba(0,0,0,0.7);
-      padding: 30px;
-      margin-top: 50px;
-      border-radius: 20px;
-      overflow-y: auto;
-      max-height: 90vh;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: rgba(0, 0, 0, 0.75);
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
 
     h1 {
       text-align: center;
-      font-size: 32px;
-      margin-bottom: 30px;
+      font-size: 2rem;
+      margin-bottom: 20px;
     }
 
     input {
       width: 100%;
-      padding: 10px;
-      margin-bottom: 20px;
+      padding: 12px;
       font-size: 16px;
       border-radius: 8px;
       border: none;
-      box-sizing: border-box;
+      margin-bottom: 30px;
     }
 
     table {
@@ -50,8 +45,8 @@
     }
 
     th, td {
-      border: 1px solid #555;
-      padding: 10px;
+      padding: 12px;
+      border: 1px solid #444;
       text-align: left;
     }
 
@@ -59,83 +54,78 @@
       background-color: #333;
     }
 
-    .totals {
+    td {
+      background-color: #222;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
       font-weight: bold;
-      margin-bottom: 40px;
+      margin: 20px 0 10px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="content">
     <h1>SkyBlock Bazaar Tracker</h1>
-    <input type="text" id="itemId" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
+    <input id="item-input" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)">
 
-    <h2>Buy Orders</h2>
-    <table id="buyTable">
+    <div class="section-title">Buy Orders</div>
+    <table>
       <thead>
-        <tr>
-          <th>Price</th>
-          <th>Amount</th>
-          <th>Total</th>
-        </tr>
+        <tr><th>Price</th><th>Amount</th><th>Total</th></tr>
       </thead>
-      <tbody></tbody>
+      <tbody id="buy-orders"></tbody>
     </table>
 
-    <h2>Sell Orders</h2>
-    <table id="sellTable">
+    <div class="section-title">Sell Orders</div>
+    <table>
       <thead>
-        <tr>
-          <th>Price</th>
-          <th>Amount</th>
-          <th>Total</th>
-        </tr>
+        <tr><th>Price</th><th>Amount</th><th>Total</th></tr>
       </thead>
-      <tbody></tbody>
+      <tbody id="sell-orders"></tbody>
     </table>
-
-    <div class="totals" id="totals"></div>
   </div>
 
   <script>
-    const input = document.getElementById('itemId');
-    const buyBody = document.querySelector('#buyTable tbody');
-    const sellBody = document.querySelector('#sellTable tbody');
-    const totals = document.getElementById('totals');
+    async function fetchBazaar(itemId) {
+      try {
+        const apiKey = await fetch('api.txt').then(res => res.text()).then(text => text.trim());
+        const url = `https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`;
+        const res = await fetch(url);
+        const data = await res.json();
 
-    input.addEventListener('change', () => {
-      const id = input.value.toUpperCase().trim();
-      if (!id) return;
+        const item = data.products[itemId];
+        if (!item) {
+          alert("Invalid item ID");
+          return;
+        }
 
-      fetch(`https://api.hypixel.net/skyblock/bazaar/product?productId=${id}`)
-        .then(res => res.json())
-        .then(data => {
-          const product = data.product;
-          const buys = product.buy_summary || [];
-          const sells = product.sell_summary || [];
+        const buyOrders = item.buy_summary;
+        const sellOrders = item.sell_summary;
 
-          let buyTotal = 0, sellTotal = 0;
-          buyBody.innerHTML = sells.map(row => {
-            const total = row.pricePerUnit * row.amount;
-            buyTotal += total;
-            return `<tr><td>${row.pricePerUnit.toLocaleString()}</td><td>${row.amount}</td><td>${total.toLocaleString()}</td></tr>`;
-          }).join('');
+        function format(orders) {
+          return orders.map(order => `
+            <tr>
+              <td>${order.pricePerUnit.toLocaleString()}</td>
+              <td>${order.amount.toLocaleString()}</td>
+              <td>${(order.pricePerUnit * order.amount).toLocaleString()}</td>
+            </tr>
+          `).join('');
+        }
 
-          sellBody.innerHTML = buys.map(row => {
-            const total = row.pricePerUnit * row.amount;
-            sellTotal += total;
-            return `<tr><td>${row.pricePerUnit.toLocaleString()}</td><td>${row.amount}</td><td>${total.toLocaleString()}</td></tr>`;
-          }).join('');
+        document.getElementById('buy-orders').innerHTML = format(buyOrders);
+        document.getElementById('sell-orders').innerHTML = format(sellOrders);
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Failed to fetch data");
+      }
+    }
 
-          totals.innerHTML = `
-            Total Buy Order Volume: ${buyTotal.toLocaleString()} coins<br>
-            Total Sell Order Volume: ${sellTotal.toLocaleString()} coins
-          `;
-        })
-        .catch(err => {
-          alert("Item not found or API error.");
-          console.error(err);
-        });
+    document.getElementById('item-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        fetchBazaar(this.value.trim().toUpperCase());
+      }
     });
   </script>
 </body>
