@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SkyBlock Bazaar Tracker</title>
   <style>
     body {
@@ -12,136 +12,134 @@
       background-size: cover;
       color: #fff;
     }
-
     .container {
+      max-width: 900px;
+      margin: 40px auto;
       background-color: rgba(0, 0, 0, 0.8);
-      max-width: 1000px;
-      margin: 60px auto;
       padding: 30px;
       border-radius: 20px;
-      box-shadow: 0 0 15px #000;
     }
-
     h1 {
       text-align: center;
-      margin-bottom: 30px;
+      font-size: 32px;
     }
-
-    input[type="text"] {
+    input {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       margin-bottom: 30px;
-      font-size: 16px;
+      font-size: 18px;
+      border-radius: 6px;
       border: none;
-      border-radius: 10px;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 40px;
+      background-color: rgba(255, 255, 255, 0.05);
     }
-
     th, td {
-      border: 1px solid #444;
+      border: 1px solid #666;
       padding: 10px;
-      text-align: center;
-      background-color: rgba(30, 30, 30, 0.95);
+      text-align: right;
+      font-size: 16px;
     }
-
     th {
-      background-color: rgba(60, 60, 60, 0.95);
+      background-color: rgba(255, 255, 255, 0.15);
+      text-align: center;
     }
-
-    .total-row td {
+    td:first-child, th:first-child {
+      text-align: center;
+    }
+    tfoot td {
       font-weight: bold;
-      background-color: rgba(20, 20, 20, 0.95);
+      background-color: rgba(255, 255, 255, 0.1);
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>SkyBlock Bazaar Tracker</h1>
-    <input type="text" id="itemId" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" onkeypress="handleKey(event)">
-
+    <input type="text" id="item-input" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" onkeyup="fetchOrders()" />
     <h2>Buy Orders</h2>
-    <table id="buyOrders">
+    <table id="buy-orders">
       <thead>
         <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
       </thead>
       <tbody></tbody>
+      <tfoot></tfoot>
     </table>
-
     <h2>Sell Orders</h2>
-    <table id="sellOrders">
+    <table id="sell-orders">
       <thead>
         <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
       </thead>
       <tbody></tbody>
+      <tfoot></tfoot>
     </table>
   </div>
-
   <script>
-    async function getApiKey() {
-      try {
-        const res = await fetch('api.txt');
-        return (await res.text()).trim();
-      } catch {
-        alert("Unable to load API key. Make sure 'api.txt' exists next to 'bgimage.jpeg'.");
-      }
-    }
-
-    function handleKey(event) {
-      if (event.key === "Enter") {
-        fetchOrders();
-      }
-    }
-
     async function fetchOrders() {
-      const itemId = document.getElementById("itemId").value.toUpperCase();
-      const apiKey = await getApiKey();
-      if (!apiKey || !itemId) return;
+      const itemId = document.getElementById('item-input').value.trim().toUpperCase();
+      if (!itemId) return;
+
+      const apiKeyPath = './api.txt';
+      let apiKey = '';
+
+      try {
+        const res = await fetch(apiKeyPath);
+        apiKey = (await res.text()).trim();
+      } catch (err) {
+        console.error("Couldn't load API key from api.txt", err);
+        return;
+      }
 
       const url = `https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const product = data.products[itemId];
-      if (!product) return alert("Item not found.");
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        const product = data.products[itemId];
+        if (!product) return;
 
-      populateTable('buyOrders', product.buy_summary);
-      populateTable('sellOrders', product.sell_summary);
+        renderTable('buy-orders', product.buy_summary);
+        renderTable('sell-orders', product.sell_summary);
+      } catch (err) {
+        console.error("Bazaar fetch error", err);
+      }
     }
 
-    function populateTable(id, orders) {
-      const table = document.getElementById(id).querySelector('tbody');
-      table.innerHTML = '';
+    function renderTable(tableId, summary) {
+      const tbody = document.querySelector(`#${tableId} tbody`);
+      const tfoot = document.querySelector(`#${tableId} tfoot`);
+      tbody.innerHTML = '';
+      tfoot.innerHTML = '';
 
       let totalAmount = 0;
       let totalCoins = 0;
 
-      for (const o of orders) {
-        const row = document.createElement("tr");
-        const total = o.pricePerUnit * o.amount;
-        totalAmount += o.amount;
-        totalCoins += total;
+      for (const order of summary) {
+        const row = document.createElement('tr');
+        const price = order.pricePerUnit;
+        const amount = order.amount;
+        const coins = price * amount;
         row.innerHTML = `
-          <td>${o.orders}</td>
-          <td>${o.amount}</td>
-          <td>${o.pricePerUnit.toLocaleString()} coins</td>
-          <td>${total.toLocaleString()} coins</td>
+          <td>${order.orders}</td>
+          <td>${amount.toLocaleString()}</td>
+          <td>${price.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})} coins</td>
+          <td>${coins.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})} coins</td>
         `;
-        table.appendChild(row);
+        tbody.appendChild(row);
+        totalAmount += amount;
+        totalCoins += coins;
       }
 
-      const totalRow = document.createElement("tr");
-      totalRow.className = 'total-row';
+      const totalRow = document.createElement('tr');
       totalRow.innerHTML = `
-        <td colspan="1">Total:</td>
+        <td><strong>Total:</strong></td>
         <td>${totalAmount.toLocaleString()}</td>
         <td></td>
-        <td>${totalCoins.toLocaleString()} coins</td>
+        <td>${totalCoins.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})} coins</td>
       `;
-      table.appendChild(totalRow);
+      tfoot.appendChild(totalRow);
     }
   </script>
 </body>
