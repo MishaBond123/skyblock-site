@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2487.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
+    span.s1 {font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;title&gt;SkyBlock Bazaar Tracker&lt;/title&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;body&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;h1&gt;SkyBlock Bazaar Prices&lt;/h1&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div id="prices"&gt;Loading...&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;script&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const items = ["TUNGSTEN_PLATE", "REFINED_UMBER", "GLACITE_AMALGAMATION"];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>fetch("https://api.hypixel.net/skyblock/bazaar")</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.then(res =&gt; res.json())</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.then(data =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let html = "&lt;ul&gt;";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>for (let item of items) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>const q = data.products[item].quick_status;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>html += `&lt;li&gt;&lt;strong&gt;${item.replaceAll("_", " ")}:&lt;/strong&gt; Buy: ${q.buyPrice.toFixed(1)} | Sell: ${q.sellPrice.toFixed(1)}&lt;/li&gt;`;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>html += "&lt;/ul&gt;";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById("prices").innerHTML = html;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+</body>
+</html>
