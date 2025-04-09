@@ -2,145 +2,154 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SkyBlock Bazaar Tracker</title>
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: url("bgimage.jpeg") no-repeat center center fixed;
+      background: url('./bgimage.jpeg') no-repeat center center fixed;
       background-size: cover;
-      color: #fff;
+      color: white;
     }
-    .container {
+    .content {
       max-width: 900px;
-      margin: 40px auto;
+      margin: auto;
       background-color: rgba(0, 0, 0, 0.8);
       padding: 30px;
-      border-radius: 20px;
-    }
-    h1 {
-      text-align: center;
-      font-size: 32px;
+      border-radius: 16px;
+      margin-top: 40px;
     }
     input {
       width: 100%;
       padding: 10px;
-      margin-bottom: 30px;
-      font-size: 18px;
+      font-size: 16px;
       border-radius: 6px;
       border: none;
+      margin-bottom: 30px;
+    }
+    h1, h2 {
+      text-align: center;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 40px;
-      background-color: rgba(255, 255, 255, 0.05);
     }
     th, td {
-      border: 1px solid #666;
+      border: 1px solid rgba(255, 255, 255, 0.2);
       padding: 10px;
-      text-align: right;
-      font-size: 16px;
+      text-align: left;
     }
     th {
-      background-color: rgba(255, 255, 255, 0.15);
-      text-align: center;
-    }
-    td:first-child, th:first-child {
-      text-align: center;
-    }
-    tfoot td {
-      font-weight: bold;
       background-color: rgba(255, 255, 255, 0.1);
+    }
+    tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    .total-row td {
+      font-weight: bold;
+      border-top: 2px solid white;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="content">
     <h1>SkyBlock Bazaar Tracker</h1>
-    <input type="text" id="item-input" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" onkeyup="fetchOrders()" />
-    <h2>Buy Orders</h2>
-    <table id="buy-orders">
-      <thead>
-        <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
-      </thead>
-      <tbody></tbody>
-      <tfoot></tfoot>
-    </table>
+    <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
+    
     <h2>Sell Orders</h2>
-    <table id="sell-orders">
+    <table id="buyTable">
       <thead>
-        <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
+        <tr>
+          <th>Orders</th>
+          <th>Amount</th>
+          <th>Unit Price</th>
+          <th>Coin Equivalent</th>
+        </tr>
       </thead>
       <tbody></tbody>
-      <tfoot></tfoot>
+    </table>
+
+    <h2>Buy Orders</h2>
+    <table id="sellTable">
+      <thead>
+        <tr>
+          <th>Orders</th>
+          <th>Amount</th>
+          <th>Unit Price</th>
+          <th>Coin Equivalent</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
     </table>
   </div>
+
   <script>
-    async function fetchOrders() {
-      const itemId = document.getElementById('item-input').value.trim().toUpperCase();
-      if (!itemId) return;
+    const itemInput = document.getElementById("itemInput");
+    const buyTable = document.getElementById("buyTable").querySelector("tbody");
+    const sellTable = document.getElementById("sellTable").querySelector("tbody");
 
-      const apiKeyPath = './api.txt';
-      let apiKey = '';
-
-      try {
-        const res = await fetch(apiKeyPath);
-        apiKey = (await res.text()).trim();
-      } catch (err) {
-        console.error("Couldn't load API key from api.txt", err);
-        return;
-      }
-
-      const url = `https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`;
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        const product = data.products[itemId];
-        if (!product) return;
-
-        renderTable('buy-orders', product.buy_summary);
-        renderTable('sell-orders', product.sell_summary);
-      } catch (err) {
-        console.error("Bazaar fetch error", err);
-      }
+    async function getApiKey() {
+      const res = await fetch("./api.txt");
+      return (await res.text()).trim();
     }
 
-    function renderTable(tableId, summary) {
-      const tbody = document.querySelector(`#${tableId} tbody`);
-      const tfoot = document.querySelector(`#${tableId} tfoot`);
-      tbody.innerHTML = '';
-      tfoot.innerHTML = '';
+    function formatNumber(num) {
+      return new Intl.NumberFormat().format(num.toFixed(1));
+    }
 
+    async function fetchOrders(itemId) {
+      const apiKey = await getApiKey();
+      const res = await fetch(`https://api.hypixel.net/v2/skyblock/bazaar/product?key=${apiKey}&productId=${itemId}`);
+      const data = await res.json();
+      return data.product_info;
+    }
+
+    function renderOrders(table, orders) {
+      table.innerHTML = "";
       let totalAmount = 0;
       let totalCoins = 0;
 
-      for (const order of summary) {
-        const row = document.createElement('tr');
-        const price = order.pricePerUnit;
-        const amount = order.amount;
-        const coins = price * amount;
-        row.innerHTML = `
-          <td>${order.orders}</td>
-          <td>${amount.toLocaleString()}</td>
-          <td>${price.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})} coins</td>
-          <td>${coins.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})} coins</td>
+      for (const order of orders) {
+        const coinValue = order.amount * order.pricePerUnit;
+        totalAmount += order.amount;
+        totalCoins += coinValue;
+
+        table.innerHTML += `
+          <tr>
+            <td>${order.orders}</td>
+            <td>${order.amount}</td>
+            <td>${formatNumber(order.pricePerUnit)} coins</td>
+            <td>${formatNumber(coinValue)} coins</td>
+          </tr>
         `;
-        tbody.appendChild(row);
-        totalAmount += amount;
-        totalCoins += coins;
       }
 
-      const totalRow = document.createElement('tr');
-      totalRow.innerHTML = `
-        <td><strong>Total:</strong></td>
-        <td>${totalAmount.toLocaleString()}</td>
-        <td></td>
-        <td>${totalCoins.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})} coins</td>
+      table.innerHTML += `
+        <tr class="total-row">
+          <td><strong>Total:</strong></td>
+          <td>${formatNumber(totalAmount)}</td>
+          <td></td>
+          <td>${formatNumber(totalCoins)} coins</td>
+        </tr>
       `;
-      tfoot.appendChild(totalRow);
     }
+
+    itemInput.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter") {
+        const itemId = itemInput.value.trim().toUpperCase();
+        if (!itemId) return;
+        try {
+          const product = await fetchOrders(itemId);
+          // SWAPPED ORDER TYPES: Buy display = Sell orders, and vice versa
+          renderOrders(buyTable, product.sell_summary);
+          renderOrders(sellTable, product.buy_summary);
+        } catch (err) {
+          alert("Failed to load data. Check the item ID and API key.");
+        }
+      }
+    });
   </script>
 </body>
 </html>
