@@ -2,131 +2,147 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SkyBlock Bazaar Tracker</title>
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background-image: url('bgimage.jpeg');
+      background: url("bgimage.jpeg") no-repeat center center fixed;
       background-size: cover;
-      background-attachment: fixed;
-      background-position: center;
       color: #fff;
     }
 
-    .content {
-      max-width: 900px;
-      margin: 50px auto;
-      padding: 20px;
-      background-color: rgba(0, 0, 0, 0.75);
-      border-radius: 16px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    .container {
+      background-color: rgba(0, 0, 0, 0.8);
+      max-width: 1000px;
+      margin: 60px auto;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px #000;
     }
 
     h1 {
       text-align: center;
-      font-size: 2rem;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
 
-    input {
+    input[type="text"] {
       width: 100%;
       padding: 12px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: none;
       margin-bottom: 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 30px;
+      margin-bottom: 40px;
     }
 
     th, td {
-      padding: 12px;
       border: 1px solid #444;
-      text-align: left;
+      padding: 10px;
+      text-align: center;
+      background-color: rgba(30, 30, 30, 0.95);
     }
 
     th {
-      background-color: #333;
+      background-color: rgba(60, 60, 60, 0.95);
     }
 
-    td {
-      background-color: #222;
-    }
-
-    .section-title {
-      font-size: 1.2rem;
+    .total-row td {
       font-weight: bold;
-      margin: 20px 0 10px;
+      background-color: rgba(20, 20, 20, 0.95);
     }
   </style>
 </head>
 <body>
-  <div class="content">
+  <div class="container">
     <h1>SkyBlock Bazaar Tracker</h1>
-    <input id="item-input" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)">
+    <input type="text" id="itemId" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" onkeypress="handleKey(event)">
 
-    <div class="section-title">Buy Orders</div>
-    <table>
+    <h2>Buy Orders</h2>
+    <table id="buyOrders">
       <thead>
-        <tr><th>Price</th><th>Amount</th><th>Total</th></tr>
+        <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
       </thead>
-      <tbody id="buy-orders"></tbody>
+      <tbody></tbody>
     </table>
 
-    <div class="section-title">Sell Orders</div>
-    <table>
+    <h2>Sell Orders</h2>
+    <table id="sellOrders">
       <thead>
-        <tr><th>Price</th><th>Amount</th><th>Total</th></tr>
+        <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
       </thead>
-      <tbody id="sell-orders"></tbody>
+      <tbody></tbody>
     </table>
   </div>
 
   <script>
-    async function fetchBazaar(itemId) {
+    async function getApiKey() {
       try {
-        const apiKey = await fetch('api.txt').then(res => res.text()).then(text => text.trim());
-        const url = `https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`;
-        const res = await fetch(url);
-        const data = await res.json();
-
-        const item = data.products[itemId];
-        if (!item) {
-          alert("Invalid item ID");
-          return;
-        }
-
-        const buyOrders = item.buy_summary;
-        const sellOrders = item.sell_summary;
-
-        function format(orders) {
-          return orders.map(order => `
-            <tr>
-              <td>${order.pricePerUnit.toLocaleString()}</td>
-              <td>${order.amount.toLocaleString()}</td>
-              <td>${(order.pricePerUnit * order.amount).toLocaleString()}</td>
-            </tr>
-          `).join('');
-        }
-
-        document.getElementById('buy-orders').innerHTML = format(buyOrders);
-        document.getElementById('sell-orders').innerHTML = format(sellOrders);
-      } catch (err) {
-        console.error("Error:", err);
-        alert("Failed to fetch data");
+        const res = await fetch('api.txt');
+        return (await res.text()).trim();
+      } catch {
+        alert("Unable to load API key. Make sure 'api.txt' exists next to 'bgimage.jpeg'.");
       }
     }
 
-    document.getElementById('item-input').addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        fetchBazaar(this.value.trim().toUpperCase());
+    function handleKey(event) {
+      if (event.key === "Enter") {
+        fetchOrders();
       }
-    });
+    }
+
+    async function fetchOrders() {
+      const itemId = document.getElementById("itemId").value.toUpperCase();
+      const apiKey = await getApiKey();
+      if (!apiKey || !itemId) return;
+
+      const url = `https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const product = data.products[itemId];
+      if (!product) return alert("Item not found.");
+
+      populateTable('buyOrders', product.buy_summary);
+      populateTable('sellOrders', product.sell_summary);
+    }
+
+    function populateTable(id, orders) {
+      const table = document.getElementById(id).querySelector('tbody');
+      table.innerHTML = '';
+
+      let totalAmount = 0;
+      let totalCoins = 0;
+
+      for (const o of orders) {
+        const row = document.createElement("tr");
+        const total = o.pricePerUnit * o.amount;
+        totalAmount += o.amount;
+        totalCoins += total;
+        row.innerHTML = `
+          <td>${o.orders}</td>
+          <td>${o.amount}</td>
+          <td>${o.pricePerUnit.toLocaleString()} coins</td>
+          <td>${total.toLocaleString()} coins</td>
+        `;
+        table.appendChild(row);
+      }
+
+      const totalRow = document.createElement("tr");
+      totalRow.className = 'total-row';
+      totalRow.innerHTML = `
+        <td colspan="1">Total:</td>
+        <td>${totalAmount.toLocaleString()}</td>
+        <td></td>
+        <td>${totalCoins.toLocaleString()} coins</td>
+      `;
+      table.appendChild(totalRow);
+    }
   </script>
 </body>
 </html>
