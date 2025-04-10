@@ -100,11 +100,6 @@
     .dropdown-item:hover {
       background-color: rgba(255, 255, 255, 0.1);
     }
-    .dropdown-item img {
-      width: 24px;
-      height: 24px;
-      margin-right: 10px;
-    }
     .dropdown-label {
       display: flex;
       align-items: center;
@@ -196,8 +191,7 @@
         return {
           id,
           name: id.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase()),
-          price,
-          icon: `https://sky.coflnet.com/item-icon/${id}.png`
+          price
         };
       });
     }
@@ -212,7 +206,6 @@
         div.className = "dropdown-item";
         div.innerHTML = `
           <div class="dropdown-label">
-            <img src="${item.icon}" />
             ${item.name}
           </div>
           <div class="dropdown-price">${item.price} /bz</div>
