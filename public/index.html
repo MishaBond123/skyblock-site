@@ -89,16 +89,16 @@
 
     <div class="tables">
       <div class="table-wrapper">
-        <h2>Sell Orders</h2>
-        <table id="sellTable">
+        <h2>Buy Orders</h2>
+        <table id="buyTable">
           <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr></thead>
           <tbody></tbody>
           <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
         </table>
       </div>
       <div class="table-wrapper">
-        <h2>Buy Orders</h2>
-        <table id="buyTable">
+        <h2>Sell Orders</h2>
+        <table id="sellTable">
           <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr></thead>
           <tbody></tbody>
           <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
@@ -121,7 +121,7 @@
     });
 
     async function getApiKey() {
-      return "YOUR_API_KEY_HERE"; // Replace this with your actual key
+      return "YOUR_API_KEY_HERE"; // Replace with actual key
     }
 
     async function loadData(itemId) {
@@ -141,9 +141,8 @@
         instabuysElem.textContent = instabuysPerHour;
         instasellsElem.textContent = instasellsPerHour;
 
-        // ✅ Correct mapping: sellSummary → sellTable, buySummary → buyTable
-        renderTable(sellSummary, sellBody, sellFoot, +instabuysPerHour);
         renderTable(buySummary, buyBody, buyFoot, +instasellsPerHour);
+        renderTable(sellSummary, sellBody, sellFoot, +instabuysPerHour);
       } catch (err) {
         alert("Failed to load data. Check the item ID and API key.");
         console.error(err);
