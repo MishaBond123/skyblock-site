@@ -83,8 +83,8 @@
     <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
 
     <div class="info-box" id="infoBox">
-      <div><strong>Instabuys/hour:</strong><br><span id="instabuys">?</span></div>
-      <div><strong>Instasells/hour:</strong><br><span id="instasells">?</span></div>
+      <div><strong>Instabuys / hour:</strong><br><span id="instabuys">?</span></div>
+      <div><strong>Instasells / hour:</strong><br><span id="instasells">?</span></div>
     </div>
 
     <div class="tables">
@@ -121,7 +121,7 @@
     });
 
     async function getApiKey() {
-      return "YOUR_API_KEY_HERE"; // Replace with your key or use fetch('/api.txt') for backend proxy
+      return "YOUR_API_KEY_HERE"; // Replace this with your actual key
     }
 
     async function loadData(itemId) {
@@ -141,8 +141,9 @@
         instabuysElem.textContent = instabuysPerHour;
         instasellsElem.textContent = instasellsPerHour;
 
-        renderTable(sellSummary, sellBody, sellFoot, +instabuysPerHour); // Sell orders are filled by instabuys
-        renderTable(buySummary, buyBody, buyFoot, +instasellsPerHour);  // Buy orders are filled by instasells
+        // ✅ Correct mapping: sellSummary → sellTable, buySummary → buyTable
+        renderTable(sellSummary, sellBody, sellFoot, +instabuysPerHour);
+        renderTable(buySummary, buyBody, buyFoot, +instasellsPerHour);
       } catch (err) {
         alert("Failed to load data. Check the item ID and API key.");
         console.error(err);
