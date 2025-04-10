@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" type="image/jpeg" href="site-icon.jpeg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SkyBlock Bazaar Tracker</title>
+  <link rel="icon" type="image/jpeg" href="site-icon.jpeg"/>
   <style>
     body {
       margin: 0;
@@ -15,38 +15,50 @@
       color: #fff;
     }
     .container {
-      max-width: 1400px;
-      margin: 20px auto;
+      max-width: 1200px;
+      margin: 40px auto;
       background-color: rgba(0, 0, 0, 0.75);
       padding: 30px;
       border-radius: 16px;
     }
-    h1, h2 {
+    h1 {
       text-align: center;
+      margin-bottom: 20px;
     }
     input {
       width: 100%;
-      padding: 10px;
-      font-size: 16px;
+      padding: 12px;
+      font-size: 18px;
       margin: 20px 0;
       border-radius: 6px;
       border: none;
+      display: block;
     }
     .stats {
       display: flex;
       justify-content: space-around;
       margin-bottom: 20px;
-      background-color: rgba(255, 255, 255, 0.05);
-      padding: 10px;
-      border-radius: 8px;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+    }
+    .stats div {
+      text-align: center;
     }
     .tables {
       display: flex;
       gap: 20px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .table-wrapper {
+      flex: 1;
+      min-width: 500px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
+      margin-bottom: 30px;
       background-color: rgba(255, 255, 255, 0.05);
     }
     th, td {
@@ -60,11 +72,11 @@
     tfoot td {
       font-weight: bold;
     }
-    .warn {
-      background-color: rgba(255, 255, 0, 0.3);
+    tr.warn {
+      background-color: rgba(255, 255, 0, 0.2);
     }
-    .alert {
-      background-color: rgba(255, 0, 0, 0.4);
+    tr.danger {
+      background-color: rgba(255, 0, 0, 0.3);
     }
   </style>
 </head>
@@ -72,14 +84,18 @@
   <div class="container">
     <h1>SkyBlock Bazaar Tracker</h1>
     <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
-
     <div class="stats">
-      <div><strong>Instabuys / hour:</strong><br><span id="instabuys">0</span></div>
-      <div><strong>Instasells / hour:</strong><br><span id="instasells">0</span></div>
+      <div>
+        <strong>Instabuys / hour:</strong>
+        <div id="buysPerHour">-</div>
+      </div>
+      <div>
+        <strong>Instasells / hour:</strong>
+        <div id="sellsPerHour">-</div>
+      </div>
     </div>
-
     <div class="tables">
-      <div style="width: 50%">
+      <div class="table-wrapper">
         <h2>Buy Orders</h2>
         <table id="buyTable">
           <thead>
@@ -89,8 +105,7 @@
           <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
         </table>
       </div>
-
-      <div style="width: 50%">
+      <div class="table-wrapper">
         <h2>Sell Orders</h2>
         <table id="sellTable">
           <thead>
@@ -102,23 +117,21 @@
       </div>
     </div>
   </div>
-
   <script>
     const input = document.getElementById("itemInput");
     const buyBody = document.querySelector("#buyTable tbody");
     const sellBody = document.querySelector("#sellTable tbody");
     const buyFoot = document.querySelector("#buyTable tfoot tr");
     const sellFoot = document.querySelector("#sellTable tfoot tr");
-    const instabuysEl = document.getElementById("instabuys");
-    const instasellsEl = document.getElementById("instasells");
+    const buysPerHourDisplay = document.getElementById("buysPerHour");
+    const sellsPerHourDisplay = document.getElementById("sellsPerHour");
 
     input.addEventListener("change", () => {
       loadData(input.value.trim().toUpperCase());
     });
 
     async function getApiKey() {
-      const res = await fetch("api.txt");
-      return (await res.text()).trim();
+      return "YOUR_API_KEY_HERE";
     }
 
     async function loadData(itemId) {
@@ -129,48 +142,45 @@
         const data = json.products[itemId];
         if (!data) throw new Error("Item not found");
 
-        const instabuys = data.quick_status.buyMovingWeek / 168;
-        const instasells = data.quick_status.sellMovingWeek / 168;
-        instabuysEl.textContent = instabuys.toFixed(1);
-        instasellsEl.textContent = instasells.toFixed(1);
+        const buysPerHour = (data.quick_status.sellMovingWeek / 7 / 24).toFixed(1);
+        const sellsPerHour = (data.quick_status.buyMovingWeek / 7 / 24).toFixed(1);
+        buysPerHourDisplay.textContent = buysPerHour;
+        sellsPerHourDisplay.textContent = sellsPerHour;
 
-        renderTable(data.sell_summary, buyBody, buyFoot, instasells); // people buy from sells
-        renderTable(data.buy_summary, sellBody, sellFoot, instabuys); // people sell into buys
+        renderTable(data.buy_summary, buyBody, buyFoot, sellsPerHour);
+        renderTable(data.sell_summary, sellBody, sellFoot, buysPerHour);
       } catch (err) {
         alert("Failed to load data. Check the item ID and API key.");
         console.error(err);
       }
     }
 
-    function renderTable(summary, tbody, tfootRow, hourlyVolume) {
+    function renderTable(summary, tbody, tfootRow, hourlyLimit) {
       tbody.innerHTML = "";
-      let totalAmount = 0, totalCoins = 0;
+      let totalOrders = 0, totalAmount = 0, totalCoins = 0;
 
       for (const row of summary) {
         const total = row.amount * row.pricePerUnit;
+        totalOrders += 1;
         totalAmount += row.amount;
         totalCoins += total;
 
         const tr = document.createElement("tr");
+        if (row.amount > hourlyLimit * 5) tr.classList.add("danger");
+        else if (row.amount > hourlyLimit) tr.classList.add("warn");
+
         tr.innerHTML = `
           <td>${row.orders}</td>
-          <td>${row.amount}</td>
+          <td>${row.amount.toLocaleString()}</td>
           <td>${row.pricePerUnit.toLocaleString()} coins</td>
           <td>${total.toLocaleString()} coins</td>
         `;
-
-        if (row.amount > 5 * hourlyVolume) {
-          tr.classList.add("alert");
-        } else if (row.amount > hourlyVolume) {
-          tr.classList.add("warn");
-        }
-
         tbody.appendChild(tr);
       }
 
       tfootRow.innerHTML = `
         <td>Total:</td>
-        <td>${totalAmount}</td>
+        <td>${totalAmount.toLocaleString()}</td>
         <td></td>
         <td>${totalCoins.toLocaleString()} coins</td>
       `;
