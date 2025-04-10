@@ -158,64 +158,60 @@
       }
     }
 
-    function renderTable(summary, tbody, tfootRow, hourlyVolume, trackPrice) {
-      tbody.innerHTML = "";
-      let totalAmount = 0, totalCoins = 0, totalOrders = 0;
+    function renderTable(summary, tbody, tfootRow, trackPrice, hourlyRate, isBuyTable) {
+  tbody.innerHTML = "";
+  let totalOrders = 0, totalAmount = 0, totalCoins = 0;
+  let trackedOrder = null, coinGap = 0, itemsGap = 0;
 
-      let runningItems = 0, runningCoins = 0;
-      let matched = null, matchedIndex = -1;
+  for (let i = 0; i < summary.length; i++) {
+    const row = summary[i];
+    const total = row.amount * row.pricePerUnit;
+    totalOrders += 1;
+    totalAmount += row.amount;
+    totalCoins += total;
 
-      summary.forEach((row, index) => {
-        const total = row.amount * row.pricePerUnit;
-        const highlight = row.amount > hourlyVolume * 5
-          ? 'highlight-red' : row.amount > hourlyVolume ? 'highlight-yellow' : '';
+    const tr = document.createElement("tr");
 
-        const isTracked = trackPrice && row.pricePerUnit.toFixed(1) === trackPrice.toFixed(1);
-        const tr = document.createElement("tr");
-        tr.className = isTracked ? 'highlight-blue' : highlight;
-        tr.innerHTML = `
-          <td>${row.orders}</td>
-          <td>${row.amount}</td>
-          <td>${row.pricePerUnit.toLocaleString()} coins</td>
-          <td>${total.toLocaleString()} coins</td>
-        `;
-        tbody.appendChild(tr);
-
-        if (!matched && isTracked) {
-          matched = row;
-          matchedIndex = index;
-        }
-
-        if (!matched) {
-          runningItems += row.amount;
-          runningCoins += total;
-        }
-
-        totalOrders++;
-        totalAmount += row.amount;
-        totalCoins += total;
-      });
-
-      tfootRow.innerHTML = `
-        <td>Total:</td>
-        <td>${totalAmount}</td>
-        <td></td>
-        <td>${totalCoins.toLocaleString()} coins</td>
-      `;
-
-      if (matched) {
-        trackedOrderInfo.style.display = 'block';
-        trackedOrderInfo.innerHTML = `
-          <strong>Tracked Order:</strong><br>
-          Priority Position: ${matchedIndex + 1}<br>
-          Items in between: ${runningItems.toLocaleString()}<br>
-          Coins in between: ${runningCoins.toLocaleString()} coins<br>
-          Items in this order: ${matched.amount.toLocaleString()}<br>
-        `;
-      } else {
-        trackedOrderInfo.style.display = 'none';
-      }
+    // Highlighting logic
+    let highlightClass = "";
+    if (hourlyRate > 0 && row.amount > hourlyRate * 5) {
+      highlightClass = "highlight-high";
+    } else if (hourlyRate > 0 && row.amount > hourlyRate) {
+      highlightClass = "highlight-low";
     }
+
+    const matchTracked = trackPrice && Math.abs(row.pricePerUnit - trackPrice) < 0.01;
+    if (matchTracked) {
+      highlightClass = "tracked";
+      trackedOrder = {
+        rowIndex: i,
+        itemsBefore: summary.slice(0, i).reduce((a, b) => a + b.amount, 0),
+        coinGap: summary.slice(0, i).reduce((a, b) => a + (b.amount * b.pricePerUnit), 0),
+        orderAmount: row.amount,
+        orderType: isBuyTable ? "Buy" : "Sell"
+      };
+    }
+
+    tr.className = highlightClass;
+    tr.innerHTML = `
+      <td>${row.orders}</td>
+      <td>${row.amount}</td>
+      <td>${row.pricePerUnit.toLocaleString()} coins</td>
+      <td>${total.toLocaleString()} coins</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  tfootRow.innerHTML = `
+    <td>Total:</td>
+    <td>${totalAmount}</td>
+    <td></td>
+    <td>${totalCoins.toLocaleString()} coins</td>
+  `;
+
+  return trackedOrder;
+}
+
   </script>
 </body>
 </html>
