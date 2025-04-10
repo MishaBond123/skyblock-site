@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" type="image/jpeg" href="site-icon.jpeg">
   <title>SkyBlock Bazaar Tracker</title>
-  <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
   <style>
     body {
       margin: 0;
@@ -15,8 +15,8 @@
       color: #fff;
     }
     .container {
-      max-width: 1200px;
-      margin: 40px auto;
+      max-width: 1400px;
+      margin: 20px auto;
       background-color: rgba(0, 0, 0, 0.75);
       padding: 30px;
       border-radius: 16px;
@@ -32,10 +32,21 @@
       border-radius: 6px;
       border: none;
     }
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .tables {
+      display: flex;
+      gap: 20px;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 20px;
       background-color: rgba(255, 255, 255, 0.05);
     }
     th, td {
@@ -49,31 +60,11 @@
     tfoot td {
       font-weight: bold;
     }
-    .tables {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
+    .warn {
+      background-color: rgba(255, 255, 0, 0.3);
     }
-    .table-wrapper {
-      flex: 1 1 48%;
-    }
-    .info-box {
-      display: flex;
-      justify-content: space-evenly;
-      margin-bottom: 20px;
-      background-color: rgba(255, 255, 255, 0.1);
-      padding: 15px;
-      border-radius: 10px;
-      font-size: 16px;
-    }
-    .info-box div {
-      text-align: center;
-    }
-    .highlight-soft {
-      background-color: rgba(255, 255, 0, 0.2);
-    }
-    .highlight-strong {
-      background-color: rgba(255, 0, 0, 0.25);
+    .alert {
+      background-color: rgba(255, 0, 0, 0.4);
     }
   </style>
 </head>
@@ -82,24 +73,29 @@
     <h1>SkyBlock Bazaar Tracker</h1>
     <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
 
-    <div class="info-box" id="infoBox">
-      <div><strong>Instabuys / hour:</strong><br><span id="instabuys">?</span></div>
-      <div><strong>Instasells / hour:</strong><br><span id="instasells">?</span></div>
+    <div class="stats">
+      <div><strong>Instabuys / hour:</strong><br><span id="instabuys">0</span></div>
+      <div><strong>Instasells / hour:</strong><br><span id="instasells">0</span></div>
     </div>
 
     <div class="tables">
-      <div class="table-wrapper">
+      <div style="width: 50%">
         <h2>Buy Orders</h2>
         <table id="buyTable">
-          <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr></thead>
+          <thead>
+            <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
+          </thead>
           <tbody></tbody>
           <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
         </table>
       </div>
-      <div class="table-wrapper">
+
+      <div style="width: 50%">
         <h2>Sell Orders</h2>
         <table id="sellTable">
-          <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr></thead>
+          <thead>
+            <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
+          </thead>
           <tbody></tbody>
           <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
         </table>
@@ -113,15 +109,16 @@
     const sellBody = document.querySelector("#sellTable tbody");
     const buyFoot = document.querySelector("#buyTable tfoot tr");
     const sellFoot = document.querySelector("#sellTable tfoot tr");
-    const instabuysElem = document.getElementById("instabuys");
-    const instasellsElem = document.getElementById("instasells");
+    const instabuysEl = document.getElementById("instabuys");
+    const instasellsEl = document.getElementById("instasells");
 
     input.addEventListener("change", () => {
       loadData(input.value.trim().toUpperCase());
     });
 
     async function getApiKey() {
-      return "YOUR_API_KEY_HERE"; // Replace with actual key
+      const res = await fetch("api.txt");
+      return (await res.text()).trim();
     }
 
     async function loadData(itemId) {
@@ -132,24 +129,20 @@
         const data = json.products[itemId];
         if (!data) throw new Error("Item not found");
 
-        const buySummary = data.buy_summary;
-        const sellSummary = data.sell_summary;
-        const stats = data.quick_status;
+        const instabuys = data.quick_status.buyMovingWeek / 168;
+        const instasells = data.quick_status.sellMovingWeek / 168;
+        instabuysEl.textContent = instabuys.toFixed(1);
+        instasellsEl.textContent = instasells.toFixed(1);
 
-        const instabuysPerHour = (stats.buyMovingWeek / (7 * 24)).toFixed(1);
-        const instasellsPerHour = (stats.sellMovingWeek / (7 * 24)).toFixed(1);
-        instabuysElem.textContent = instabuysPerHour;
-        instasellsElem.textContent = instasellsPerHour;
-
-        renderTable(buySummary, buyBody, buyFoot, +instasellsPerHour);
-        renderTable(sellSummary, sellBody, sellFoot, +instabuysPerHour);
+        renderTable(data.sell_summary, buyBody, buyFoot, instasells); // people buy from sells
+        renderTable(data.buy_summary, sellBody, sellFoot, instabuys); // people sell into buys
       } catch (err) {
         alert("Failed to load data. Check the item ID and API key.");
         console.error(err);
       }
     }
 
-    function renderTable(summary, tbody, tfootRow, hourlyRate) {
+    function renderTable(summary, tbody, tfootRow, hourlyVolume) {
       tbody.innerHTML = "";
       let totalAmount = 0, totalCoins = 0;
 
@@ -159,18 +152,19 @@
         totalCoins += total;
 
         const tr = document.createElement("tr");
-        if (row.amount > hourlyRate * 5) {
-          tr.classList.add("highlight-strong");
-        } else if (row.amount > hourlyRate) {
-          tr.classList.add("highlight-soft");
-        }
-
         tr.innerHTML = `
           <td>${row.orders}</td>
           <td>${row.amount}</td>
           <td>${row.pricePerUnit.toLocaleString()} coins</td>
           <td>${total.toLocaleString()} coins</td>
         `;
+
+        if (row.amount > 5 * hourlyVolume) {
+          tr.classList.add("alert");
+        } else if (row.amount > hourlyVolume) {
+          tr.classList.add("warn");
+        }
+
         tbody.appendChild(tr);
       }
 
