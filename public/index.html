@@ -150,8 +150,8 @@
         document.getElementById("instabuys").innerText = (data.quick_status.buyMovingWeek / (7 * 24)).toFixed(1);
         document.getElementById("instasells").innerText = (data.quick_status.sellMovingWeek / (7 * 24)).toFixed(1);
 
-        const buyTracked = renderTable(data.buy_summary, document.querySelector("#buyTable tbody"), document.querySelector("#buyTable tfoot tr"), trackPrice, data.quick_status.sellMovingWeek / (7 * 24), true);
-        const sellTracked = renderTable(data.sell_summary, document.querySelector("#sellTable tbody"), document.querySelector("#sellTable tfoot tr"), trackPrice, data.quick_status.buyMovingWeek / (7 * 24), false);
+        const buyTracked = renderTable(data.buy_summary, document.querySelector("#sellTable tbody"), document.querySelector("#sellTable tfoot tr"), trackPrice, data.quick_status.sellMovingWeek / (7 * 24), true);
+        const sellTracked = renderTable(data.sell_summary, document.querySelector("#buyTable tbody"), document.querySelector("#buyTable tfoot tr"), trackPrice, data.quick_status.buyMovingWeek / (7 * 24), false);
 
         const activeTrack = buyTracked || sellTracked;
         if (activeTrack) {
