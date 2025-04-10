@@ -28,7 +28,7 @@
       width: 100%;
       padding: 10px;
       font-size: 16px;
-      margin: 10px 0 30px;
+      margin: 10px 0 10px;
       border-radius: 6px;
       border: none;
     }
@@ -81,6 +81,41 @@
       padding: 20px;
       border-radius: 12px;
     }
+    .dropdown {
+      background-color: rgba(0, 0, 0, 0.85);
+      border-radius: 8px;
+      padding: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+    }
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+    }
+    .dropdown-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .dropdown-item img {
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+    }
+    .dropdown-label {
+      display: flex;
+      align-items: center;
+    }
+    .dropdown-price {
+      background-color: goldenrod;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-weight: bold;
+      color: black;
+    }
   </style>
 </head>
 <body>
@@ -100,6 +135,7 @@
 
     <h3>Item ID:</h3>
     <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
+    <div id="itemDropdown" class="dropdown"></div>
 
     <h3>Track Order By Price:</h3>
     <input id="trackInput" placeholder="Enter price to track (e.g. 10,670,396.3)" />
@@ -133,19 +169,49 @@
   <script>
     const itemInput = document.getElementById("itemInput");
     const trackInput = document.getElementById("trackInput");
-    const buyBody = document.querySelector("#buyTable tbody");   // For sell_summary (buy orders)
-    const sellBody = document.querySelector("#sellTable tbody"); // For buy_summary (sell orders)
+    const buyBody = document.querySelector("#buyTable tbody");
+    const sellBody = document.querySelector("#sellTable tbody");
     const buyFoot = document.querySelector("#buyTable tfoot tr");
     const sellFoot = document.querySelector("#sellTable tfoot tr");
     const instabuys = document.getElementById("instabuys");
     const instasells = document.getElementById("instasells");
     const orderInfo = document.getElementById("orderInfo");
+    const itemDropdown = document.getElementById("itemDropdown");
 
-    let latestBuySummary = [], latestSellSummary = [], currentItemId = "";
+    const items = [
+      { id: "ENCHANTED_TUNGSTEN", name: "Enchanted Tungsten", price: "9.82k", icon: "https://sky.coflnet.com/item-icon/ENCHANTED_TUNGSTEN.png" },
+      { id: "REFINED_TUNGSTEN", name: "Refined Tungsten", price: "1.88M", icon: "https://sky.coflnet.com/item-icon/REFINED_TUNGSTEN.png" },
+      { id: "TUNGSTEN", name: "Tungsten", price: "56.6", icon: "https://sky.coflnet.com/item-icon/TUNGSTEN.png" },
+      { id: "TUNGSTEN_KEY", name: "Tungsten Key", price: "2.4M", icon: "https://sky.coflnet.com/item-icon/TUNGSTEN_KEY.png" },
+      { id: "TUNGSTEN_REGULATOR", name: "Tungsten Regulator", price: "-", icon: "https://sky.coflnet.com/item-icon/TUNGSTEN_REGULATOR.png" },
+      { id: "TUNGSTEN_PLATE", name: "Tungsten Plate", price: "9.81M", icon: "https://sky.coflnet.com/item-icon/TUNGSTEN_PLATE.png" }
+    ];
 
-    itemInput.addEventListener("change", () => {
-      currentItemId = itemInput.value.trim().toUpperCase();
-      loadData(currentItemId);
+    itemInput.addEventListener("input", () => {
+      const query = itemInput.value.trim().toLowerCase();
+      itemDropdown.innerHTML = "";
+      if (!query) return (itemDropdown.style.display = "none");
+
+      const filtered = items.filter(i => i.name.toLowerCase().includes(query) || i.id.toLowerCase().includes(query));
+      for (const item of filtered) {
+        const div = document.createElement("div");
+        div.className = "dropdown-item";
+        div.innerHTML = `
+          <div class="dropdown-label">
+            <img src="${item.icon}" />
+            ${item.name}
+          </div>
+          <div class="dropdown-price">${item.price} /bz</div>
+        `;
+        div.onclick = () => {
+          itemInput.value = item.id;
+          itemDropdown.style.display = "none";
+          currentItemId = item.id;
+          loadData(item.id);
+        };
+        itemDropdown.appendChild(div);
+      }
+      itemDropdown.style.display = "block";
     });
 
     trackInput.addEventListener("change", () => {
@@ -153,8 +219,10 @@
       highlightTrackedOrder(tracked);
     });
 
+    let latestBuySummary = [], latestSellSummary = [], currentItemId = "";
+
     async function getApiKey() {
-      return "YOUR_API_KEY_HERE"; // Replace with your real key if not using server proxy
+      return "YOUR_API_KEY_HERE";
     }
 
     async function loadData(itemId) {
@@ -168,12 +236,11 @@
         instabuys.textContent = data.quick_status.buyMovingWeek ? (data.quick_status.buyMovingWeek / (7 * 24)).toFixed(1) : "-";
         instasells.textContent = data.quick_status.sellMovingWeek ? (data.quick_status.sellMovingWeek / (7 * 24)).toFixed(1) : "-";
 
-        // Swap summaries to reflect actual order direction
-        latestBuySummary = data.sell_summary; // Players placing buy orders
-        latestSellSummary = data.buy_summary; // Players placing sell orders
+        latestBuySummary = data.sell_summary;
+        latestSellSummary = data.buy_summary;
 
-        renderTable(latestBuySummary, buyBody, buyFoot, parseFloat(instasells.textContent)); // Buy orders filled by instasells
-        renderTable(latestSellSummary, sellBody, sellFoot, parseFloat(instabuys.textContent)); // Sell orders filled by instabuys
+        renderTable(latestBuySummary, buyBody, buyFoot, parseFloat(instasells.textContent));
+        renderTable(latestSellSummary, sellBody, sellFoot, parseFloat(instabuys.textContent));
 
         highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));
       } catch (err) {
@@ -185,12 +252,10 @@
     function renderTable(summary, tbody, tfootRow, hourlyVolume) {
       tbody.innerHTML = "";
       let totalAmount = 0, totalCoins = 0;
-
       for (const row of summary) {
         const total = row.amount * row.pricePerUnit;
         totalAmount += row.amount;
         totalCoins += total;
-
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${row.orders}</td>
@@ -198,16 +263,10 @@
           <td>${row.pricePerUnit.toLocaleString()} coins</td>
           <td>${total.toLocaleString()} coins</td>
         `;
-
-        if (row.amount > hourlyVolume * 5) {
-          tr.classList.add("highlight-red");
-        } else if (row.amount > hourlyVolume) {
-          tr.classList.add("highlight-yellow");
-        }
-
+        if (row.amount > hourlyVolume * 5) tr.classList.add("highlight-red");
+        else if (row.amount > hourlyVolume) tr.classList.add("highlight-yellow");
         tbody.appendChild(tr);
       }
-
       tfootRow.innerHTML = `
         <td>Total:</td>
         <td>${totalAmount}</td>
@@ -219,23 +278,19 @@
     function highlightTrackedOrder(price) {
       orderInfo.innerHTML = "";
       if (!price || isNaN(price)) return;
-
       const allRows = [...buyBody.children, ...sellBody.children];
       allRows.forEach(row => row.classList.remove("highlight-blue"));
-
       for (const [summary, body] of [
         [latestBuySummary, buyBody],
         [latestSellSummary, sellBody]
       ]) {
         let coinsBetween = 0, itemsBetween = 0, priority = 1;
-
         for (const row of summary) {
           const unit = parseFloat(row.pricePerUnit.toFixed(1));
           if (Math.abs(unit - price) < 0.1) {
             const index = summary.indexOf(row);
             const tr = body.children[index];
             if (tr) tr.classList.add("highlight-blue");
-
             orderInfo.innerHTML = `
               <div class="order-info">
                 <strong>Tracked Order Info</strong><br>
