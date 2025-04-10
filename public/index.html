@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SkyBlock Bazaar Tracker</title>
-  <link rel="icon" href="site-icon.jpeg" />
+  <link rel="icon" href="site-icon.jpeg" type="image/jpeg">
   <style>
     body {
       margin: 0;
@@ -15,7 +15,7 @@
       color: #fff;
     }
     .container {
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 40px auto;
       background-color: rgba(0, 0, 0, 0.75);
       padding: 30px;
@@ -24,34 +24,13 @@
     h1, h2 {
       text-align: center;
     }
-    .centered-label {
-      text-align: center;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
     input {
       width: 100%;
       padding: 10px;
       font-size: 16px;
-      margin: 10px 0 30px;
+      margin: 10px 0 30px 0;
       border-radius: 6px;
       border: none;
-    }
-    .summary {
-      display: flex;
-      justify-content: space-around;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 10px;
-      margin-bottom: 20px;
-      border-radius: 12px;
-    }
-    .summary div {
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .tables {
-      display: flex;
-      gap: 20px;
     }
     table {
       width: 100%;
@@ -70,47 +49,64 @@
     tfoot td {
       font-weight: bold;
     }
-    .warn1 {
+    .tables {
+      display: flex;
+      gap: 20px;
+    }
+    .tables > div {
+      width: 50%;
+    }
+    .highlight-yellow {
       background-color: rgba(255, 255, 0, 0.2);
     }
-    .warn2 {
+    .highlight-red {
       background-color: rgba(255, 0, 0, 0.4);
     }
-    .tracked {
-      background-color: rgba(0, 128, 255, 0.3);
+    .highlight-blue {
+      background-color: rgba(0, 0, 255, 0.3);
     }
-    #orderInfo {
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .summary > div {
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 10px 20px;
+      border-radius: 8px;
+      flex: 1;
+      margin: 0 10px;
       text-align: center;
-      margin-top: -10px;
-      margin-bottom: 30px;
-      background-color: rgba(255, 255, 255, 0.07);
+    }
+    .track-info {
+      text-align: center;
+      margin-bottom: 20px;
+      background-color: rgba(0, 0, 0, 0.6);
       padding: 15px;
       border-radius: 10px;
-      display: none;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>SkyBlock Bazaar Tracker</h1>
-
     <div class="summary">
-      <div><span>Instabuys / hour:</span> <span id="instabuys">?</span></div>
-      <div><span>Instasells / hour:</span> <span id="instasells">?</span></div>
+      <div><strong>Instabuys / hour:</strong><br><span id="instabuys"></span></div>
+      <div><strong>Instasells / hour:</strong><br><span id="instasells"></span></div>
     </div>
 
-    <div class="centered-label">Item ID:</div>
+    <h3 style="text-align:center">Item ID:</h3>
     <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
 
-    <div class="centered-label">Track Order By Price:</div>
-    <input id="trackInput" placeholder="Enter Unit Price (e.g. 10,670,396.3)" />
+    <h3 style="text-align:center">Track Order By Price:</h3>
+    <input id="trackInput" placeholder="Enter price (e.g. 10,670,396.3)" />
 
-    <div id="orderInfo"></div>
+    <div id="trackDetails"></div>
 
     <div class="tables">
-      <div style="width: 50%">
-        <h2>Sell Orders</h2>
-        <table id="sellTable">
+      <div>
+        <h2>Buy Orders</h2>
+        <table id="buyTable">
           <thead>
             <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
           </thead>
@@ -118,9 +114,9 @@
           <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
         </table>
       </div>
-      <div style="width: 50%">
-        <h2>Buy Orders</h2>
-        <table id="buyTable">
+      <div>
+        <h2>Sell Orders</h2>
+        <table id="sellTable">
           <thead>
             <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
           </thead>
@@ -140,97 +136,91 @@
     const sellFoot = document.querySelector("#sellTable tfoot tr");
     const instabuys = document.getElementById("instabuys");
     const instasells = document.getElementById("instasells");
-    const orderInfo = document.getElementById("orderInfo");
+    const trackDetails = document.getElementById("trackDetails");
 
-    let currentData = null;
-    let currentTrack = null;
+    itemInput.addEventListener("change", () => loadData(itemInput.value.trim().toUpperCase()));
+    trackInput.addEventListener("change", () => loadData(itemInput.value.trim().toUpperCase()));
 
-    itemInput.addEventListener("change", () => {
-      loadData(itemInput.value.trim().toUpperCase());
-    });
-
-    trackInput.addEventListener("change", () => {
-      currentTrack = parseFloat(trackInput.value.replace(/,/g, ""));
-      if (currentData) renderTables(currentData);
-    });
+    async function getApiKey() {
+      return "YOUR_API_KEY_HERE";
+    }
 
     async function loadData(itemId) {
+      const apiKey = await getApiKey();
       try {
-        const apiKey = "YOUR_API_KEY_HERE";
         const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
         const json = await res.json();
-        const data = json.products[itemId];
-        if (!data) throw new Error("Item not found");
-        currentData = data;
-        currentTrack = parseFloat(trackInput.value.replace(/,/g, "")) || null;
-        renderTables(data);
-        instabuys.textContent = (data.quick_status.buyMovingWeek / 168).toFixed(1);
-        instasells.textContent = (data.quick_status.sellMovingWeek / 168).toFixed(1);
+        const product = json.products[itemId];
+        if (!product) throw new Error("Item not found");
+
+        const buySummary = product.buy_summary;
+        const sellSummary = product.sell_summary;
+
+        const volume = product.quick_status;
+        instabuys.textContent = (volume.buyMovingWeek / 168).toFixed(1);
+        instasells.textContent = (volume.sellMovingWeek / 168).toFixed(1);
+
+        renderTable(buySummary, buyBody, buyFoot, volume.sellMovingWeek / 168, 'buy');
+        renderTable(sellSummary, sellBody, sellFoot, volume.buyMovingWeek / 168, 'sell');
       } catch (err) {
         alert("Failed to load data. Check the item ID and API key.");
         console.error(err);
       }
     }
 
-    function renderTables(data) {
-      renderTable(data.buy_summary, buyBody, buyFoot, currentTrack, data.quick_status.sellMovingWeek / 168, "buy");
-      renderTable(data.sell_summary, sellBody, sellFoot, currentTrack, data.quick_status.buyMovingWeek / 168, "sell");
-    }
-
-    function renderTable(summary, tbody, tfootRow, tracked, hourlyVolume, type) {
+    function renderTable(summary, tbody, tfootRow, hourlyVolume, type) {
       tbody.innerHTML = "";
-      let totalOrders = 0, totalAmount = 0, totalCoins = 0;
-      let found = false;
-      let trackedPriority = 0, itemsBetween = 0, coinGap = 0, trackedAmount = 0;
+      let totalAmount = 0, totalCoins = 0;
+      let trackPrice = parseFloat(trackInput.value.replace(/,/g, ''));
+      let matchIndex = -1, matchRow = null;
 
-      for (const row of summary) {
+      for (let i = 0; i < summary.length; i++) {
+        const row = summary[i];
         const total = row.amount * row.pricePerUnit;
-        totalOrders += row.orders;
         totalAmount += row.amount;
         totalCoins += total;
 
         const tr = document.createElement("tr");
-        let cls = "";
-        if (row.amount > hourlyVolume * 5) cls = "warn2";
-        else if (row.amount > hourlyVolume) cls = "warn1";
-        if (tracked && row.pricePerUnit === tracked) {
-          cls = "tracked";
-          trackedAmount = row.amount;
-          found = true;
-        } else if (!found && tracked) {
-          itemsBetween += row.amount;
-          coinGap += row.amount * row.pricePerUnit;
-          trackedPriority++;
-        }
-
-        tr.className = cls;
         tr.innerHTML = `
           <td>${row.orders}</td>
-          <td>${row.amount.toLocaleString()}</td>
+          <td>${row.amount}</td>
           <td>${row.pricePerUnit.toLocaleString()} coins</td>
           <td>${total.toLocaleString()} coins</td>
         `;
+
+        if (row.amount > 5 * hourlyVolume) tr.classList.add("highlight-red");
+        else if (row.amount > hourlyVolume) tr.classList.add("highlight-yellow");
+
+        if (Math.abs(row.pricePerUnit - trackPrice) < 0.01) {
+          tr.classList.add("highlight-blue");
+          matchIndex = i;
+          matchRow = row;
+        }
+
         tbody.appendChild(tr);
       }
 
       tfootRow.innerHTML = `
         <td>Total:</td>
-        <td>${totalAmount.toLocaleString()}</td>
+        <td>${totalAmount}</td>
         <td></td>
         <td>${totalCoins.toLocaleString()} coins</td>
       `;
 
-      if (found) {
-        orderInfo.style.display = "block";
-        orderInfo.innerHTML = `
-          <strong>Tracked Order Info (${type === "buy" ? "Buy" : "Sell"})</strong><br/>
-          Priority position: ${trackedPriority + 1}<br/>
-          Items between: ${itemsBetween.toLocaleString()}<br/>
-          Coin gap: ${coinGap.toLocaleString()} coins<br/>
-          Items left in order: ${trackedAmount.toLocaleString()}
+      if (matchIndex >= 0 && matchRow) {
+        const itemsBefore = summary.slice(0, matchIndex).reduce((sum, row) => sum + row.amount, 0);
+        const coinGap = summary.slice(0, matchIndex).reduce((sum, row) => sum + row.amount * row.pricePerUnit, 0);
+        trackDetails.innerHTML = `
+          <div class="track-info">
+            <strong>Tracked Order Info (${type === 'buy' ? 'Buy' : 'Sell'})</strong><br>
+            Priority position: ${matchIndex + 1}<br>
+            Items between: ${itemsBefore.toLocaleString()}<br>
+            Coin gap: ${coinGap.toLocaleString()} coins<br>
+            Items left in order: ${matchRow.amount.toLocaleString()}
+          </div>
         `;
       } else {
-        orderInfo.style.display = "none";
+        trackDetails.innerHTML = "";
       }
     }
   </script>
