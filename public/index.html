@@ -171,8 +171,9 @@
         latestBuySummary = data.buy_summary;
         latestSellSummary = data.sell_summary;
 
-        renderTable(latestBuySummary, buyBody, buyFoot, parseFloat(instasells.textContent));
-        renderTable(latestSellSummary, sellBody, sellFoot, parseFloat(instabuys.textContent));
+        renderTable(latestBuySummary, buyBody, buyFoot, parseFloat(instabuys.textContent));
+        renderTable(latestSellSummary, sellBody, sellFoot, parseFloat(instasells.textContent));
+
 
         highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));
       } catch (err) {
