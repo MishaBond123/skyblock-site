@@ -109,7 +109,7 @@
     <div class="tables">
       <div>
         <h2>Buy Orders</h2>
-        <table id="sellTable">
+        <table id="buyTable">
           <thead>
             <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
           </thead>
@@ -119,7 +119,7 @@
       </div>
       <div>
         <h2>Sell Orders</h2>
-        <table id="buyTable">
+        <table id="sellTable">
           <thead>
             <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
           </thead>
@@ -133,8 +133,8 @@
   <script>
     const itemInput = document.getElementById("itemInput");
     const trackInput = document.getElementById("trackInput");
-    const buyBody = document.querySelector("#buyTable tbody");
-    const sellBody = document.querySelector("#sellTable tbody");
+    const buyBody = document.querySelector("#buyTable tbody");   // For sell_summary (buy orders)
+    const sellBody = document.querySelector("#sellTable tbody"); // For buy_summary (sell orders)
     const buyFoot = document.querySelector("#buyTable tfoot tr");
     const sellFoot = document.querySelector("#sellTable tfoot tr");
     const instabuys = document.getElementById("instabuys");
@@ -154,7 +154,7 @@
     });
 
     async function getApiKey() {
-      return "YOUR_API_KEY_HERE";
+      return "YOUR_API_KEY_HERE"; // Replace with your real key if not using server proxy
     }
 
     async function loadData(itemId) {
@@ -168,12 +168,12 @@
         instabuys.textContent = data.quick_status.buyMovingWeek ? (data.quick_status.buyMovingWeek / (7 * 24)).toFixed(1) : "-";
         instasells.textContent = data.quick_status.sellMovingWeek ? (data.quick_status.sellMovingWeek / (7 * 24)).toFixed(1) : "-";
 
-        latestBuySummary = data.buy_summary;
-        latestSellSummary = data.sell_summary;
+        // Swap summaries to reflect actual order direction
+        latestBuySummary = data.sell_summary; // Players placing buy orders
+        latestSellSummary = data.buy_summary; // Players placing sell orders
 
-        renderTable(latestBuySummary, buyBody, buyFoot, parseFloat(instabuys.textContent));
-        renderTable(latestSellSummary, sellBody, sellFoot, parseFloat(instasells.textContent));
-
+        renderTable(latestBuySummary, buyBody, buyFoot, parseFloat(instasells.textContent)); // Buy orders filled by instasells
+        renderTable(latestSellSummary, sellBody, sellFoot, parseFloat(instabuys.textContent)); // Sell orders filled by instabuys
 
         highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));
       } catch (err) {
@@ -223,12 +223,11 @@
       const allRows = [...buyBody.children, ...sellBody.children];
       allRows.forEach(row => row.classList.remove("highlight-blue"));
 
-      for (const [tableName, summary, body, hourly] of [
-        ["Buy", latestBuySummary, buyBody, parseFloat(instasells.textContent)],
-        ["Sell", latestSellSummary, sellBody, parseFloat(instabuys.textContent)]
+      for (const [summary, body] of [
+        [latestBuySummary, buyBody],
+        [latestSellSummary, sellBody]
       ]) {
         let coinsBetween = 0, itemsBetween = 0, priority = 1;
-        let found = false;
 
         for (const row of summary) {
           const unit = parseFloat(row.pricePerUnit.toFixed(1));
@@ -246,15 +245,12 @@
                 Items left in order: ${row.amount}
               </div>
             `;
-            found = true;
-            break;
+            return;
           }
           itemsBetween += row.amount;
           coinsBetween += row.amount * row.pricePerUnit;
           priority++;
         }
-
-        if (found) break;
       }
     }
 
