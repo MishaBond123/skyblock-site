@@ -21,6 +21,30 @@
       padding: 30px;
       border-radius: 16px;
     }
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 8px 8px 0 0;
+      margin-right: 10px;
+    }
+    .tab.active {
+      background-color: rgba(255, 255, 255, 0.15);
+      font-weight: bold;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
     h1, h2, h3 {
       text-align: center;
     }
@@ -115,49 +139,47 @@
 </head>
 <body>
   <div class="container">
-    <h1>SkyBlock Bazaar Tracker</h1>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('ordersTab')">Orders</div>
+      <div class="tab" onclick="switchTab('volumeDrainTab')">Buy Order Volume Drain</div>
+    </div>
 
-    <div class="volume-box">
-      <div>
-        <strong>Instabuys / hour:</strong>
-        <div id="instabuys"></div>
+    <div id="ordersTab" class="tab-content active">
+      <h1>SkyBlock Bazaar Tracker</h1>
+      <div class="volume-box">
+        <div><strong>Instabuys / hour:</strong><div id="instabuys"></div></div>
+        <div><strong>Instasells / hour:</strong><div id="instasells"></div></div>
       </div>
-      <div>
-        <strong>Instasells / hour:</strong>
-        <div id="instasells"></div>
+      <h3>Item ID:</h3>
+      <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
+      <div id="itemDropdown" class="dropdown"></div>
+      <h3>Track Order By Price:</h3>
+      <input id="trackInput" placeholder="Enter price to track (e.g. 10,670,396.3)" />
+      <div id="orderInfo"></div>
+      <div class="tables">
+        <div>
+          <h2>Buy Orders</h2>
+          <table id="buyTable">
+            <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr></thead>
+            <tbody></tbody>
+            <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
+          </table>
+        </div>
+        <div>
+          <h2>Sell Orders</h2>
+          <table id="sellTable">
+            <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr></thead>
+            <tbody></tbody>
+            <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
+          </table>
+        </div>
       </div>
     </div>
 
-    <h3>Item ID:</h3>
-    <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
-    <div id="itemDropdown" class="dropdown"></div>
-
-    <h3>Track Order By Price:</h3>
-    <input id="trackInput" placeholder="Enter price to track (e.g. 10,670,396.3)" />
-
-    <div id="orderInfo"></div>
-
-    <div class="tables">
-      <div>
-        <h2>Buy Orders</h2>
-        <table id="buyTable">
-          <thead>
-            <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
-          </thead>
-          <tbody></tbody>
-          <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
-        </table>
-      </div>
-      <div>
-        <h2>Sell Orders</h2>
-        <table id="sellTable">
-          <thead>
-            <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
-          </thead>
-          <tbody></tbody>
-          <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
-        </table>
-      </div>
+    <div id="volumeDrainTab" class="tab-content">
+      <h2>Buy Order Volume Drain</h2>
+      <p>This tab will display categorized gemstone and plate items under different price drop statuses.</p>
+      <div id="priceDropCategories"></div>
     </div>
   </div>
 
@@ -205,9 +227,7 @@
         const div = document.createElement("div");
         div.className = "dropdown-item";
         div.innerHTML = `
-          <div class="dropdown-label">
-            ${item.name}
-          </div>
+          <div class="dropdown-label">${item.name}</div>
           <div class="dropdown-price">${item.price} /bz</div>
         `;
         div.onclick = () => {
@@ -304,6 +324,13 @@
           priority++;
         }
       }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector(`[onclick*="${tabId}"]`).classList.add('active');
+      document.getElementById(tabId).classList.add('active');
     }
 
     fetchAllItems();
