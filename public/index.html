@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SkyBlock Bazaar Tracker</title>
-  <link rel="icon" type="image/jpeg" href="site-icon.jpeg"/>
+  <link rel="icon" href="site-icon.jpeg" type="image/jpeg">
   <style>
     body {
       margin: 0;
@@ -15,7 +15,7 @@
       color: #fff;
     }
     .container {
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 40px auto;
       background-color: rgba(0, 0, 0, 0.75);
       padding: 30px;
@@ -23,37 +23,29 @@
     }
     h1 {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
     input {
       width: 100%;
-      padding: 12px;
-      font-size: 18px;
+      padding: 10px;
+      font-size: 16px;
       margin: 20px 0;
       border-radius: 6px;
       border: none;
-      display: block;
     }
-    .stats {
+    .metrics {
       display: flex;
       justify-content: space-around;
-      margin-bottom: 20px;
-      padding: 20px;
-      background-color: rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
-    }
-    .stats div {
+      margin-bottom: 30px;
       text-align: center;
+      font-weight: bold;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 10px;
+      border-radius: 8px;
     }
     .tables {
       display: flex;
       gap: 20px;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-    .table-wrapper {
-      flex: 1;
-      min-width: 500px;
     }
     table {
       width: 100%;
@@ -72,11 +64,11 @@
     tfoot td {
       font-weight: bold;
     }
-    tr.warn {
+    .warn {
       background-color: rgba(255, 255, 0, 0.2);
     }
-    tr.danger {
-      background-color: rgba(255, 0, 0, 0.3);
+    .danger {
+      background-color: rgba(255, 0, 0, 0.4);
     }
   </style>
 </head>
@@ -84,18 +76,14 @@
   <div class="container">
     <h1>SkyBlock Bazaar Tracker</h1>
     <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
-    <div class="stats">
-      <div>
-        <strong>Instabuys / hour:</strong>
-        <div id="buysPerHour">-</div>
-      </div>
-      <div>
-        <strong>Instasells / hour:</strong>
-        <div id="sellsPerHour">-</div>
-      </div>
+
+    <div class="metrics">
+      <div><div>Instabuys / hour:</div><div id="instabuys">-</div></div>
+      <div><div>Instasells / hour:</div><div id="instasells">-</div></div>
     </div>
+
     <div class="tables">
-      <div class="table-wrapper">
+      <div style="width: 50%">
         <h2>Buy Orders</h2>
         <table id="buyTable">
           <thead>
@@ -105,7 +93,7 @@
           <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
         </table>
       </div>
-      <div class="table-wrapper">
+      <div style="width: 50%">
         <h2>Sell Orders</h2>
         <table id="sellTable">
           <thead>
@@ -117,21 +105,22 @@
       </div>
     </div>
   </div>
+
   <script>
     const input = document.getElementById("itemInput");
     const buyBody = document.querySelector("#buyTable tbody");
     const sellBody = document.querySelector("#sellTable tbody");
     const buyFoot = document.querySelector("#buyTable tfoot tr");
     const sellFoot = document.querySelector("#sellTable tfoot tr");
-    const buysPerHourDisplay = document.getElementById("buysPerHour");
-    const sellsPerHourDisplay = document.getElementById("sellsPerHour");
+    const buysEl = document.getElementById("instabuys");
+    const sellsEl = document.getElementById("instasells");
 
     input.addEventListener("change", () => {
       loadData(input.value.trim().toUpperCase());
     });
 
     async function getApiKey() {
-      return "YOUR_API_KEY_HERE";
+      return "YOUR_API_KEY_HERE"; // Replace this
     }
 
     async function loadData(itemId) {
@@ -142,10 +131,10 @@
         const data = json.products[itemId];
         if (!data) throw new Error("Item not found");
 
-        const buysPerHour = (data.quick_status.sellMovingWeek / 7 / 24).toFixed(1);
-        const sellsPerHour = (data.quick_status.buyMovingWeek / 7 / 24).toFixed(1);
-        buysPerHourDisplay.textContent = buysPerHour;
-        sellsPerHourDisplay.textContent = sellsPerHour;
+        const buysPerHour = (data.quick_status.buyMovingWeek / (7 * 24)).toFixed(1);
+        const sellsPerHour = (data.quick_status.sellMovingWeek / (7 * 24)).toFixed(1);
+        buysEl.textContent = parseFloat(buysPerHour).toLocaleString();
+        sellsEl.textContent = parseFloat(sellsPerHour).toLocaleString();
 
         renderTable(data.buy_summary, buyBody, buyFoot, sellsPerHour);
         renderTable(data.sell_summary, sellBody, sellFoot, buysPerHour);
@@ -166,12 +155,15 @@
         totalCoins += total;
 
         const tr = document.createElement("tr");
-        if (row.amount > hourlyLimit * 5) tr.classList.add("danger");
-        else if (row.amount > hourlyLimit) tr.classList.add("warn");
+        if (row.amount > hourlyLimit * 5) {
+          tr.classList.add("danger");
+        } else if (row.amount > hourlyLimit) {
+          tr.classList.add("warn");
+        }
 
         tr.innerHTML = `
           <td>${row.orders}</td>
-          <td>${row.amount.toLocaleString()}</td>
+          <td>${row.amount}</td>
           <td>${row.pricePerUnit.toLocaleString()} coins</td>
           <td>${total.toLocaleString()} coins</td>
         `;
@@ -180,7 +172,7 @@
 
       tfootRow.innerHTML = `
         <td>Total:</td>
-        <td>${totalAmount.toLocaleString()}</td>
+        <td>${totalAmount}</td>
         <td></td>
         <td>${totalCoins.toLocaleString()} coins</td>
       `;
