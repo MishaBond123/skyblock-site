@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="site-icon.jpeg">
   <title>SkyBlock Bazaar Tracker</title>
-  <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
   <style>
     body {
       margin: 0;
@@ -15,7 +15,7 @@
       color: #fff;
     }
     .container {
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 40px auto;
       background-color: rgba(0, 0, 0, 0.75);
       padding: 30px;
@@ -28,9 +28,26 @@
       width: 100%;
       padding: 10px;
       font-size: 16px;
-      margin-bottom: 20px;
+      margin: 10px 0 30px;
       border-radius: 6px;
       border: none;
+    }
+    .rate-box {
+      display: flex;
+      justify-content: space-around;
+      margin: 10px 0 30px;
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      text-align: center;
+    }
+    .rate-box div {
+      flex: 1;
+    }
+    .tables {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
     }
     table {
       width: 100%;
@@ -49,48 +66,39 @@
     tfoot td {
       font-weight: bold;
     }
-    .highlight-yellow { background-color: rgba(255, 255, 0, 0.2); }
-    .highlight-red { background-color: rgba(255, 0, 0, 0.3); }
-    .highlight-blue { background-color: rgba(0, 128, 255, 0.4); }
-    .volume-boxes { display: flex; justify-content: space-around; margin: 20px 0; text-align: center; }
-    .volume-boxes div {
-      flex: 1;
-      background-color: rgba(255, 255, 255, 0.05);
-      margin: 0 10px;
-      padding: 10px;
-      border-radius: 8px;
+    .highlight-low {
+      background-color: rgba(255, 255, 0, 0.2);
     }
-    .tables { display: flex; gap: 20px; }
-    .order-info-box {
+    .highlight-high {
+      background-color: rgba(255, 0, 0, 0.3);
+    }
+    .tracked {
+      background-color: rgba(0, 100, 255, 0.4);
+    }
+    .track-box {
       background-color: rgba(255, 255, 255, 0.1);
-      padding: 15px;
+      padding: 12px;
       border-radius: 10px;
-      margin-bottom: 20px;
+      margin: 20px 0;
+      text-align: center;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>SkyBlock Bazaar Tracker</h1>
-
-    <label><strong>Item ID:</strong></label>
-    <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
-
-    <label><strong>Track Order By Price:</strong></label>
-    <input id="trackPriceInput" placeholder="Enter Coin Equivalent (e.g. 10,670,396.3)" />
-
-    <div class="volume-boxes">
-      <div>
-        <h3>Instabuys / hour:</h3>
-        <div id="buysPerHour">-</div>
-      </div>
-      <div>
-        <h3>Instasells / hour:</h3>
-        <div id="sellsPerHour">-</div>
-      </div>
+    <div class="rate-box">
+      <div><strong>Instabuys / hour:</strong><br><span id="instabuys">-</span></div>
+      <div><strong>Instasells / hour:</strong><br><span id="instasells">-</span></div>
     </div>
 
-    <div id="trackedOrderInfo" class="order-info-box" style="display:none;"></div>
+    <h3>Item ID:</h3>
+    <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
+
+    <h3>Track Order By Price:</h3>
+    <input id="trackInput" placeholder="Enter Coin Equivalent (e.g. 10,670,396.3)" />
+
+    <div id="trackedInfo"></div>
 
     <div class="tables">
       <div style="width: 50%">
@@ -117,18 +125,11 @@
   </div>
 
   <script>
-    const itemInput = document.getElementById("itemInput");
-    const trackPriceInput = document.getElementById("trackPriceInput");
-    const buyBody = document.querySelector("#buyTable tbody");
-    const sellBody = document.querySelector("#sellTable tbody");
-    const buyFoot = document.querySelector("#buyTable tfoot tr");
-    const sellFoot = document.querySelector("#sellTable tfoot tr");
-    const buysPerHourDisplay = document.getElementById("buysPerHour");
-    const sellsPerHourDisplay = document.getElementById("sellsPerHour");
-    const trackedOrderInfo = document.getElementById("trackedOrderInfo");
+    const input = document.getElementById("itemInput");
+    const trackInput = document.getElementById("trackInput");
 
-    itemInput.addEventListener("change", () => loadData(itemInput.value.trim().toUpperCase()));
-    trackPriceInput.addEventListener("change", () => loadData(itemInput.value.trim().toUpperCase()));
+    input.addEventListener("change", () => loadData(input.value.trim().toUpperCase()));
+    trackInput.addEventListener("change", () => loadData(input.value.trim().toUpperCase()));
 
     async function getApiKey() {
       return "YOUR_API_KEY_HERE";
@@ -142,16 +143,28 @@
         const data = json.products[itemId];
         if (!data) throw new Error("Item not found");
 
-        const buysPerHour = +(data.quick_status.buyMovingWeek / 7 / 24).toFixed(1);
-        const sellsPerHour = +(data.quick_status.sellMovingWeek / 7 / 24).toFixed(1);
-        buysPerHourDisplay.textContent = buysPerHour;
-        sellsPerHourDisplay.textContent = sellsPerHour;
+        const trackPrice = parseFloat(trackInput.value.replace(/,/g, ''));
+        const trackedInfo = document.getElementById("trackedInfo");
+        trackedInfo.innerHTML = "";
 
-        const trackPrice = parseFloat(trackPriceInput.value.replace(/,/g, '')) || null;
+        document.getElementById("instabuys").innerText = (data.quick_status.buyMovingWeek / (7 * 24)).toFixed(1);
+        document.getElementById("instasells").innerText = (data.quick_status.sellMovingWeek / (7 * 24)).toFixed(1);
 
-        renderTable(data.buy_summary, buyBody, buyFoot, sellsPerHour, trackPrice);
-        renderTable(data.sell_summary, sellBody, sellFoot, buysPerHour, trackPrice);
+        const buyTracked = renderTable(data.buy_summary, document.querySelector("#buyTable tbody"), document.querySelector("#buyTable tfoot tr"), trackPrice, data.quick_status.sellMovingWeek / (7 * 24), true);
+        const sellTracked = renderTable(data.sell_summary, document.querySelector("#sellTable tbody"), document.querySelector("#sellTable tfoot tr"), trackPrice, data.quick_status.buyMovingWeek / (7 * 24), false);
 
+        const activeTrack = buyTracked || sellTracked;
+        if (activeTrack) {
+          trackedInfo.innerHTML = `
+            <div class="track-box">
+              <strong>Tracking ${activeTrack.orderType} Order</strong><br>
+              Priority: #${activeTrack.rowIndex + 1}<br>
+              Items Before: ${activeTrack.itemsBefore}<br>
+              Coin Gap: ${activeTrack.coinGap.toLocaleString()} coins<br>
+              Items in Tracked Order: ${activeTrack.orderAmount}
+            </div>
+          `;
+        }
       } catch (err) {
         alert("Failed to load data. Check the item ID and API key.");
         console.error(err);
@@ -159,59 +172,57 @@
     }
 
     function renderTable(summary, tbody, tfootRow, trackPrice, hourlyRate, isBuyTable) {
-  tbody.innerHTML = "";
-  let totalOrders = 0, totalAmount = 0, totalCoins = 0;
-  let trackedOrder = null, coinGap = 0, itemsGap = 0;
+      tbody.innerHTML = "";
+      let totalOrders = 0, totalAmount = 0, totalCoins = 0;
+      let trackedOrder = null;
 
-  for (let i = 0; i < summary.length; i++) {
-    const row = summary[i];
-    const total = row.amount * row.pricePerUnit;
-    totalOrders += 1;
-    totalAmount += row.amount;
-    totalCoins += total;
+      for (let i = 0; i < summary.length; i++) {
+        const row = summary[i];
+        const total = row.amount * row.pricePerUnit;
+        totalOrders += 1;
+        totalAmount += row.amount;
+        totalCoins += total;
 
-    const tr = document.createElement("tr");
+        const tr = document.createElement("tr");
+        let highlightClass = "";
 
-    // Highlighting logic
-    let highlightClass = "";
-    if (hourlyRate > 0 && row.amount > hourlyRate * 5) {
-      highlightClass = "highlight-high";
-    } else if (hourlyRate > 0 && row.amount > hourlyRate) {
-      highlightClass = "highlight-low";
+        if (hourlyRate > 0 && row.amount > hourlyRate * 5) {
+          highlightClass = "highlight-high";
+        } else if (hourlyRate > 0 && row.amount > hourlyRate) {
+          highlightClass = "highlight-low";
+        }
+
+        const matchTracked = trackPrice && Math.abs(row.pricePerUnit - trackPrice) < 0.01;
+        if (matchTracked) {
+          highlightClass = "tracked";
+          trackedOrder = {
+            rowIndex: i,
+            itemsBefore: summary.slice(0, i).reduce((a, b) => a + b.amount, 0),
+            coinGap: summary.slice(0, i).reduce((a, b) => a + (b.amount * b.pricePerUnit), 0),
+            orderAmount: row.amount,
+            orderType: isBuyTable ? "Buy" : "Sell"
+          };
+        }
+
+        tr.className = highlightClass;
+        tr.innerHTML = `
+          <td>${row.orders}</td>
+          <td>${row.amount}</td>
+          <td>${row.pricePerUnit.toLocaleString()} coins</td>
+          <td>${total.toLocaleString()} coins</td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      tfootRow.innerHTML = `
+        <td>Total:</td>
+        <td>${totalAmount}</td>
+        <td></td>
+        <td>${totalCoins.toLocaleString()} coins</td>
+      `;
+
+      return trackedOrder;
     }
-
-    const matchTracked = trackPrice && Math.abs(row.pricePerUnit - trackPrice) < 0.01;
-    if (matchTracked) {
-      highlightClass = "tracked";
-      trackedOrder = {
-        rowIndex: i,
-        itemsBefore: summary.slice(0, i).reduce((a, b) => a + b.amount, 0),
-        coinGap: summary.slice(0, i).reduce((a, b) => a + (b.amount * b.pricePerUnit), 0),
-        orderAmount: row.amount,
-        orderType: isBuyTable ? "Buy" : "Sell"
-      };
-    }
-
-    tr.className = highlightClass;
-    tr.innerHTML = `
-      <td>${row.orders}</td>
-      <td>${row.amount}</td>
-      <td>${row.pricePerUnit.toLocaleString()} coins</td>
-      <td>${total.toLocaleString()} coins</td>
-    `;
-    tbody.appendChild(tr);
-  }
-
-  tfootRow.innerHTML = `
-    <td>Total:</td>
-    <td>${totalAmount}</td>
-    <td></td>
-    <td>${totalCoins.toLocaleString()} coins</td>
-  `;
-
-  return trackedOrder;
-}
-
   </script>
 </body>
 </html>
