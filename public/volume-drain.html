@@ -89,7 +89,7 @@
     
         if (!buyOrders.length || !sellOrders.length) return;
     
-        const highestBuyPrice = buyOrders[0].pricePerUnit;
+        const highestBuyPrice = Math.max(...buyOrders.map(o => o.pricePerUnit));
         const lowestSellPrice = sellOrders[0].pricePerUnit;
     
         if (lowestSellPrice >= highestBuyPrice * 1.3) {
