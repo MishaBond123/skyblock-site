@@ -137,7 +137,10 @@
         } else {
           list.innerHTML = orders.map((order, index) => `
             <div class="order-row">
-              <a href="index.html?item=${order.item}&track=${order.price}" target="_blank">${order.item} @ ${parseFloat(order.price).toLocaleString()} coins</a>
+              <a href="index.html?item=${order.item}&track=${order.price}">
+  ${order.item} @ ${parseFloat(order.price).toLocaleString()} coins
+</a>
+
               <button class="remove-btn" data-index="${index}">–</button>
             </div>
           `).join("");
