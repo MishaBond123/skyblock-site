@@ -1,141 +1,150 @@
 <!DOCTYPE html>
- <html lang="en">
- <head>
-   <meta charset="UTF-8" />
-   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-   <title>SkyBlock Bazaar Tracker</title>
-   <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
-   <style>
-     body {
-       margin: 0;
-       font-family: 'Segoe UI', sans-serif;
-       background-image: url('bgimage.jpeg');
-       background-size: cover;
-       background-attachment: fixed;
-       color: #fff;
-     }
-     .container {
-       max-width: 1200px;
-       margin: 40px auto;
-       background-color: rgba(0, 0, 0, 0.75);
-       padding: 30px;
-       border-radius: 16px;
-     }
-     h1, h2, h3 {
-       text-align: center;
-     }
-     input {
-       width: 100%;
-       padding: 10px;
-       font-size: 16px;
-       margin: 10px 0 10px;
-       border-radius: 6px;
-       border: none;
-     }
-     table {
-       width: 100%;
-       border-collapse: collapse;
-       margin-bottom: 30px;
-       background-color: rgba(255, 255, 255, 0.05);
-     }
-     th, td {
-       padding: 10px;
-       text-align: center;
-       border: 1px solid rgba(255, 255, 255, 0.2);
-     }
-     th {
-       background-color: rgba(255, 255, 255, 0.1);
-     }
-     tfoot td {
-       font-weight: bold;
-     }
-     .tables {
-       display: flex;
-       gap: 20px;
-     }
-     .tables > div {
-       flex: 1;
-     }
-     .highlight-yellow {
-       background-color: rgba(255, 255, 0, 0.2);
-     }
-     .highlight-red {
-       background-color: rgba(255, 0, 0, 0.4);
-     }
-     .highlight-blue {
-       background-color: rgba(0, 191, 255, 0.3);
-     }
-     .order-info {
-       margin: 20px auto;
-       max-width: 600px;
-       text-align: center;
-       background-color: rgba(255, 255, 255, 0.05);
-       padding: 20px;
-       border-radius: 10px;
-     }
-     .volume-box {
-       display: flex;
-       justify-content: space-around;
-       margin-bottom: 20px;
-       background-color: rgba(255,255,255,0.05);
-       padding: 20px;
-       border-radius: 12px;
-     }
-     .dropdown {
-       background-color: rgba(0, 0, 0, 0.85);
-       border-radius: 8px;
-       padding: 10px;
-       max-height: 300px;
-       overflow-y: auto;
-       display: none;
-     }
-     .dropdown-item {
-       display: flex;
-       align-items: center;
-       justify-content: space-between;
-       padding: 8px 12px;
-       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-       cursor: pointer;
-     }
-     .dropdown-item:hover {
-       background-color: rgba(255, 255, 255, 0.1);
-     }
-     .dropdown-label {
-       display: flex;
-       align-items: center;
-     }
-     .dropdown-price {
-       background-color: goldenrod;
-       padding: 4px 8px;
-       border-radius: 6px;
-       font-weight: bold;
-       color: black;
-     }
-   </style>
- </head>
- <body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkyBlock Bazaar Tracker</title>
+  <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
   <style>
-    .button-row {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url('bgimage.jpeg');
+      background-size: cover;
+      background-attachment: fixed;
+      color: #fff;
     }
-    .nav-button {
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+    .tabs {
+      display: flex;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.75);
+      padding: 8px 20px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-radius: 0 0 12px 12px;
+    }
+    .tab {
       padding: 10px 20px;
+      cursor: pointer;
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 10px 10px 0 0;
+      margin-right: 12px;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+    .tab.active {
+      background-color: rgba(255, 255, 255, 0.35);
+    }
+    .tab:hover {
+      background-color: rgba(255, 255, 255, 0.25);
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
       font-size: 16px;
+      margin: 10px 0 10px;
+      border-radius: 6px;
       border: none;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    th {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    tfoot td {
+      font-weight: bold;
+    }
+    .tables {
+      display: flex;
+      gap: 20px;
+    }
+    .tables > div {
+      flex: 1;
+    }
+    .highlight-yellow {
+      background-color: rgba(255, 255, 0, 0.2);
+    }
+    .highlight-red {
+      background-color: rgba(255, 0, 0, 0.4);
+    }
+    .highlight-blue {
+      background-color: rgba(0, 191, 255, 0.3);
+    }
+    .order-info {
+      margin: 20px auto;
+      max-width: 600px;
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .volume-box {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      background-color: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 12px;
+    }
+    .dropdown {
+      background-color: rgba(0, 0, 0, 0.85);
       border-radius: 8px;
-      background-color: rgba(255, 255, 255, 0.2);
-      color: white;
+      padding: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+    }
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
     }
-    .nav-button:hover {
-      background-color: rgba(255, 255, 255, 0.3);
+    .dropdown-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .dropdown-label {
+      display: flex;
+      align-items: center;
+    }
+    .dropdown-price {
+      background-color: goldenrod;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-weight: bold;
+      color: black;
     }
   </style>
+</head>
+<body>
+  <div class="tabs">
+    <div class="tab active">Orders</div>
+    <div class="tab" onclick="window.location.href='volume-drain.html'">Buy Order Volume Drain</div>
+  </div>
 
   <div class="container">
-    <div class="button-row">
+    <h1>SkyBlock Bazaar Tracker</h1>
       <button class="nav-button" onclick="window.location.href='volume-drain.html'">Buy Order Volume Drain</button>
     </div>
 
