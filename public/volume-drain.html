@@ -83,16 +83,17 @@
         const data = products[id];
         if (!data) return;
     
-        const buyOrders = data.buy_summary;
-        const sellOrders = data.sell_summary;
-        const instaSellsHour = data.quick_status.sellMovingWeek / 168;
+        // REMEMBER: API is inverted
+        const buyOrders = data.sell_summary; // players sell => buy instantly
+        const sellOrders = data.buy_summary; // players buy => sell instantly
+        const instaSellsHour = data.quick_status.buyMovingWeek / 168;
     
         if (!buyOrders.length || !sellOrders.length) return;
     
         const activeBuy = buyOrders[0].pricePerUnit;
         const activeSell = sellOrders[0].pricePerUnit;
     
-        // === Category 1: activeBuy * 1.25 <= activeSell ===
+        // === Category 1 ===
         if (activeBuy * 1.25 <= activeSell) {
           const percentChange = ((activeBuy - activeSell) / activeSell) * 100;
           const coinsGap = activeSell - activeBuy;
@@ -100,43 +101,42 @@
           return;
         }
     
-        // === Category 2: look for big drop between adjacent orders and check volume in between ===
+        // === Category 2 ===
         let foundCat2 = false;
         for (let i = 1; i < buyOrders.length; i++) {
-          const prevPrice = buyOrders[i - 1].pricePerUnit;
-          const currPrice = buyOrders[i].pricePerUnit;
-          const dropRatio = (prevPrice - currPrice) / currPrice;
-          if (dropRatio <= -0.2) continue;
+          const price1 = buyOrders[i - 1].pricePerUnit;
+          const price2 = buyOrders[i].pricePerUnit;
+          const drop = (price2 - price1) / price2;
     
-          let volumeBetween = 0;
-          for (let j = 0; j <= i; j++) volumeBetween += buyOrders[j].amount;
+          if (drop <= -0.2) {
+            let volume = 0;
+            for (let j = 0; j < i; j++) volume += buyOrders[j].amount;
     
-          if (volumeBetween <= 10 * instaSellsHour) {
-            const percentChange = ((currPrice - activeSell) / activeSell) * 100;
-            const coinsGap = activeSell - currPrice;
-            cat2.push([id, percentChange.toFixed(1), (volumeBetween - buyOrders[i].amount).toFixed(1), instaSellsHour.toFixed(1), coinsGap.toFixed(1)]);
-            foundCat2 = true;
-            break;
+            if (volume <= 10 * instaSellsHour) {
+              const percentChange = ((price2 - activeSell) / activeSell) * 100;
+              const coinsGap = activeSell - price2;
+              cat2.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), coinsGap.toFixed(1)]);
+              foundCat2 = true;
+              break;
+            }
           }
         }
         if (foundCat2) return;
     
-        // === Category 3: find biggest drop between any two adjacent orders
+        // === Category 3 ===
         let maxDrop = -Infinity;
         let bestIndex = 1;
         for (let i = 1; i < buyOrders.length; i++) {
           const prev = buyOrders[i - 1].pricePerUnit;
           const curr = buyOrders[i].pricePerUnit;
-          const drop = (prev - curr) / curr;
+          const drop = (curr - prev) / curr;
           if (drop < maxDrop) continue;
           maxDrop = drop;
           bestIndex = i;
         }
-    
         const bestOrder = buyOrders[bestIndex];
         let volume = 0;
         for (let j = 0; j < bestIndex; j++) volume += buyOrders[j].amount;
-    
         const percentChange = ((bestOrder.pricePerUnit - activeSell) / activeSell) * 100;
         const coinsGap = activeSell - bestOrder.pricePerUnit;
         cat3.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), coinsGap.toFixed(1)]);
@@ -173,6 +173,6 @@
     
     fetchData();
     setInterval(fetchData,30000);
-    </script>
+    </script>    
 </body>
 </html>
