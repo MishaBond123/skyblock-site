@@ -1,164 +1,145 @@
 <!DOCTYPE html>
- <html lang="en">
- <head>
-   <meta charset="UTF-8" />
-   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-   <title>SkyBlock Bazaar Tracker</title>
-   <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
-   <style>
-     body {
-       margin: 0;
-       font-family: 'Segoe UI', sans-serif;
-       background-image: url('bgimage.jpeg');
-       background-size: cover;
-       background-attachment: fixed;
-       color: #fff;
-     }
-     .container {
-       max-width: 1200px;
-       margin: 40px auto;
-       background-color: rgba(0, 0, 0, 0.75);
-       padding: 30px;
-       border-radius: 16px;
-     }
-     h1, h2, h3 {
-       text-align: center;
-     }
-     input {
-       width: 100%;
-       padding: 10px;
-       font-size: 16px;
-       margin: 10px 0 10px;
-       border-radius: 6px;
-       border: none;
-     }
-     table {
-       width: 100%;
-       border-collapse: collapse;
-       margin-bottom: 30px;
-       background-color: rgba(255, 255, 255, 0.05);
-     }
-     th, td {
-       padding: 10px;
-       text-align: center;
-       border: 1px solid rgba(255, 255, 255, 0.2);
-     }
-     th {
-       background-color: rgba(255, 255, 255, 0.1);
-     }
-     tfoot td {
-       font-weight: bold;
-     }
-     .tables {
-       display: flex;
-       gap: 20px;
-     }
-     .tables > div {
-       flex: 1;
-     }
-     .highlight-yellow {
-       background-color: rgba(255, 255, 0, 0.2);
-     }
-     .highlight-red {
-       background-color: rgba(255, 0, 0, 0.4);
-     }
-     .highlight-blue {
-       background-color: rgba(0, 191, 255, 0.3);
-     }
-     .order-info {
-       margin: 20px auto;
-       max-width: 600px;
-       text-align: center;
-       background-color: rgba(255, 255, 255, 0.05);
-       padding: 20px;
-       border-radius: 10px;
-     }
-     .volume-box {
-       display: flex;
-       justify-content: space-around;
-       margin-bottom: 20px;
-       background-color: rgba(255,255,255,0.05);
-       padding: 20px;
-       border-radius: 12px;
-     }
-     .dropdown {
-       background-color: rgba(0, 0, 0, 0.85);
-       border-radius: 8px;
-       padding: 10px;
-       max-height: 300px;
-       overflow-y: auto;
-       display: none;
-     }
-     .dropdown-item {
-       display: flex;
-       align-items: center;
-       justify-content: space-between;
-       padding: 8px 12px;
-       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-       cursor: pointer;
-     }
-     .dropdown-item:hover {
-       background-color: rgba(255, 255, 255, 0.1);
-     }
-     .dropdown-label {
-       display: flex;
-       align-items: center;
-     }
-     .dropdown-price {
-       background-color: goldenrod;
-       padding: 4px 8px;
-       border-radius: 6px;
-       font-weight: bold;
-       color: black;
-     }
-   </style>
- </head>
- <body>
-   <div class="container">
-     <h1>SkyBlock Bazaar Tracker</h1>
- 
-     <div class="volume-box">
-       <div>
-         <strong>Instabuys / hour:</strong>
-         <div id="instabuys"></div>
-       </div>
-       <div>
-         <strong>Instasells / hour:</strong>
-         <div id="instasells"></div>
-       </div>
-     </div>
- 
-     <h3>Item ID:</h3>
-     <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
-     <div id="itemDropdown" class="dropdown"></div>
- 
-     <h3>Track Order By Price:</h3>
-     <input id="trackInput" placeholder="Enter price to track (e.g. 10,670,396.3)" />
- 
-     <div id="orderInfo"></div>
- 
-     <div class="tables">
-       <div>
-         <h2>Buy Orders</h2>
-         <table id="buyTable">
-           <thead>
-             <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
-           </thead>
-           <tbody></tbody>
-           <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
-         </table>
-       </div>
-       <div>
-         <h2>Sell Orders</h2>
-         <table id="sellTable">
-           <thead>
-             <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
-           </thead>
-           <tbody></tbody>
-           <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
-         </table>
-       </div>
-     </div>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkyBlock Bazaar Tracker - Orders</title>
+  <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url('bgimage.jpeg');
+      background-size: cover;
+      background-attachment: fixed;
+      color: #fff;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      background-color: rgba(0, 0, 0, 0.75);
+      padding: 30px;
+      border-radius: 16px;
+      position: relative;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      position: absolute;
+      top: -40px;
+      left: 20px;
+    }
+    .tab {
+      padding: 8px 16px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px 8px 0 0;
+    }
+    .active-tab {
+      background-color: rgba(255,255,255,0.1);
+      border-bottom: 2px solid #00bfff;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    th {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .highlight-yellow {
+      background-color: rgba(255, 255, 0, 0.2);
+    }
+    .highlight-red {
+      background-color: rgba(255, 0, 0, 0.4);
+    }
+    .highlight-blue {
+      background-color: rgba(0, 191, 255, 0.3);
+    }
+    .order-info {
+      margin: 20px auto;
+      max-width: 600px;
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .volume-box {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      background-color: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tabs">
+      <a class="tab active-tab" href="index.html">Orders</a>
+      <a class="tab" href="volume-drain.html">Buy Order Volume Drain</a>
+    </div>
+
+    <h1>SkyBlock Bazaar Tracker - Orders</h1>
+
+    <div class="volume-box">
+      <div>
+        <strong>Instabuys / hour:</strong>
+        <div id="instabuys"></div>
+      </div>
+      <div>
+        <strong>Instasells / hour:</strong>
+        <div id="instasells"></div>
+      </div>
+    </div>
+
+    <h3>Item ID:</h3>
+    <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
+    <div id="itemDropdown" class="dropdown"></div>
+
+    <h3>Track Order By Price:</h3>
+    <input id="trackInput" placeholder="Enter price to track (e.g. 10,670,396.3)" />
+
+    <div id="orderInfo"></div>
+
+    <div class="tables">
+      <div>
+        <h2>Buy Orders</h2>
+        <table id="buyTable">
+          <thead>
+            <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
+        </table>
+      </div>
+      <div>
+        <h2>Sell Orders</h2>
+        <table id="sellTable">
+          <thead>
+            <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
+        </table>
+      </div>
+    </div>
    </div>
  
    <script>
@@ -312,5 +293,4 @@
      }, 3000);
    </script>
  </body>
- </html>
  </html>
