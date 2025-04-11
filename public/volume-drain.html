@@ -66,61 +66,91 @@
     <div id="tables"></div>
   </div>
 
-<script>
-const itemsToTrack = ["PERFECT_AMBER_GEM","PERFECT_TOPAZ_GEM","PERFECT_SAPPHIRE_GEM","PERFECT_AMETHYST_GEM","PERFECT_JASPER_GEM","PERFECT_RUBY_GEM","PERFECT_JADE_GEM","PERFECT_OPAL_GEM","PERFECT_AQUAMARINE_GEM","PERFECT_CITRINE_GEM","PERFECT_ONYX_GEM","FLAWLESS_PERIDOT_GEM","UMBER_PLATE","TUNGSTEN_PLATE","MITHRIL_PLATE","PERFECT_PLATE","GOLDEN_PLATE","TITANIUM_TESSERACT","HOT_STUFF","FRIGID_HUSK","TUNGSTEN_KEY","UMBER_KEY","SKELETON_KEY"];
-
-async function fetchData() {
-  const apiKey = "YOUR_API_KEY_HERE";
-  const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
-  const json = await res.json();
-  categorizeItems(json.products);
-}
-
-function categorizeItems(products) {
-  let cat1=[], cat2=[], cat3=[];
-
-  itemsToTrack.forEach(id => {
-    const data = products[id];
-    if (!data) return;
-    const avgPrice = data.quick_status.buyPrice;
-    const buyOrders = data.buy_summary;
-    const instaSellsHour = data.quick_status.sellMovingWeek / 168;
-
-    if (!buyOrders.length) return;
-
-    const activePrice = buyOrders[0].pricePerUnit;
-    const percentDrop = ((avgPrice - activePrice) / avgPrice) * 100;
-
-    if (percentDrop >= 50) cat1.push([id, percentDrop.toFixed(1), buyOrders[0].amount, instaSellsHour.toFixed(1), (avgPrice - activePrice).toFixed(1)]);
-    else {
-      let found = false;
-      for (let i = 1; i < buyOrders.length; i++) {
-        const dropPerc = ((buyOrders[i-1].pricePerUnit - buyOrders[i].pricePerUnit)/buyOrders[i-1].pricePerUnit)*100;
-        const volumeBetween = buyOrders.slice(0,i).reduce((a,c)=>a+c.amount,0);
-        if (dropPerc >= 15) {
-          const score = (Math.E*(1-(buyOrders[i].pricePerUnit/buyOrders[i-1].pricePerUnit))*instaSellsHour)/volumeBetween;
-          cat2.push([id, dropPerc.toFixed(1), volumeBetween, instaSellsHour.toFixed(1), ((buyOrders[i-1].pricePerUnit - buyOrders[i].pricePerUnit)*volumeBetween).toFixed(1), score]);
-          found=true;
-          break;
-        }
-      }
-      if (!found) cat3.push([id, percentDrop.toFixed(1), buyOrders[0].amount, instaSellsHour.toFixed(1), (avgPrice - activePrice).toFixed(1)]);
+  <script>
+    const itemsToTrack = ["PERFECT_AMBER_GEM","PERFECT_TOPAZ_GEM","PERFECT_SAPPHIRE_GEM","PERFECT_AMETHYST_GEM","PERFECT_JASPER_GEM","PERFECT_RUBY_GEM","PERFECT_JADE_GEM","PERFECT_OPAL_GEM","PERFECT_AQUAMARINE_GEM","PERFECT_CITRINE_GEM","PERFECT_ONYX_GEM","FLAWLESS_PERIDOT_GEM","UMBER_PLATE","TUNGSTEN_PLATE","MITHRIL_PLATE","PERFECT_PLATE","GOLDEN_PLATE","TITANIUM_TESSERACT","HOT_STUFF","FRIGID_HUSK","TUNGSTEN_KEY","UMBER_KEY","SKELETON_KEY"];
+    
+    async function fetchData() {
+      const apiKey = "YOUR_API_KEY_HERE";
+      const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
+      const json = await res.json();
+      categorizeItems(json.products);
     }
-  });
-
-  cat2.sort((a,b)=>b[5]-a[5]);
-
-  document.getElementById('tables').innerHTML=[['Under Price Drop',cat1],['About To Price Drop',cat2],['Not Price Dropping',cat3]].map(cat=>`
-    <h2>${cat[0]}</h2>
-    <table>
-      <tr><th>Item</th><th>% Price Decrease</th><th>Item Volume</th><th>Insta-sells/hour</th><th>Coins Gap</th></tr>
-      ${cat[1].map(row=>`<tr><td>${row[0]}</td><td>${row[1]}%</td><td>${row[2]}</td><td>${row[3]}</td><td>${row[4]}</td></tr>`).join('')}
-    </table>
-  `).join('');
-}
-
-fetchData();
-setInterval(fetchData,30000);
-</script>
+    
+    function categorizeItems(products) {
+      let cat1=[], cat2=[], cat3=[];
+    
+      itemsToTrack.forEach(id => {
+        const data = products[id];
+        if (!data) return;
+    
+        const buyOrders = data.buy_summary;
+        const instaSellsHour = data.quick_status.sellMovingWeek / 168;
+    
+        if (!buyOrders.length) return;
+    
+        const activePrice = buyOrders[0].pricePerUnit;
+        const avgBuyOrderPrice = buyOrders.reduce((sum, ord) => sum + ord.pricePerUnit, 0) / buyOrders.length;
+    
+        const percentBelowAvg = ((avgBuyOrderPrice - activePrice) / avgBuyOrderPrice) * 100;
+    
+        if (percentBelowAvg >= 50) {
+          cat1.push([id, percentBelowAvg.toFixed(1), buyOrders[0].amount, instaSellsHour.toFixed(1), (avgBuyOrderPrice - activePrice).toFixed(1)]);
+        } else {
+          let foundDrop = false;
+          let cumulativeVolume = buyOrders[0].amount;
+    
+          for (let i = 1; i < buyOrders.length; i++) {
+            const higherPrice = buyOrders[i-1].pricePerUnit;
+            const lowerPrice = buyOrders[i].pricePerUnit;
+            const percentChange = ((lowerPrice - higherPrice) / higherPrice) * 100;
+    
+            if (percentChange <= -15 && cumulativeVolume < instaSellsHour * 10) {
+              const dropMultiplier = lowerPrice / higherPrice;
+              const scoreAmount = (Math.E * (1 - dropMultiplier) * instaSellsHour) / cumulativeVolume;
+              cat2.push([id, percentChange.toFixed(1), cumulativeVolume, instaSellsHour.toFixed(1), ((higherPrice - lowerPrice) * cumulativeVolume).toFixed(1), scoreAmount]);
+              foundDrop = true;
+              break;
+            }
+            cumulativeVolume += buyOrders[i].amount;
+          }
+    
+          if (!foundDrop) {
+            cat3.push([id, percentBelowAvg.toFixed(1), buyOrders[0].amount, instaSellsHour.toFixed(1), (avgBuyOrderPrice - activePrice).toFixed(1)]);
+          }
+        }
+      });
+    
+      cat2.sort((a,b) => b[5] - a[5]);
+    
+      document.getElementById('tables').innerHTML = [
+        ['Under Price Drop', cat1],
+        ['About To Price Drop', cat2],
+        ['Not Price Dropping', cat3]
+      ].map(cat => `
+        <h2>${cat[0]}</h2>
+        <table>
+          <tr>
+            <th>Item</th>
+            <th>% Price Decrease</th>
+            <th>Item Volume</th>
+            <th>Insta-sells/hour</th>
+            <th>Coins Gap</th>
+          </tr>
+          ${cat[1].map(row => `
+            <tr>
+              <td>${row[0]}</td>
+              <td>${row[1]}%</td>
+              <td>${row[2]}</td>
+              <td>${row[3]}</td>
+              <td>${row[4]}</td>
+            </tr>
+          `).join('')}
+        </table>
+      `).join('');
+    }
+    
+    fetchData();
+    setInterval(fetchData,30000);
+    </script>    
 </body>
 </html>
