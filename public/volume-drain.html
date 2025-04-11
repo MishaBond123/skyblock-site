@@ -82,39 +82,39 @@ function categorizeItems(products) {
   itemsToTrack.forEach(id => {
     const data = products[id];
     if (!data) return;
-    const sellPrice = data.quick_status.sellPrice;
+    const avgPrice = data.quick_status.buyPrice;
     const buyOrders = data.buy_summary;
     const instaSellsHour = data.quick_status.sellMovingWeek / 168;
 
     if (!buyOrders.length) return;
 
     const activePrice = buyOrders[0].pricePerUnit;
-    const percentDrop = ((sellPrice - activePrice) / sellPrice) * 100;
+    const percentDrop = ((avgPrice - activePrice) / avgPrice) * 100;
 
-    if (percentDrop > 50) cat1.push([id, percentDrop.toFixed(1), buyOrders[0].amount, (sellPrice - activePrice).toFixed(1)]);
+    if (percentDrop >= 50) cat1.push([id, percentDrop.toFixed(1), buyOrders[0].amount, instaSellsHour.toFixed(1), (avgPrice - activePrice).toFixed(1)]);
     else {
       let found = false;
       for (let i = 1; i < buyOrders.length; i++) {
         const dropPerc = ((buyOrders[i-1].pricePerUnit - buyOrders[i].pricePerUnit)/buyOrders[i-1].pricePerUnit)*100;
         const volumeBetween = buyOrders.slice(0,i).reduce((a,c)=>a+c.amount,0);
-        if (dropPerc > 15 && volumeBetween < 10*instaSellsHour) {
+        if (dropPerc >= 15) {
           const score = (Math.E*(1-(buyOrders[i].pricePerUnit/buyOrders[i-1].pricePerUnit))*instaSellsHour)/volumeBetween;
-          cat2.push([id, dropPerc.toFixed(1), volumeBetween, ((buyOrders[i-1].pricePerUnit - buyOrders[i].pricePerUnit)*volumeBetween).toFixed(1), score]);
+          cat2.push([id, dropPerc.toFixed(1), volumeBetween, instaSellsHour.toFixed(1), ((buyOrders[i-1].pricePerUnit - buyOrders[i].pricePerUnit)*volumeBetween).toFixed(1), score]);
           found=true;
           break;
         }
       }
-      if (!found) cat3.push([id, percentDrop.toFixed(1), buyOrders[0].amount, (sellPrice - activePrice).toFixed(1)]);
+      if (!found) cat3.push([id, percentDrop.toFixed(1), buyOrders[0].amount, instaSellsHour.toFixed(1), (avgPrice - activePrice).toFixed(1)]);
     }
   });
 
-  cat2.sort((a,b)=>b[4]-a[4]);
+  cat2.sort((a,b)=>b[5]-a[5]);
 
   document.getElementById('tables').innerHTML=[['Under Price Drop',cat1],['About To Price Drop',cat2],['Not Price Dropping',cat3]].map(cat=>`
     <h2>${cat[0]}</h2>
     <table>
-      <tr><th>Item</th><th>% Price Decrease</th><th>Item Volume</th><th>Coins Gap</th></tr>
-      ${cat[1].map(row=>`<tr><td>${row[0]}</td><td>${row[1]}%</td><td>${row[2]}</td><td>${row[3]}</td></tr>`).join('')}
+      <tr><th>Item</th><th>% Price Decrease</th><th>Item Volume</th><th>Insta-sells/hour</th><th>Coins Gap</th></tr>
+      ${cat[1].map(row=>`<tr><td>${row[0]}</td><td>${row[1]}%</td><td>${row[2]}</td><td>${row[3]}</td><td>${row[4]}</td></tr>`).join('')}
     </table>
   `).join('');
 }
