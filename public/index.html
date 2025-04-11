@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkyBlock Bazaar Tracker - Orders</title>
+  <title>SkyBlock Bazaar Tracker</title>
   <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
   <style>
     body {
@@ -44,7 +44,7 @@
       width: 100%;
       padding: 10px;
       font-size: 16px;
-      margin: 10px 0;
+      margin: 10px 0 10px;
       border-radius: 6px;
       border: none;
     }
@@ -62,14 +62,20 @@
     th {
       background-color: rgba(255, 255, 255, 0.1);
     }
-    .highlight-yellow { background-color: rgba(255,255,0,0.2); }
-    .highlight-red { background-color: rgba(255,0,0,0.4); }
-    .highlight-blue { background-color: rgba(0,191,255,0.3); }
+    .highlight-yellow {
+      background-color: rgba(255, 255, 0, 0.2);
+    }
+    .highlight-red {
+      background-color: rgba(255, 0, 0, 0.4);
+    }
+    .highlight-blue {
+      background-color: rgba(0, 191, 255, 0.3);
+    }
     .order-info {
       margin: 20px auto;
       max-width: 600px;
       text-align: center;
-      background-color: rgba(255,255,255,0.05);
+      background-color: rgba(255, 255, 255, 0.05);
       padding: 20px;
       border-radius: 10px;
     }
@@ -82,25 +88,28 @@
       border-radius: 12px;
     }
     .dropdown {
-      background-color: rgba(0,0,0,0.85);
+      background-color: rgba(0, 0, 0, 0.85);
       border-radius: 8px;
       padding: 10px;
       max-height: 300px;
       overflow-y: auto;
       display: none;
-      position: absolute;
-      z-index: 1000;
-      width: calc(100% - 60px);
     }
     .dropdown-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 8px 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
     }
-    .dropdown-item:hover { background-color: rgba(255,255,255,0.1); }
+    .dropdown-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .dropdown-label {
+      display: flex;
+      align-items: center;
+    }
     .dropdown-price {
       background-color: goldenrod;
       padding: 4px 8px;
@@ -108,8 +117,6 @@
       font-weight: bold;
       color: black;
     }
-    .tables { display: flex; gap: 20px; }
-    .tables > div { flex: 1; }
   </style>
 </head>
 <body>
@@ -117,6 +124,11 @@
     <div class="tabs">
       <a class="tab active-tab" href="index.html">Orders</a>
       <a class="tab" href="volume-drain.html">Buy Order Volume Drain</a>
+      <a class="tab" href="saved-orders.html">Saved Orders</a>
+    </div>
+
+    <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
+      <a href="auth.html" id="loginLink" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>
     </div>
 
     <h1>SkyBlock Bazaar Tracker</h1>
@@ -320,6 +332,20 @@
       setInterval(() => {
         if (currentItemId) loadData(currentItemId);
       }, 3000);
+      const currentUser = localStorage.getItem("currentUser");
+const authStatus = document.getElementById("authStatus");
+
+if (currentUser) {
+  authStatus.innerHTML = `
+    Logged in as <strong>${currentUser}</strong>
+    <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+  `;
+  document.getElementById("logoutLink").onclick = () => {
+    localStorage.removeItem("currentUser");
+    location.reload();
+  };
+}
+
       </script>      
   </div>
 </body>

@@ -60,9 +60,15 @@
     <div class="tabs">
       <a class="tab" href="index.html">Orders</a>
       <a class="tab active-tab" href="volume-drain.html">Buy Order Volume Drain</a>
+      <a class="tab" href="saved-orders.html">Saved Orders</a>
+    </div>
+
+    <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
+      <a href="auth.html" id="loginLink" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>
     </div>
 
     <h1>Buy Order Volume Drain</h1>
+
     <div id="tables"></div>
   </div>
 
@@ -173,6 +179,20 @@
     
     fetchData();
     setInterval(fetchData,30000);
+    const currentUser = localStorage.getItem("currentUser");
+const authStatus = document.getElementById("authStatus");
+
+if (currentUser) {
+  authStatus.innerHTML = `
+    Logged in as <strong>${currentUser}</strong>
+    <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+  `;
+  document.getElementById("logoutLink").onclick = () => {
+    localStorage.removeItem("currentUser");
+    location.reload();
+  };
+}
+
     </script>    
 </body>
 </html>
