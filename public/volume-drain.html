@@ -89,39 +89,54 @@
     
         if (!buyOrders.length || !sellOrders.length) return;
     
-        const highestBuyPrice = Math.max(...buyOrders.map(o => o.pricePerUnit));
-        const lowestSellPrice = sellOrders[0].pricePerUnit;
+        const activeBuy = buyOrders[0].pricePerUnit;
+        const activeSell = sellOrders[0].pricePerUnit;
     
-        if (lowestSellPrice >= highestBuyPrice * 1.3) {
-          const percentGap = ((lowestSellPrice - highestBuyPrice) / highestBuyPrice) * 100;
-          cat1.push([id, percentGap.toFixed(1), buyOrders[0].amount, instaSellsHour.toFixed(1), (lowestSellPrice - highestBuyPrice).toFixed(1)]);
-        } else {
-          let foundDrop = false;
-          let cumulativeVolume = buyOrders[0].amount;
+        // === Category 1: Active buy is 25% or more below active sell ===
+        if (activeBuy * 1.25 <= activeSell) {
+          const percentChange = ((activeBuy - activeSell) / activeSell) * 100;
+          const coinsGap = activeSell - activeBuy;
+          cat1.push([id, percentChange.toFixed(1), "Already Price Dropped: No Volume", instaSellsHour.toFixed(1), coinsGap.toFixed(1)]);
+          return;
+        }
     
-          for (let i = 1; i < buyOrders.length; i++) {
-            const higherPrice = buyOrders[i-1].pricePerUnit;
-            const lowerPrice = buyOrders[i].pricePerUnit;
-            const percentChange = ((lowerPrice - higherPrice) / higherPrice) * 100;
+        // === Category 2: Look for sudden drop and small volume between ===
+        let foundDrop = false;
+        for (let i = 1; i < buyOrders.length; i++) {
+          const prev = buyOrders[i - 1];
+          const curr = buyOrders[i];
+          const priceChange = (curr.pricePerUnit - prev.pricePerUnit) / curr.pricePerUnit;
+          let volumeBetween = 0;
+          for (let j = 0; j < i; j++) volumeBetween += buyOrders[j].amount;
     
-            if (percentChange <= -15 && cumulativeVolume < instaSellsHour * 10) {
-              const dropMultiplier = lowerPrice / higherPrice;
-              const scoreAmount = (Math.E * (1 - dropMultiplier) * instaSellsHour) / cumulativeVolume;
-              cat2.push([id, percentChange.toFixed(1), cumulativeVolume, instaSellsHour.toFixed(1), ((higherPrice - lowerPrice) * cumulativeVolume).toFixed(1), scoreAmount]);
-              foundDrop = true;
-              break;
-            }
-            cumulativeVolume += buyOrders[i].amount;
-          }
-    
-          if (!foundDrop) {
-            const percentGap = ((lowestSellPrice - highestBuyPrice) / highestBuyPrice) * 100;
-            cat3.push([id, percentGap.toFixed(1), buyOrders[0].amount, instaSellsHour.toFixed(1), (lowestSellPrice - highestBuyPrice).toFixed(1)]);
+          if (priceChange <= -0.2 && volumeBetween <= 10 * instaSellsHour) {
+            const percentChange = ((curr.pricePerUnit - activeSell) / activeSell) * 100;
+            const coinsGap = activeSell - curr.pricePerUnit;
+            cat2.push([id, percentChange.toFixed(1), volumeBetween, instaSellsHour.toFixed(1), coinsGap.toFixed(1)]);
+            foundDrop = true;
+            break;
           }
         }
+        if (foundDrop) return;
+    
+        // === Category 3: Not price dropping (find max gap between any 2 consecutive orders) ===
+        let maxDrop = -Infinity;
+        let bestIndex = 0;
+        for (let i = 1; i < buyOrders.length; i++) {
+          const change = (buyOrders[i].pricePerUnit - buyOrders[i - 1].pricePerUnit) / buyOrders[i].pricePerUnit;
+          if (change < maxDrop) continue;
+          maxDrop = change;
+          bestIndex = i;
+        }
+        const bestOrder = buyOrders[bestIndex];
+        let volume = 0;
+        for (let j = 0; j < bestIndex; j++) volume += buyOrders[j].amount;
+        const percentChange = ((bestOrder.pricePerUnit - activeSell) / activeSell) * 100;
+        const coinsGap = activeSell - bestOrder.pricePerUnit;
+        cat3.push([id, percentChange.toFixed(1), volume, instaSellsHour.toFixed(1), coinsGap.toFixed(1)]);
       });
     
-      cat2.sort((a,b) => b[5] - a[5]);
+      cat2.sort((a,b) => b[4] - a[4]);
     
       document.getElementById('tables').innerHTML = [
         ['Under Price Drop', cat1],
@@ -132,7 +147,7 @@
         <table>
           <tr>
             <th>Item</th>
-            <th>% Price Decrease</th>
+            <th>% Price Change</th>
             <th>Item Volume</th>
             <th>Insta-sells/hour</th>
             <th>Coins Gap</th>
