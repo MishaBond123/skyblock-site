@@ -114,19 +114,44 @@
    </style>
  </head>
  <body>
-   <div class="container">
-     <h1>SkyBlock Bazaar Tracker</h1>
- 
-     <div class="volume-box">
-       <div>
-         <strong>Instabuys / hour:</strong>
-         <div id="instabuys"></div>
-       </div>
-       <div>
-         <strong>Instasells / hour:</strong>
-         <div id="instasells"></div>
-       </div>
-     </div>
+  <style>
+    .button-row {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .nav-button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      cursor: pointer;
+    }
+    .nav-button:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+
+  <div class="container">
+    <div class="button-row">
+      <button class="nav-button" onclick="window.location.href='volume-drain.html'">Buy Order Volume Drain</button>
+    </div>
+
+    <h1>SkyBlock Bazaar Tracker</h1>
+
+    <div class="volume-box">
+      <div>
+        <strong>Instabuys / hour:</strong>
+        <div id="instabuys"></div>
+      </div>
+      <div>
+        <strong>Instasells / hour:</strong>
+        <div id="instasells"></div>
+      </div>
+    </div>
+
  
      <h3>Item ID:</h3>
      <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
