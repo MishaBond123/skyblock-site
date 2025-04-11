@@ -53,11 +53,6 @@
     th {
       background-color: rgba(255,255,255,0.1);
     }
-    .clickable-item {
-      text-decoration: underline;
-      cursor: pointer;
-      color: #00bfff;
-    }
   </style>
 </head>
 <body>
@@ -71,127 +66,113 @@
     <div id="tables"></div>
   </div>
 
-  <!-- Popup -->
-  <div id="itemPopup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background-color:rgba(0,0,0,0.95); color:white; padding:20px 30px; border-radius:12px; z-index:1000; text-align:center; max-width:90%; box-shadow:0 0 20px black;">
-    <div style="text-align:right; margin:-10px -10px 10px 0;">
-      <span id="popupClose" style="cursor:pointer; font-size:20px;">✖</span>
-    </div>
-    <div style="margin-bottom:10px;">Would you like to open:</div>
-    <div style="display:flex; gap:15px; justify-content:center;">
-      <button id="popupChart" style="padding:8px 16px; font-size:15px; cursor:pointer;">📈 Chart</button>
-      <button id="popupOrders" style="padding:8px 16px; font-size:15px; cursor:pointer;">📋 Orders</button>
-    </div>
-  </div>
-
   <script>
-const itemsToTrack = ["PERFECT_AMBER_GEM","PERFECT_TOPAZ_GEM","PERFECT_SAPPHIRE_GEM","PERFECT_AMETHYST_GEM","PERFECT_JASPER_GEM","PERFECT_RUBY_GEM","PERFECT_JADE_GEM","PERFECT_OPAL_GEM","PERFECT_AQUAMARINE_GEM","PERFECT_CITRINE_GEM","PERFECT_ONYX_GEM","FLAWLESS_PERIDOT_GEM","UMBER_PLATE","TUNGSTEN_PLATE","MITHRIL_PLATE","PERFECT_PLATE","GOLDEN_PLATE","TITANIUM_TESSERACT","HOT_STUFF","FRIGID_HUSK","TUNGSTEN_KEY","UMBER_KEY","SKELETON_KEY"];
-
-async function fetchData() {
-  const apiKey = "YOUR_API_KEY_HERE";
-  const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
-  const json = await res.json();
-  categorizeItems(json.products);
-}
-
-function formatM(coins) {
-  return (coins / 1e6).toFixed(2) + "M";
-}
-
-function categorizeItems(products) {
-  let cat1=[], cat2=[], cat3=[];
-
-  itemsToTrack.forEach(id => {
-    const data = products[id];
-    if (!data) return;
-
-    const buyOrders = data.sell_summary;  // sell_summary = buy orders
-    const sellOrders = data.buy_summary;  // buy_summary = sell orders
-    const instaSellsHour = data.quick_status.sellMovingWeek / 168;
-    if (!buyOrders.length || !sellOrders.length) return;
-
-    const activeBuy = buyOrders[0].pricePerUnit;
-    const activeSell = sellOrders[0].pricePerUnit;
-
-    if (activeBuy * 1.25 <= activeSell) {
-      const percentChange = ((activeBuy - activeSell) / activeSell) * 100;
-      const coinGap = activeSell - activeBuy;
-      cat1.push([id, percentChange.toFixed(1), "Already Price Dropped: No Volume", instaSellsHour.toFixed(1), formatM(coinGap)]);
-    } else {
-      let foundCat2 = false;
-      for (let i = 1; i < buyOrders.length; i++) {
-        const priceDrop = (buyOrders[i-1].pricePerUnit - buyOrders[i].pricePerUnit) / buyOrders[i].pricePerUnit;
-        const volume = buyOrders.slice(0, i).reduce((sum, o) => sum + o.amount, 0);
-        if (priceDrop <= -0.2) {
-          const coinGap = activeSell - buyOrders[i].pricePerUnit;
-          const percentChange = ((buyOrders[i].pricePerUnit - activeSell) / activeSell) * 100;
-          cat2.push([id, percentChange.toFixed(1), volume, instaSellsHour.toFixed(1), formatM(coinGap)]);
-          foundCat2 = true;
-          break;
+    const itemsToTrack = ["PERFECT_AMBER_GEM","PERFECT_TOPAZ_GEM","PERFECT_SAPPHIRE_GEM","PERFECT_AMETHYST_GEM","PERFECT_JASPER_GEM","PERFECT_RUBY_GEM","PERFECT_JADE_GEM","PERFECT_OPAL_GEM","PERFECT_AQUAMARINE_GEM","PERFECT_CITRINE_GEM","PERFECT_ONYX_GEM","FLAWLESS_PERIDOT_GEM","UMBER_PLATE","TUNGSTEN_PLATE","MITHRIL_PLATE","PERFECT_PLATE","GOLDEN_PLATE","TITANIUM_TESSERACT","HOT_STUFF","FRIGID_HUSK","TUNGSTEN_KEY","UMBER_KEY","SKELETON_KEY"];
+    
+    async function fetchData() {
+      const apiKey = "YOUR_API_KEY_HERE";
+      const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
+      const json = await res.json();
+      categorizeItems(json.products);
+    }
+    
+    function categorizeItems(products) {
+      let cat1=[], cat2=[], cat3=[];
+    
+      itemsToTrack.forEach(id => {
+        const data = products[id];
+        if (!data) return;
+    
+        // REMEMBER: API is inverted
+        const buyOrders = data.sell_summary; // players sell => buy instantly
+        const sellOrders = data.buy_summary; // players buy => sell instantly
+        const instaSellsHour = data.quick_status.buyMovingWeek / 168;
+    
+        if (!buyOrders.length || !sellOrders.length) return;
+    
+        const activeBuy = buyOrders[0].pricePerUnit;
+        const activeSell = sellOrders[0].pricePerUnit;
+    
+        // === Category 1 ===
+        if (activeBuy * 1.25 <= activeSell) {
+          const percentChange = ((activeBuy - activeSell) / activeSell) * 100;
+          const coinsGap = activeSell - activeBuy;
+          cat1.push([id, percentChange.toFixed(1), "Already Price Dropped: No Volume", instaSellsHour.toFixed(1), (parseFloat(coinsGap.toFixed(1))/1e6).toFixed(2) + 'M']);
+          return;
         }
-      }
-
-      if (!foundCat2) {
-        let maxDrop = 0;
-        let maxDropIndex = 1;
+    
+        // === Category 2 ===
+        let foundCat2 = false;
         for (let i = 1; i < buyOrders.length; i++) {
-          const drop = (buyOrders[i-1].pricePerUnit - buyOrders[i].pricePerUnit) / buyOrders[i].pricePerUnit;
-          if (drop < maxDrop) {
-            maxDrop = drop;
-            maxDropIndex = i;
+          const price1 = buyOrders[i - 1].pricePerUnit;
+          const price2 = buyOrders[i].pricePerUnit;
+          const drop = (price2 - price1) / price2;
+    
+          if (drop <= -0.2) {
+            let volume = 0;
+            for (let j = 0; j < i; j++) volume += buyOrders[j].amount;
+    
+            if (volume <= 10 * instaSellsHour) {
+              const percentChange = ((price2 - activeSell) / activeSell) * 100;
+              const coinsGap = activeSell - price2;
+              cat2.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (parseFloat(coinsGap.toFixed(1))/1e6).toFixed(2) + 'M']);
+              foundCat2 = true;
+              break;
+            }
           }
         }
-        const volume = buyOrders.slice(0, maxDropIndex).reduce((sum, o) => sum + o.amount, 0);
-        const percentChange = ((buyOrders[maxDropIndex].pricePerUnit - activeSell) / activeSell) * 100;
-        const coinGap = activeSell - buyOrders[maxDropIndex].pricePerUnit;
-        cat3.push([id, percentChange.toFixed(1), volume, instaSellsHour.toFixed(1), formatM(coinGap)]);
-      }
+        if (foundCat2) return;
+    
+        // === Category 3 ===
+        let maxDrop = -Infinity;
+        let bestIndex = 1;
+        for (let i = 1; i < buyOrders.length; i++) {
+          const prev = buyOrders[i - 1].pricePerUnit;
+          const curr = buyOrders[i].pricePerUnit;
+          const drop = (curr - prev) / curr;
+          if (drop < maxDrop) continue;
+          maxDrop = drop;
+          bestIndex = i;
+        }
+        const bestOrder = buyOrders[bestIndex];
+        let volume = 0;
+        for (let j = 0; j < bestIndex; j++) volume += buyOrders[j].amount;
+        const percentChange = ((bestOrder.pricePerUnit - activeSell) / activeSell) * 100;
+        const coinsGap = activeSell - bestOrder.pricePerUnit;
+        cat3.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (parseFloat(coinsGap.toFixed(1))/1e6).toFixed(2) + 'M']);
+      });
+    
+      cat2.sort((a,b) => b[4] - a[4]);
+    
+      document.getElementById('tables').innerHTML = [
+        ['Under Price Drop', cat1],
+        ['About To Price Drop', cat2],
+        ['Not Price Dropping', cat3]
+      ].map(cat => `
+        <h2>${cat[0]}</h2>
+        <table>
+          <tr>
+            <th>Item</th>
+            <th>% Price Change</th>
+            <th>Item Volume</th>
+            <th>Insta-sells/hour</th>
+            <th>Coins Gap</th>
+          </tr>
+          ${cat[1].map(row => `
+            <tr>
+              <td><a href="https://skyblock.finance/items/${row[0]}/chart" target="_blank" style="color: #fff; text-decoration: underline;">${row[0]}</a></td>
+              <td>${row[1]}%</td>
+              <td>${row[2]}</td>
+              <td>${row[3]}</td>
+              <td>${row[4]}</td>
+            </tr>
+          `).join('')}
+        </table>
+      `).join('');
     }
-  });
-
-  document.getElementById('tables').innerHTML = [
-    ['Under Price Drop', cat1],
-    ['About To Price Drop', cat2],
-    ['Not Price Dropping', cat3]
-  ].map(cat => `
-    <h2>${cat[0]}</h2>
-    <table>
-      <tr><th>Item</th><th>% Price Change</th><th>Item Volume</th><th>Insta-sells/hour</th><th>Coins Gap</th></tr>
-      ${cat[1].map(row => `
-        <tr>
-          <td><span class="clickable-item" data-id="${row[0]}">${row[0]}</span></td>
-          <td>${row[1]}%</td>
-          <td>${row[2]}</td>
-          <td>${row[3]}</td>
-          <td>${row[4]}</td>
-        </tr>`).join('')}
-    </table>
-  `).join('');
-}
-
-fetchData();
-setInterval(fetchData, 30000);
-
-// Popup logic
-let currentPopupItem = "";
-document.addEventListener("click", (e) => {
-  const popup = document.getElementById("itemPopup");
-  if (e.target.matches(".clickable-item")) {
-    currentPopupItem = e.target.dataset.id;
-    popup.style.display = "block";
-  } else if (e.target.id === "popupClose") {
-    popup.style.display = "none";
-  } else if (e.target.id === "popupChart") {
-    if (currentPopupItem)
-      window.open(`https://skyblock.finance/items/${currentPopupItem}/chart`, '_blank');
-    popup.style.display = "none";
-  } else if (e.target.id === "popupOrders") {
-    if (currentPopupItem)
-      window.open(`index.html?item=${currentPopupItem}`, '_blank');
-    popup.style.display = "none";
-  } else if (!popup.contains(e.target)) {
-    popup.style.display = "none";
-  }
-});
-  </script>
+    
+    fetchData();
+    setInterval(fetchData,30000);
+    </script>    
 </body>
 </html>
