@@ -1,316 +1,298 @@
 <!DOCTYPE html>
- <html lang="en">
- <head>
-   <meta charset="UTF-8" />
-   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-   <title>SkyBlock Bazaar Tracker</title>
-   <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
-   <style>
-     body {
-       margin: 0;
-       font-family: 'Segoe UI', sans-serif;
-       background-image: url('bgimage.jpeg');
-       background-size: cover;
-       background-attachment: fixed;
-       color: #fff;
-     }
-     .container {
-       max-width: 1200px;
-       margin: 40px auto;
-       background-color: rgba(0, 0, 0, 0.75);
-       padding: 30px;
-       border-radius: 16px;
-     }
-     h1, h2, h3 {
-       text-align: center;
-     }
-     input {
-       width: 100%;
-       padding: 10px;
-       font-size: 16px;
-       margin: 10px 0 10px;
-       border-radius: 6px;
-       border: none;
-     }
-     table {
-       width: 100%;
-       border-collapse: collapse;
-       margin-bottom: 30px;
-       background-color: rgba(255, 255, 255, 0.05);
-     }
-     th, td {
-       padding: 10px;
-       text-align: center;
-       border: 1px solid rgba(255, 255, 255, 0.2);
-     }
-     th {
-       background-color: rgba(255, 255, 255, 0.1);
-     }
-     tfoot td {
-       font-weight: bold;
-     }
-     .tables {
-       display: flex;
-       gap: 20px;
-     }
-     .tables > div {
-       flex: 1;
-     }
-     .highlight-yellow {
-       background-color: rgba(255, 255, 0, 0.2);
-     }
-     .highlight-red {
-       background-color: rgba(255, 0, 0, 0.4);
-     }
-     .highlight-blue {
-       background-color: rgba(0, 191, 255, 0.3);
-     }
-     .order-info {
-       margin: 20px auto;
-       max-width: 600px;
-       text-align: center;
-       background-color: rgba(255, 255, 255, 0.05);
-       padding: 20px;
-       border-radius: 10px;
-     }
-     .volume-box {
-       display: flex;
-       justify-content: space-around;
-       margin-bottom: 20px;
-       background-color: rgba(255,255,255,0.05);
-       padding: 20px;
-       border-radius: 12px;
-     }
-     .dropdown {
-       background-color: rgba(0, 0, 0, 0.85);
-       border-radius: 8px;
-       padding: 10px;
-       max-height: 300px;
-       overflow-y: auto;
-       display: none;
-     }
-     .dropdown-item {
-       display: flex;
-       align-items: center;
-       justify-content: space-between;
-       padding: 8px 12px;
-       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-       cursor: pointer;
-     }
-     .dropdown-item:hover {
-       background-color: rgba(255, 255, 255, 0.1);
-     }
-     .dropdown-label {
-       display: flex;
-       align-items: center;
-     }
-     .dropdown-price {
-       background-color: goldenrod;
-       padding: 4px 8px;
-       border-radius: 6px;
-       font-weight: bold;
-       color: black;
-     }
-   </style>
- </head>
- <body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkyBlock Bazaar Tracker - Orders</title>
+  <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url('bgimage.jpeg');
+      background-size: cover;
+      background-attachment: fixed;
+      color: #fff;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      background-color: rgba(0, 0, 0, 0.75);
+      padding: 30px;
+      border-radius: 16px;
+      position: relative;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      position: absolute;
+      top: -40px;
+      left: 20px;
+    }
+    .tab {
+      padding: 8px 16px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px 8px 0 0;
+    }
+    .active-tab {
+      background-color: rgba(255,255,255,0.1);
+      border-bottom: 2px solid #00bfff;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    th {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .highlight-yellow {
+      background-color: rgba(255, 255, 0, 0.2);
+    }
+    .highlight-red {
+      background-color: rgba(255, 0, 0, 0.4);
+    }
+    .highlight-blue {
+      background-color: rgba(0, 191, 255, 0.3);
+    }
+    .order-info {
+      margin: 20px auto;
+      max-width: 600px;
+      text-align: center;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .volume-box {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      background-color: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
   <div class="container">
-    <div class="tabs" style="display: flex; gap: 10px; position: absolute; top: -40px; left: 20px;">
-      <a class="tab active-tab" href="index.html" style="padding: 8px 16px; background-color: rgba(0,0,0,0.6); color:#fff; text-decoration:none; border-radius:8px 8px 0 0; background-color:rgba(255,255,255,0.1); border-bottom:2px solid #00bfff;">Orders</a>
-      <a class="tab" href="volume-drain.html" style="padding: 8px 16px; background-color: rgba(0,0,0,0.6); color:#fff; text-decoration:none; border-radius:8px 8px 0 0;">Buy Order Volume Drain</a>
+    <div class="tabs">
+      <a class="tab active-tab" href="index.html">Orders</a>
+      <a class="tab" href="volume-drain.html">Buy Order Volume Drain</a>
     </div>
-  
+
     <h1>SkyBlock Bazaar Tracker</h1>
-  
+
     <div class="volume-box">
       <div>
         <strong>Instabuys / hour:</strong>
         <div id="instabuys"></div>
-      </div>  
- 
-     <h3>Item ID:</h3>
-     <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
-     <div id="itemDropdown" class="dropdown"></div>
- 
-     <h3>Track Order By Price:</h3>
-     <input id="trackInput" placeholder="Enter price to track (e.g. 10,670,396.3)" />
- 
-     <div id="orderInfo"></div>
- 
-     <div class="tables">
-       <div>
-         <h2>Buy Orders</h2>
-         <table id="buyTable">
-           <thead>
-             <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
-           </thead>
-           <tbody></tbody>
-           <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
-         </table>
-       </div>
-       <div>
-         <h2>Sell Orders</h2>
-         <table id="sellTable">
-           <thead>
-             <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
-           </thead>
-           <tbody></tbody>
-           <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
-         </table>
-       </div>
-     </div>
-   </div>
- 
-   <script>
-     const itemInput = document.getElementById("itemInput");
-     const trackInput = document.getElementById("trackInput");
-     const buyBody = document.querySelector("#buyTable tbody");
-     const sellBody = document.querySelector("#sellTable tbody");
-     const buyFoot = document.querySelector("#buyTable tfoot tr");
-     const sellFoot = document.querySelector("#sellTable tfoot tr");
-     const instabuys = document.getElementById("instabuys");
-     const instasells = document.getElementById("instasells");
-     const orderInfo = document.getElementById("orderInfo");
-     const itemDropdown = document.getElementById("itemDropdown");
- 
-     let latestBuySummary = [], latestSellSummary = [], currentItemId = "";
-     let allItems = [];
- 
-     async function getApiKey() {
-       return "YOUR_API_KEY_HERE";
-     }
- 
-     async function fetchAllItems() {
-       const apiKey = await getApiKey();
-       const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
-       const json = await res.json();
-       const products = json.products;
-       allItems = Object.keys(products).map(id => {
-         const quick = products[id].quick_status;
-         const price = quick.sellPrice > 1000000 ? (quick.sellPrice / 1e6).toFixed(2) + 'M' : quick.sellPrice > 1000 ? (quick.sellPrice / 1e3).toFixed(1) + 'k' : quick.sellPrice.toFixed(1);
-         return {
-           id,
-           name: id.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase()),
-           price
-         };
-       });
-     }
- 
-     itemInput.addEventListener("input", () => {
-       const query = itemInput.value.trim().toLowerCase();
-       itemDropdown.innerHTML = "";
-       if (!query) return (itemDropdown.style.display = "none");
-       const filtered = allItems.filter(i => i.name.toLowerCase().includes(query) || i.id.toLowerCase().includes(query));
-       for (const item of filtered.slice(0, 50)) {
-         const div = document.createElement("div");
-         div.className = "dropdown-item";
-         div.innerHTML = `
-           <div class="dropdown-label">
-             ${item.name}
-           </div>
-           <div class="dropdown-price">${item.price} /bz</div>
-         `;
-         div.onclick = () => {
-           itemInput.value = item.id;
-           itemDropdown.style.display = "none";
-           currentItemId = item.id;
-           loadData(item.id);
-         };
-         itemDropdown.appendChild(div);
-       }
-       itemDropdown.style.display = "block";
-     });
- 
-     trackInput.addEventListener("change", () => {
-       const tracked = parseFloat(trackInput.value.replace(/,/g, ''));
-       highlightTrackedOrder(tracked);
-     });
- 
-     async function loadData(itemId) {
-       const apiKey = await getApiKey();
-       try {
-         const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
-         const json = await res.json();
-         const data = json.products[itemId];
-         if (!data) throw new Error("Item not found");
-         instabuys.textContent = data.quick_status.buyMovingWeek ? (data.quick_status.buyMovingWeek / (7 * 24)).toFixed(1) : "-";
-         instasells.textContent = data.quick_status.sellMovingWeek ? (data.quick_status.sellMovingWeek / (7 * 24)).toFixed(1) : "-";
-         latestBuySummary = data.sell_summary;
-         latestSellSummary = data.buy_summary;
-         renderTable(latestBuySummary, buyBody, buyFoot, parseFloat(instasells.textContent));
-         renderTable(latestSellSummary, sellBody, sellFoot, parseFloat(instabuys.textContent));
-         highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));
-       } catch (err) {
-         alert("Failed to load data. Check the item ID and API key.");
-         console.error(err);
-       }
-     }
- 
-     function renderTable(summary, tbody, tfootRow, hourlyVolume) {
-       tbody.innerHTML = "";
-       let totalAmount = 0, totalCoins = 0;
-       for (const row of summary) {
-         const total = row.amount * row.pricePerUnit;
-         totalAmount += row.amount;
-         totalCoins += total;
-         const tr = document.createElement("tr");
-         tr.innerHTML = `
-           <td>${row.orders}</td>
-           <td>${row.amount}</td>
-           <td>${row.pricePerUnit.toLocaleString()} coins</td>
-           <td>${total.toLocaleString()} coins</td>
-         `;
-         if (row.amount > hourlyVolume * 5) tr.classList.add("highlight-red");
-         else if (row.amount > hourlyVolume) tr.classList.add("highlight-yellow");
-         tbody.appendChild(tr);
-       }
-       tfootRow.innerHTML = `
-         <td>Total:</td>
-         <td>${totalAmount}</td>
-         <td></td>
-         <td>${totalCoins.toLocaleString()} coins</td>
-       `;
-     }
- 
-     function highlightTrackedOrder(price) {
-       orderInfo.innerHTML = "";
-       if (!price || isNaN(price)) return;
-       const allRows = [...buyBody.children, ...sellBody.children];
-       allRows.forEach(row => row.classList.remove("highlight-blue"));
-       for (const [summary, body] of [
-         [latestBuySummary, buyBody],
-         [latestSellSummary, sellBody]
-       ]) {
-         let coinsBetween = 0, itemsBetween = 0, priority = 1;
-         for (const row of summary) {
-           const unit = parseFloat(row.pricePerUnit.toFixed(1));
-           if (Math.abs(unit - price) < 0.1) {
-             const index = summary.indexOf(row);
-             const tr = body.children[index];
-             if (tr) tr.classList.add("highlight-blue");
-             orderInfo.innerHTML = `
-               <div class="order-info">
-                 <strong>Tracked Order Info</strong><br>
-                 Priority position: ${priority}<br>
-                 Items between: ${itemsBetween}<br>
-                 Coin gap: ${Math.round(coinsBetween).toLocaleString()} coins<br>
-                 Items left in order: ${row.amount}
-               </div>
-             `;
-             return;
-           }
-           itemsBetween += row.amount;
-           coinsBetween += row.amount * row.pricePerUnit;
-           priority++;
-         }
-       }
-     }
- 
-     fetchAllItems();
-     setInterval(() => {
-       if (currentItemId) loadData(currentItemId);
-     }, 3000);
-   </script>
- </body>
- </html>
- </html>
+      </div>
+      <div>
+        <strong>Instasells / hour:</strong>
+        <div id="instasells"></div>
+      </div>
+    </div>
+
+    <h3>Item ID:</h3>
+    <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
+    <div id="itemDropdown" class="dropdown"></div>
+
+    <h3>Track Order By Price:</h3>
+    <input id="trackInput" placeholder="Enter price to track (e.g. 10,670,396.3)" />
+
+    <div id="orderInfo"></div>
+
+    <div class="tables">
+      <div>
+        <h2>Buy Orders</h2>
+        <table id="buyTable">
+          <thead>
+            <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
+        </table>
+      </div>
+      <div>
+        <h2>Sell Orders</h2>
+        <table id="sellTable">
+          <thead>
+            <tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const itemInput = document.getElementById("itemInput");
+const trackInput = document.getElementById("trackInput");
+const buyBody = document.querySelector("#buyTable tbody");
+const sellBody = document.querySelector("#sellTable tbody");
+const buyFoot = document.querySelector("#buyTable tfoot tr");
+const sellFoot = document.querySelector("#sellTable tfoot tr");
+const instabuys = document.getElementById("instabuys");
+const instasells = document.getElementById("instasells");
+const orderInfo = document.getElementById("orderInfo");
+const itemDropdown = document.getElementById("itemDropdown");
+
+let latestBuySummary = [], latestSellSummary = [], currentItemId = "";
+let allItems = [];
+
+async function getApiKey() {
+  return "YOUR_API_KEY_HERE";
+}
+
+async function fetchAllItems() {
+  const apiKey = await getApiKey();
+  const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
+  const json = await res.json();
+  const products = json.products;
+  allItems = Object.keys(products).map(id => {
+    const quick = products[id].quick_status;
+    const price = quick.sellPrice > 1000000 ? (quick.sellPrice / 1e6).toFixed(2) + 'M' : quick.sellPrice > 1000 ? (quick.sellPrice / 1e3).toFixed(1) + 'k' : quick.sellPrice.toFixed(1);
+    return {
+      id,
+      name: id.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase()),
+      price
+    };
+  });
+}
+
+itemInput.addEventListener("input", () => {
+  const query = itemInput.value.trim().toLowerCase();
+  itemDropdown.innerHTML = "";
+  if (!query) return (itemDropdown.style.display = "none");
+  const filtered = allItems.filter(i => i.name.toLowerCase().includes(query) || i.id.toLowerCase().includes(query));
+  for (const item of filtered.slice(0, 50)) {
+    const div = document.createElement("div");
+    div.className = "dropdown-item";
+    div.innerHTML = `
+      <div class="dropdown-label">
+        ${item.name}
+      </div>
+      <div class="dropdown-price">${item.price} /bz</div>
+    `;
+    div.onclick = () => {
+      itemInput.value = item.id;
+      itemDropdown.style.display = "none";
+      currentItemId = item.id;
+      loadData(item.id);
+    };
+    itemDropdown.appendChild(div);
+  }
+  itemDropdown.style.display = "block";
+});
+
+trackInput.addEventListener("change", () => {
+  const tracked = parseFloat(trackInput.value.replace(/,/g, ''));
+  highlightTrackedOrder(tracked);
+});
+
+async function loadData(itemId) {
+  const apiKey = await getApiKey();
+  try {
+    const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
+    const json = await res.json();
+    const data = json.products[itemId];
+    if (!data) throw new Error("Item not found");
+    instabuys.textContent = data.quick_status.buyMovingWeek ? (data.quick_status.buyMovingWeek / (7 * 24)).toFixed(1) : "-";
+    instasells.textContent = data.quick_status.sellMovingWeek ? (data.quick_status.sellMovingWeek / (7 * 24)).toFixed(1) : "-";
+    latestBuySummary = data.sell_summary;
+    latestSellSummary = data.buy_summary;
+    renderTable(latestBuySummary, buyBody, buyFoot, parseFloat(instasells.textContent));
+    renderTable(latestSellSummary, sellBody, sellFoot, parseFloat(instabuys.textContent));
+    highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));
+  } catch (err) {
+    alert("Failed to load data. Check the item ID and API key.");
+    console.error(err);
+  }
+}
+
+function renderTable(summary, tbody, tfootRow, hourlyVolume) {
+  tbody.innerHTML = "";
+  let totalAmount = 0, totalCoins = 0;
+  for (const row of summary) {
+    const total = row.amount * row.pricePerUnit;
+    totalAmount += row.amount;
+    totalCoins += total;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.orders}</td>
+      <td>${row.amount}</td>
+      <td>${row.pricePerUnit.toLocaleString()} coins</td>
+      <td>${total.toLocaleString()} coins</td>
+    `;
+    if (row.amount > hourlyVolume * 5) tr.classList.add("highlight-red");
+    else if (row.amount > hourlyVolume) tr.classList.add("highlight-yellow");
+    tbody.appendChild(tr);
+  }
+  tfootRow.innerHTML = `
+    <td>Total:</td>
+    <td>${totalAmount}</td>
+    <td></td>
+    <td>${totalCoins.toLocaleString()} coins</td>
+  `;
+}
+
+function highlightTrackedOrder(price) {
+  orderInfo.innerHTML = "";
+  if (!price || isNaN(price)) return;
+  const allRows = [...buyBody.children, ...sellBody.children];
+  allRows.forEach(row => row.classList.remove("highlight-blue"));
+  for (const [summary, body] of [
+    [latestBuySummary, buyBody],
+    [latestSellSummary, sellBody]
+  ]) {
+    let coinsBetween = 0, itemsBetween = 0, priority = 1;
+    for (const row of summary) {
+      const unit = parseFloat(row.pricePerUnit.toFixed(1));
+      if (Math.abs(unit - price) < 0.1) {
+        const index = summary.indexOf(row);
+        const tr = body.children[index];
+        if (tr) tr.classList.add("highlight-blue");
+        orderInfo.innerHTML = `
+          <div class="order-info">
+            <strong>Tracked Order Info</strong><br>
+            Priority position: ${priority}<br>
+            Items between: ${itemsBetween}<br>
+            Coin gap: ${Math.round(coinsBetween).toLocaleString()} coins<br>
+            Items left in order: ${row.amount}
+          </div>
+        `;
+        return;
+      }
+      itemsBetween += row.amount;
+      coinsBetween += row.amount * row.pricePerUnit;
+      priority++;
+    }
+  }
+}
+
+fetchAllItems();
+setInterval(() => {
+  if (currentItemId) loadData(currentItemId);
+}, 3000);
+
+    </script>
+
+  </div>
+</body>
+</html>
