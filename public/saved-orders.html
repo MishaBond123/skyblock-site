@@ -98,75 +98,153 @@
   </div>
 
   <script>
-    const currentUser = localStorage.getItem("currentUser");
-    const content = document.getElementById("content");
-    const authStatus = document.getElementById("authStatus");
-
-    // Auth status UI
-    if (currentUser) {
-      authStatus.innerHTML = `
-        Logged in as <strong>${currentUser}</strong>
-        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
-      `;
-      document.getElementById("logoutLink").onclick = () => {
-        localStorage.removeItem("currentUser");
-        location.reload();
-      };
-    }
-
-    // Require login
-    if (!currentUser) {
-      content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your saved orders.</p>`;
-    } else {
-      const savedKey = `savedOrders_${currentUser}`;
-      let orders = JSON.parse(localStorage.getItem(savedKey) || "[]");
-
-      function renderOrders() {
-        content.innerHTML = `
-          <div class="center">
-            <input id="itemInput" placeholder="Item Type (e.g. HOT_STUFF)" />
-            <input id="priceInput" placeholder="Order Price (e.g. 5000000)" />
-            <button id="addBtn">+ Add Order</button>
-          </div>
-          <div id="ordersList" style="margin-top: 30px;"></div>
-        `;
-
-        const list = document.getElementById("ordersList");
-        if (orders.length === 0) {
-          list.innerHTML = '<p class="center">No saved orders yet.</p>';
-        } else {
-          list.innerHTML = orders.map((order, index) => `
-            <div class="order-row">
-              <a href="index.html?item=${order.item}&track=${order.price}">
-  ${order.item} @ ${parseFloat(order.price).toLocaleString()} coins
-</a>
-
-              <button class="remove-btn" data-index="${index}">–</button>
-            </div>
-          `).join("");
-        }
-
-        document.querySelectorAll(".remove-btn").forEach(btn => {
-          btn.onclick = () => {
-            const i = parseInt(btn.dataset.index);
-            orders.splice(i, 1);
-            localStorage.setItem(savedKey, JSON.stringify(orders));
-            renderOrders();
-          };
-        });
-
-        document.getElementById("addBtn").onclick = () => {
-          const item = document.getElementById("itemInput").value.trim();
-          const price = document.getElementById("priceInput").value.trim();
-          if (!item || !price || isNaN(price)) return alert("Enter a valid item and price.");
-          orders.push({ item, price });
-          localStorage.setItem(savedKey, JSON.stringify(orders));
-          renderOrders();
-        };
+    const itemsToTrack = ["PERFECT_AMBER_GEM","PERFECT_TOPAZ_GEM","PERFECT_SAPPHIRE_GEM","PERFECT_AMETHYST_GEM","PERFECT_JASPER_GEM","PERFECT_RUBY_GEM","PERFECT_JADE_GEM","PERFECT_OPAL_GEM","PERFECT_AQUAMARINE_GEM","PERFECT_CITRINE_GEM","PERFECT_ONYX_GEM","PERFECT_PERIDOT_GEM","UMBER_PLATE","TUNGSTEN_PLATE","MITHRIL_PLATE","PERFECT_PLATE","GOLDEN_PLATE","TITANIUM_TESSERACT","HOT_STUFF","FRIGID_HUSK","TUNGSTEN_KEY","UMBER_KEY","SKELETON_KEY"];
+    
+    let recordEnabled = false;
+    let lastCat2Items = new Set();
+    let priceHistory = {};  // { ITEM_ID: [ { time, price, volume } ] }
+    
+    document.getElementById("tables").insertAdjacentHTML('beforebegin', `
+      <label style="display:flex;align-items:center;margin-bottom:10px;gap:10px;">
+        <input type="checkbox" id="recordToggle" />
+        <span>Record Prices and Notify</span>
+      </label>
+    `);
+    
+    document.getElementById("recordToggle").addEventListener("change", (e) => {
+      recordEnabled = e.target.checked;
+      if (recordEnabled) {
+        Notification.requestPermission();
       }
-
-      renderOrders();
+    });
+    
+    async function fetchData() {
+      const apiKey = "YOUR_API_KEY_HERE";
+      const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
+      const json = await res.json();
+      categorizeItems(json.products);
     }
-  </script>
+    
+    function notify(text) {
+      if (Notification.permission === "granted") {
+        new Notification(text);
+      }
+    }
+    
+    function categorizeItems(products) {
+      let cat1 = [], cat2 = [], cat3 = [];
+      let newCat2 = new Set();
+      const timestamp = Date.now();
+    
+      itemsToTrack.forEach(id => {
+        const data = products[id];
+        if (!data) return;
+    
+        const buyOrders = [...data.sell_summary].reverse();
+        const sellOrders = data.buy_summary;
+        const instaSellsHour = data.quick_status.buyMovingWeek / 168;
+    
+        if (!buyOrders.length || !sellOrders.length) return;
+    
+        const activeBuy = buyOrders[0].pricePerUnit;
+        const activeSell = sellOrders[0].pricePerUnit;
+    
+        // === Category 1 ===
+        if (activeBuy * 1.25 <= activeSell) {
+          const percentChange = ((activeBuy - activeSell) / activeSell) * 100;
+          const coinsGap = activeSell - activeBuy;
+          cat1.push([id, percentChange.toFixed(1), "Already Price Dropped: No Volume", instaSellsHour.toFixed(1), (coinsGap/1e6).toFixed(2) + 'M']);
+          if (recordEnabled && lastCat2Items.has(id)) {
+            notify(`${id} price dropped!`);
+          }
+          return;
+        }
+    
+        // === Category 2 ===
+        for (let i = 1; i < buyOrders.length; i++) {
+          const price1 = buyOrders[i - 1].pricePerUnit;
+          const price2 = buyOrders[i].pricePerUnit;
+          const drop = (price2 - price1) / price2;
+    
+          if (drop <= -0.2) {
+            let volume = 0;
+            for (let j = 0; j < i; j++) volume += buyOrders[j].amount;
+    
+            const totalCoinValue = price2 * volume;
+            if (true) { // we skip volume ≤ 100m check for now, or put: (totalCoinValue <= 1e8)
+              const percentChange = ((price2 - activeSell) / activeSell) * 100;
+              const coinsGap = activeSell - price2;
+              cat2.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (coinsGap/1e6).toFixed(2) + 'M']);
+    
+              newCat2.add(id);
+    
+              if (recordEnabled && !lastCat2Items.has(id) && totalCoinValue <= 1e8) {
+                notify(`${id} is about to drop in price`);
+              }
+    
+              if (recordEnabled) {
+                if (!priceHistory[id]) priceHistory[id] = [];
+                priceHistory[id].push({ time: timestamp, price: price2, volume });
+              }
+    
+              return;
+            }
+          }
+        }
+    
+        // === Category 3 ===
+        let maxDrop = -Infinity;
+        let bestIndex = 1;
+        for (let i = 1; i < buyOrders.length; i++) {
+          const prev = buyOrders[i - 1].pricePerUnit;
+          const curr = buyOrders[i].pricePerUnit;
+          const drop = (curr - prev) / curr;
+          if (drop > maxDrop) {
+            maxDrop = drop;
+            bestIndex = i;
+          }
+        }
+        const bestOrder = buyOrders[bestIndex];
+        let volume = 0;
+        for (let j = 0; j < bestIndex; j++) volume += buyOrders[j].amount;
+        const percentChange = ((bestOrder.pricePerUnit - activeSell) / activeSell) * 100;
+        const coinsGap = activeSell - bestOrder.pricePerUnit;
+        cat3.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (coinsGap/1e6).toFixed(2) + 'M']);
+      });
+    
+      lastCat2Items = newCat2;
+    
+      cat2.sort((a, b) => b[4] - a[4]);
+    
+      document.getElementById('tables').innerHTML = [
+        ['Under Price Drop', cat1],
+        ['About To Price Drop', cat2],
+        ['Not Price Dropping', cat3]
+      ].map(cat => `
+        <h2>${cat[0]}</h2>
+        <table>
+          <tr>
+            <th>Item</th>
+            <th>% Price Change</th>
+            <th>Item Volume</th>
+            <th>Insta-sells/hour</th>
+            <th>Coin Gap</th>
+          </tr>
+          ${cat[1].map(row => `
+            <tr>
+              <td><a href="https://skyblock.finance/items/${row[0]}/chart" target="_blank">${row[0]}</a></td>
+              <td>${row[1]}%</td>
+              <td>${row[2]}</td>
+              <td>${row[3]}</td>
+              <td>${row[4]}</td>
+            </tr>
+          `).join('')}
+        </table>
+      `).join('');
+    }
+    
+    fetchData();
+    setInterval(fetchData, 10000);
+    </script>    
 </body>
 </html>
