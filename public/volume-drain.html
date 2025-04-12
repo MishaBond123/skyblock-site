@@ -92,7 +92,7 @@
         const data = products[id];
         if (!data) return;
 
-        const buyOrders = [...data.sell_summary].reverse();
+        const buyOrders = data.sell_summary; // API inverted
         const sellOrders = data.buy_summary;
         const instaSellsHour = data.quick_status.buyMovingWeek / 168;
 
@@ -110,40 +110,47 @@
         }
 
         // === Category 2 ===
+        let found = false;
         for (let i = 1; i < buyOrders.length; i++) {
-          const price1 = buyOrders[i - 1].pricePerUnit;
-          const price2 = buyOrders[i].pricePerUnit;
-          const drop = (price2 - price1) / price2;
+          const prev = buyOrders[i - 1];
+          const curr = buyOrders[i];
+          const drop = (prev.pricePerUnit - curr.pricePerUnit) / curr.pricePerUnit;
 
           if (drop <= -0.2) {
             let volume = 0;
             for (let j = 0; j < i; j++) volume += buyOrders[j].amount;
 
-            const percentChange = ((price2 - activeSell) / activeSell) * 100;
-            const coinsGap = activeSell - price2;
-            cat2.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (coinsGap / 1e6).toFixed(2) + 'M']);
-            return;
+            if (volume <= 10 * instaSellsHour) {
+              const percentChange = ((curr.pricePerUnit - activeSell) / activeSell) * 100;
+              const coinsGap = activeSell - curr.pricePerUnit;
+              cat2.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (coinsGap / 1e6).toFixed(2) + 'M']);
+              found = true;
+              break;
+            }
           }
         }
 
-        // === Category 3 ===
-        let maxDrop = -Infinity;
-        let bestIndex = 1;
-        for (let i = 1; i < buyOrders.length; i++) {
-          const prev = buyOrders[i - 1].pricePerUnit;
-          const curr = buyOrders[i].pricePerUnit;
-          const drop = (curr - prev) / curr;
-          if (drop > maxDrop) {
+        if (!found) {
+          // === Category 3 ===
+          let maxDrop = -Infinity;
+          let bestIndex = 1;
+          for (let i = 1; i < buyOrders.length; i++) {
+            const prev = buyOrders[i - 1];
+            const curr = buyOrders[i];
+            const drop = (prev.pricePerUnit - curr.pricePerUnit) / curr.pricePerUnit;
+            if (drop < maxDrop) continue;
             maxDrop = drop;
             bestIndex = i;
           }
+
+          let volume = 0;
+          for (let j = 0; j < bestIndex; j++) volume += buyOrders[j].amount;
+
+          const bestOrder = buyOrders[bestIndex];
+          const percentChange = ((bestOrder.pricePerUnit - activeSell) / activeSell) * 100;
+          const coinsGap = activeSell - bestOrder.pricePerUnit;
+          cat3.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (coinsGap / 1e6).toFixed(2) + 'M']);
         }
-        const bestOrder = buyOrders[bestIndex];
-        let volume = 0;
-        for (let j = 0; j < bestIndex; j++) volume += buyOrders[j].amount;
-        const percentChange = ((bestOrder.pricePerUnit - activeSell) / activeSell) * 100;
-        const coinsGap = activeSell - bestOrder.pricePerUnit;
-        cat3.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (coinsGap / 1e6).toFixed(2) + 'M']);
       });
 
       cat2.sort((a, b) => parseFloat(b[4]) - parseFloat(a[4]));
