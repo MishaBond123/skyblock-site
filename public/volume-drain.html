@@ -72,12 +72,6 @@
     </div>
 
     <h1>Buy Order Volume Drain</h1>
-
-    <label style="display:flex;align-items:center;margin-bottom:10px;gap:10px;">
-      <input type="checkbox" id="recordToggle"/>
-      <span>Record Prices and Notify</span>
-    </label>
-
     <div id="tables"></div>
   </div>
 
@@ -104,8 +98,8 @@
         const data = products[id];
         if (!data) return;
 
-        const buyOrders = [...data.sell_summary].reverse(); // player sell orders → buy instantly
-        const sellOrders = data.buy_summary; // player buy orders → sell instantly
+        const buyOrders = [...data.sell_summary].reverse(); // players sell => buy instantly
+        const sellOrders = data.buy_summary; // players buy => sell instantly
         const instaSellsHour = data.quick_status.buyMovingWeek / 168;
 
         if (!buyOrders.length || !sellOrders.length) return;
@@ -138,7 +132,8 @@
         }
 
         // === Category 3 ===
-        let maxDrop = -Infinity, bestIndex = 1;
+        let maxDrop = -Infinity;
+        let bestIndex = 1;
         for (let i = 1; i < buyOrders.length; i++) {
           const prev = buyOrders[i - 1].pricePerUnit;
           const curr = buyOrders[i].pricePerUnit;
