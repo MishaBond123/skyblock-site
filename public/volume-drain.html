@@ -135,7 +135,6 @@
         }
     
         // === Category 2 ===
-        let foundCat2 = false;
         for (let i = 1; i < buyOrders.length; i++) {
           const price1 = buyOrders[i - 1].pricePerUnit;
           const price2 = buyOrders[i].pricePerUnit;
@@ -145,8 +144,10 @@
             let volume = 0;
             for (let j = 0; j < i; j++) volume += buyOrders[j].amount;
     
+            const totalCoinValue = price2 * volume;
             const percentChange = ((price2 - activeSell) / activeSell) * 100;
             const coinsGap = activeSell - price2;
+    
             cat2.push([
               id,
               percentChange.toFixed(1),
@@ -154,21 +155,19 @@
               instaSellsHour.toFixed(1),
               (coinsGap / 1e6).toFixed(2) + 'M'
             ]);
-            foundCat2 = true;
-    
-            if (recordEnabled && !lastCat2Items.has(id)) {
-              new Notification(`${id} is about to drop in price`);
-            }
     
             if (recordEnabled) {
+              if (totalCoinValue <= 1e8 && !lastCat2Items.has(id)) {
+                new Notification(`${id} is about to drop in price`);
+              }
+    
               if (!priceHistory[id]) priceHistory[id] = [];
               priceHistory[id].push({ time: timestamp, price: price2, volume });
             }
     
-            break;
+            return;
           }
         }
-        if (foundCat2) return;
     
         // === Category 3 ===
         let maxDrop = -Infinity;
