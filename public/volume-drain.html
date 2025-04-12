@@ -68,67 +68,108 @@
     </div>
 
     <h1>Buy Order Volume Drain</h1>
-
+    <label style="display:flex;align-items:center;margin-bottom:10px;gap:10px;">
+      <input type="checkbox" id="recordToggle" />
+      <span style="font-size:16px;">Record Prices and Notify</span>
+    </label>
+    
     <div id="tables"></div>
   </div>
 
   <script>
-    const itemsToTrack = ["PERFECT_AMBER_GEM","PERFECT_TOPAZ_GEM","PERFECT_SAPPHIRE_GEM","PERFECT_AMETHYST_GEM","PERFECT_JASPER_GEM","PERFECT_RUBY_GEM","PERFECT_JADE_GEM","PERFECT_OPAL_GEM","PERFECT_AQUAMARINE_GEM","PERFECT_CITRINE_GEM","PERFECT_ONYX_GEM","PERFECT_PERIDOT_GEM","UMBER_PLATE","TUNGSTEN_PLATE","MITHRIL_PLATE","PERFECT_PLATE","GOLDEN_PLATE","TITANIUM_TESSERACT","HOT_STUFF","FRIGID_HUSK","TUNGSTEN_KEY","UMBER_KEY","SKELETON_KEY"];
-
+    const itemsToTrack = [
+      "PERFECT_AMBER_GEM", "PERFECT_TOPAZ_GEM", "PERFECT_SAPPHIRE_GEM", "PERFECT_AMETHYST_GEM", "PERFECT_JASPER_GEM",
+      "PERFECT_RUBY_GEM", "PERFECT_JADE_GEM", "PERFECT_OPAL_GEM", "PERFECT_AQUAMARINE_GEM", "PERFECT_CITRINE_GEM",
+      "PERFECT_ONYX_GEM", "PERFECT_PERIDOT_GEM", "UMBER_PLATE", "TUNGSTEN_PLATE", "MITHRIL_PLATE", "PERFECT_PLATE",
+      "GOLDEN_PLATE", "TITANIUM_TESSERACT", "HOT_STUFF", "FRIGID_HUSK", "TUNGSTEN_KEY", "UMBER_KEY", "SKELETON_KEY"
+    ];
+    
+    let recordEnabled = false;
+    let lastCat2Items = new Set();
+    let priceHistory = {};
+    
+    document.getElementById("recordToggle").addEventListener("change", (e) => {
+      recordEnabled = e.target.checked;
+      if (recordEnabled) Notification.requestPermission();
+    });
+    
     async function fetchData() {
       const apiKey = "YOUR_API_KEY_HERE";
       const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
       const json = await res.json();
       categorizeItems(json.products);
     }
-
+    
     function categorizeItems(products) {
-      let cat1=[], cat2=[], cat3=[];
-
+      let cat1 = [], cat2 = [], cat3 = [];
+      const timestamp = Date.now();
+    
       itemsToTrack.forEach(id => {
         const data = products[id];
         if (!data) return;
-
-        // REMEMBER: API is inverted
+    
         const buyOrders = data.sell_summary; // players sell => buy instantly
         const sellOrders = data.buy_summary; // players buy => sell instantly
         const instaSellsHour = data.quick_status.buyMovingWeek / 168;
-
+    
         if (!buyOrders.length || !sellOrders.length) return;
-
+    
         const activeBuy = buyOrders[0].pricePerUnit;
         const activeSell = sellOrders[0].pricePerUnit;
-
+    
         // === Category 1 ===
         if (activeBuy * 1.25 <= activeSell) {
           const percentChange = ((activeBuy - activeSell) / activeSell) * 100;
           const coinsGap = activeSell - activeBuy;
-          cat1.push([id, percentChange.toFixed(1), "Already Price Dropped: No Volume", instaSellsHour.toFixed(1), (parseFloat(coinsGap.toFixed(1))/1e6).toFixed(2) + 'M']);
+          cat1.push([
+            id,
+            percentChange.toFixed(1),
+            "Already Price Dropped: No Volume",
+            instaSellsHour.toFixed(1),
+            (coinsGap / 1e6).toFixed(2) + 'M'
+          ]);
+          if (recordEnabled && lastCat2Items.has(id)) {
+            new Notification(`${id} price dropped!`);
+          }
           return;
         }
-
+    
         // === Category 2 ===
         let foundCat2 = false;
         for (let i = 1; i < buyOrders.length; i++) {
           const price1 = buyOrders[i - 1].pricePerUnit;
           const price2 = buyOrders[i].pricePerUnit;
           const drop = (price2 - price1) / price2;
-
+    
           if (drop <= -0.2) {
             let volume = 0;
             for (let j = 0; j < i; j++) volume += buyOrders[j].amount;
-
-            if (volume <= 10 * instaSellsHour) {
-              const percentChange = ((price2 - activeSell) / activeSell) * 100;
-              const coinsGap = activeSell - price2;
-              cat2.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (parseFloat(coinsGap.toFixed(1))/1e6).toFixed(2) + 'M']);
-              foundCat2 = true;
-              break;
+    
+            const percentChange = ((price2 - activeSell) / activeSell) * 100;
+            const coinsGap = activeSell - price2;
+            cat2.push([
+              id,
+              percentChange.toFixed(1),
+              volume.toFixed(1),
+              instaSellsHour.toFixed(1),
+              (coinsGap / 1e6).toFixed(2) + 'M'
+            ]);
+            foundCat2 = true;
+    
+            if (recordEnabled && !lastCat2Items.has(id)) {
+              new Notification(`${id} is about to drop in price`);
             }
+    
+            if (recordEnabled) {
+              if (!priceHistory[id]) priceHistory[id] = [];
+              priceHistory[id].push({ time: timestamp, price: price2, volume });
+            }
+    
+            break;
           }
         }
         if (foundCat2) return;
-
+    
         // === Category 3 ===
         let maxDrop = -Infinity;
         let bestIndex = 1;
@@ -136,20 +177,28 @@
           const prev = buyOrders[i - 1].pricePerUnit;
           const curr = buyOrders[i].pricePerUnit;
           const drop = (curr - prev) / curr;
-          if (drop < maxDrop) continue;
-          maxDrop = drop;
-          bestIndex = i;
+          if (drop > maxDrop) {
+            maxDrop = drop;
+            bestIndex = i;
+          }
         }
         const bestOrder = buyOrders[bestIndex];
         let volume = 0;
         for (let j = 0; j < bestIndex; j++) volume += buyOrders[j].amount;
         const percentChange = ((bestOrder.pricePerUnit - activeSell) / activeSell) * 100;
         const coinsGap = activeSell - bestOrder.pricePerUnit;
-        cat3.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (parseFloat(coinsGap.toFixed(1))/1e6).toFixed(2) + 'M']);
+        cat3.push([
+          id,
+          percentChange.toFixed(1),
+          volume.toFixed(1),
+          instaSellsHour.toFixed(1),
+          (coinsGap / 1e6).toFixed(2) + 'M'
+        ]);
       });
-
-      cat2.sort((a,b) => b[4] - a[4]);
-
+    
+      lastCat2Items = new Set(cat2.map(row => row[0]));
+      cat2.sort((a, b) => parseFloat(b[4]) - parseFloat(a[4]));
+    
       document.getElementById('tables').innerHTML = [
         ['Under Price Drop', cat1],
         ['About To Price Drop', cat2],
@@ -166,7 +215,7 @@
           </tr>
           ${cat[1].map(row => `
             <tr>
-              <td><a href="https://skyblock.finance/items/${row[0]}/chart" target="_blank" style="color: #fff; text-decoration: underline;">${row[0]}</a></td>
+              <td><a href="https://skyblock.finance/items/${row[0]}/chart" target="_blank" style="color: #00bfff; text-decoration: none;">${row[0]}</a></td>
               <td>${row[1]}%</td>
               <td>${row[2]}</td>
               <td>${row[3]}</td>
@@ -176,23 +225,22 @@
         </table>
       `).join('');
     }
-
+    
     fetchData();
-    setInterval(fetchData,30000);
+    setInterval(fetchData, 30000);
+    
     const currentUser = localStorage.getItem("currentUser");
-const authStatus = document.getElementById("authStatus");
-
-if (currentUser) {
-  authStatus.innerHTML = `
-    Logged in as <strong>${currentUser}</strong>
-    <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
-  `;
-  document.getElementById("logoutLink").onclick = () => {
-    localStorage.removeItem("currentUser");
-    location.reload();
-  };
-}
-
-    </script> 
+    const authStatus = document.getElementById("authStatus");
+    if (currentUser) {
+      authStatus.innerHTML = `
+        Logged in as <strong>${currentUser}</strong>
+        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+      `;
+      document.getElementById("logoutLink").onclick = () => {
+        localStorage.removeItem("currentUser");
+        location.reload();
+      };
+    }
+    </script>    
 </body>
 </html>
