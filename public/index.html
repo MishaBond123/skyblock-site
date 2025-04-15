@@ -44,20 +44,19 @@
       width: 100%;
       padding: 10px;
       font-size: 16px;
-      margin: 10px 0 10px;
+      margin: 10px 0;
       border-radius: 6px;
       border: none;
     }
     .tables {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.tables > div {
-  flex: 1;
-  min-width: 400px;
-}
-
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .tables > div {
+      flex: 1;
+      min-width: 400px;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -116,10 +115,6 @@
     .dropdown-item:hover {
       background-color: rgba(255, 255, 255, 0.1);
     }
-    .dropdown-label {
-      display: flex;
-      align-items: center;
-    }
     .dropdown-price {
       background-color: goldenrod;
       padding: 4px 8px;
@@ -133,7 +128,6 @@
   <div class="container">
     <div class="tabs">
       <a class="tab active-tab" href="index.html">Orders</a>
-      <a class="tab" href="volume-drain.html">Buy Order Volume Drain</a>
       <a class="tab" href="saved-orders.html">Saved Orders</a>
     </div>
 
@@ -188,7 +182,6 @@
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       
       const authStatus = document.getElementById("authStatus");
-      
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
@@ -353,7 +346,7 @@
       setInterval(() => {
         if (currentItemId) loadData(currentItemId);
       }, 3000);
-      </script>      
+      </script>        
   </div>
 </body>
 </html>
