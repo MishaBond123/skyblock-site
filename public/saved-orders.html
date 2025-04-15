@@ -96,39 +96,38 @@
   
     <script type="module">
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-    
+      
       const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-      const content = document.getElementById("content");
+      
       const authStatus = document.getElementById("authStatus");
-    
-      const { data: { session } } = await supabase.auth.getSession();
-    
-      if (!session) {
+      const content = document.getElementById("content");
+      
+      // Fetch session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (!session || sessionError) {
         content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your saved orders.</p>`;
+        document.getElementById("loginLink").style.display = "inline";
         return;
       }
-    
+      
       const user = session.user;
-      const userId = user.id;
-    
       authStatus.innerHTML = `
-        Logged in as <strong>${user.user_metadata?.username || user.email || "Unknown"}</strong>
+        Logged in as <strong>${user.user_metadata?.username || user.email}</strong>
         <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
       `;
-    
+      
       document.getElementById("logoutLink").onclick = async () => {
         await supabase.auth.signOut();
         location.reload();
       };
-    
-      const { data: orders, error } = await supabase
-        .from("saved_orders")
-        .select("*")
-        .eq("user_id", userId);
-    
+      
+      let orders = [];
+      const { data, error } = await supabase.from("saved_orders").select("*").eq("user_id", user.id);
+      if (!error && data) orders = data;
+      
       function renderOrders() {
         content.innerHTML = `
           <div class="center">
@@ -138,78 +137,46 @@
           </div>
           <div id="ordersList" style="margin-top: 30px;"></div>
         `;
-    
+      
         const list = document.getElementById("ordersList");
         if (!orders || orders.length === 0) {
           list.innerHTML = '<p class="center">No saved orders yet.</p>';
         } else {
-          list.innerHTML = orders
-            .map(order => `
-              <div class="order-row">
-                <a href="index.html?item=${order.item}&track=${order.price}" target="_blank">
-                  ${order.item} @ ${parseFloat(order.price).toLocaleString()} coins
-                </a>
-                <button class="remove-btn" data-id="${order.id}">–</button>
-              </div>
-            `)
-            .join("");
+          list.innerHTML = orders.map(order => `
+            <div class="order-row">
+              <a href="index.html?item=${order.item}&track=${order.price}" target="_blank">${order.item} @ ${parseFloat(order.price).toLocaleString()} coins</a>
+              <button class="remove-btn" data-id="${order.id}">–</button>
+            </div>
+          `).join("");
         }
-    
+      
         document.querySelectorAll(".remove-btn").forEach(btn => {
           btn.onclick = async () => {
             const id = btn.dataset.id;
             await supabase.from("saved_orders").delete().eq("id", id);
-            location.reload();
+            orders = orders.filter(o => o.id !== id);
+            renderOrders();
           };
         });
-    
+      
         document.getElementById("addBtn").onclick = async () => {
           const item = document.getElementById("itemInput").value.trim();
           const price = document.getElementById("priceInput").value.trim();
-          if (!item || !price || isNaN(price)) {
-            alert("Enter a valid item and price.");
-            return;
-          }
-          const { error } = await supabase.from("saved_orders").insert({
-            user_id: userId,
+          if (!item || !price || isNaN(price)) return alert("Enter a valid item and price.");
+          const { data, error } = await supabase.from("saved_orders").insert({
+            user_id: user.id,
             item,
             price
-          });
-          if (error) alert("Error saving order.");
-          else location.reload();
+          }).select().maybeSingle();
+          if (error || !data) return alert("Failed to save order.");
+          orders.push(data);
+          renderOrders();
         };
       }
-      function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-  }
-
-  const sessionId = getCookie("session_id");
-
-  const authStatus = document.getElementById("authStatus");
-
-  if (sessionId) {
-    const { data, error } = await supabase
-      .from("users")
-      .select("username")
-      .eq("id", sessionId)
-      .maybeSingle();
-
-    if (data) {
-      authStatus.innerHTML = `
-        Logged in as <strong>${data.username}</strong>
-        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
-      `;
-
-      document.getElementById("logoutLink").onclick = () => {
-        document.cookie = "session_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        location.reload();
-      };
-    }
-  }
+      
       renderOrders();
-    </script>
+      </script>
+      
   </div>
 </body>
 </html>
