@@ -179,7 +179,35 @@
           else location.reload();
         };
       }
-    
+      function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+
+  const sessionId = getCookie("session_id");
+
+  const authStatus = document.getElementById("authStatus");
+
+  if (sessionId) {
+    const { data, error } = await supabase
+      .from("users")
+      .select("username")
+      .eq("id", sessionId)
+      .maybeSingle();
+
+    if (data) {
+      authStatus.innerHTML = `
+        Logged in as <strong>${data.username}</strong>
+        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+      `;
+
+      document.getElementById("logoutLink").onclick = () => {
+        document.cookie = "session_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        location.reload();
+      };
+    }
+  }
       renderOrders();
     </script>
   </div>
