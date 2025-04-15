@@ -138,13 +138,14 @@
           .select()
           .maybeSingle();
   
-        if (error) {
-          errorMsg.textContent = `Supabase error: ${error.message}`;
-          return;
-        }
+          if (error || !data) {
+  loginError.textContent = "Invalid login credentials.";
+  return;
+}
+
   
         document.cookie = `session_id=${data.id}; path=/`;
-        window.location.href = "saved-orders.html";
+        window.location.href = "index.html";
       }
     };
   </script>  
