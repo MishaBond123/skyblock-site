@@ -107,28 +107,21 @@
     const content = document.getElementById("content");
     const authStatus = document.getElementById("authStatus");
   
-    const {
-      data: { session },
-      error: sessionError
-    } = await supabase.auth.getSession();
+    const user_id = sessionStorage.getItem("user_id");
+    const username = sessionStorage.getItem("username");
   
-    if (sessionError || !session) {
+    if (!user_id || !username) {
       content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your saved orders.</p>`;
-      return;
+      authStatus.innerHTML = `<a href="auth.html" id="loginLink" style="color:#00bfff; text-decoration: underline;">Log In / Sign Up</a>`;
+      throw new Error("Not logged in");
     }
   
-    const user = session.user;
-    sessionStorage.setItem("user_id", user.id);
-    sessionStorage.setItem("username", user.user_metadata.username);
+    authStatus.innerHTML = `
+      Logged in as <strong>${username}</strong>
+      <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+    `;
   
-    document.getElementById("authStatus").innerHTML = `
-  Logged in as <strong>${user.user_metadata?.username || user.email || "Unknown"}</strong>
-  <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
-`;
-
-  
-    document.getElementById("logoutLink").onclick = async () => {
-      await supabase.auth.signOut();
+    document.getElementById("logoutLink").onclick = () => {
       sessionStorage.clear();
       location.reload();
     };
@@ -136,7 +129,7 @@
     const { data: orders, error } = await supabase
       .from("saved_orders")
       .select("*")
-      .eq("user_id", user.id);
+      .eq("user_id", user_id);
   
     function renderOrders() {
       content.innerHTML = `
@@ -152,24 +145,19 @@
       if (!orders || orders.length === 0) {
         list.innerHTML = '<p class="center">No saved orders yet.</p>';
       } else {
-        list.innerHTML = orders
-          .map(
-            (order, index) => `
+        list.innerHTML = orders.map(order => `
           <div class="order-row">
             <a href="index.html?item=${order.item}&track=${order.price}" target="_blank">
               ${order.item} @ ${parseFloat(order.price).toLocaleString()} coins
             </a>
             <button class="remove-btn" data-id="${order.id}">–</button>
           </div>
-        `
-          )
-          .join("");
+        `).join("");
       }
   
       document.querySelectorAll(".remove-btn").forEach(btn => {
         btn.onclick = async () => {
-          const id = btn.dataset.id;
-          await supabase.from("saved_orders").delete().eq("id", id);
+          await supabase.from("saved_orders").delete().eq("id", btn.dataset.id);
           location.reload();
         };
       });
@@ -178,17 +166,13 @@
         const item = document.getElementById("itemInput").value.trim();
         const price = document.getElementById("priceInput").value.trim();
         if (!item || !price || isNaN(price)) return alert("Enter a valid item and price.");
-        const { error } = await supabase.from("saved_orders").insert({
-          user_id: user.id,
-          item,
-          price
-        });
+        const { error } = await supabase.from("saved_orders").insert({ user_id, item, price });
         if (error) alert("Error saving order.");
         else location.reload();
       };
     }
   
     renderOrders();
-  </script>    
+  </script>  
 </body>
 </html>

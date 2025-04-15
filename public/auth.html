@@ -82,8 +82,8 @@
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
   
-    const SUPABASE_URL = 'https://dhgfmbsyndfbsretlhvm.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI';
+    const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   
     const loginTab = document.getElementById("loginTab");
@@ -98,6 +98,7 @@
       loginTab.classList.add("active");
       signupTab.classList.remove("active");
       submitBtn.textContent = "Login";
+      errorMsg.textContent = "";
     };
   
     signupTab.onclick = () => {
@@ -105,6 +106,7 @@
       signupTab.classList.add("active");
       loginTab.classList.remove("active");
       submitBtn.textContent = "Sign Up";
+      errorMsg.textContent = "";
     };
   
     submitBtn.onclick = async () => {
@@ -125,11 +127,12 @@
           .maybeSingle();
   
         if (error || !data) {
-          errorMsg.textContent = error ? `Supabase error: ${error.message}` : "No matching user found.";
+          errorMsg.textContent = "Invalid login credentials.";
           return;
         }
   
-        document.cookie = `session_id=${data.id}; path=/`;
+        sessionStorage.setItem("user_id", data.id);
+        sessionStorage.setItem("username", data.username);
         window.location.href = "index.html";
       } else {
         const { data, error } = await supabase
@@ -138,13 +141,13 @@
           .select()
           .maybeSingle();
   
-          if (error || !data) {
-  loginError.textContent = "Invalid login credentials.";
-  return;
-}
-
+        if (error || !data) {
+          errorMsg.textContent = "Username already exists.";
+          return;
+        }
   
-        document.cookie = `session_id=${data.id}; path=/`;
+        sessionStorage.setItem("user_id", data.id);
+        sessionStorage.setItem("username", data.username);
         window.location.href = "index.html";
       }
     };
