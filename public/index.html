@@ -182,18 +182,18 @@
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI"
       );
   
-      const session = await supabase.auth.getSession();
-      const user = session.data.session?.user;
-  
+      const { data: { session } } = await supabase.auth.getSession();
       const authStatus = document.getElementById("authStatus");
-      if (user) {
-        authStatus.innerHTML = `Logged in as <strong>${user.user_metadata?.username || user.email}</strong> <a href="#" id="logoutLink" style="color:#00bfff;text-decoration:underline;margin-left:10px;">Log Out</a>`;
+  
+      if (session?.user) {
+        const username = session.user.user_metadata?.username || session.user.email;
+        authStatus.innerHTML = `Logged in as <strong>${username}</strong> <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>`;
         document.getElementById("logoutLink").onclick = async () => {
           await supabase.auth.signOut();
           location.reload();
         };
       } else {
-        authStatus.innerHTML = `<a href="auth.html" style="color:#00bfff;text-decoration:underline;">Log In / Sign Up</a>`;
+        authStatus.innerHTML = `<a href="auth.html" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>`;
       }
       const itemInput = document.getElementById("itemInput");
       const trackInput = document.getElementById("trackInput");

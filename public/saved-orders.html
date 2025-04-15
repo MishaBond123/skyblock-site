@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Saved Orders</title>
-  <link rel="icon" href="site-icon.jpeg" />
+  <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
   <style>
     body {
       margin: 0;
@@ -40,11 +40,6 @@
       background-color: rgba(255,255,255,0.1);
       border-bottom: 2px solid #00bfff;
     }
-    .order-row {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 10px;
-    }
   </style>
 </head>
 <body>
@@ -53,9 +48,13 @@
       <a class="tab" href="index.html">Orders</a>
       <a class="tab active-tab" href="saved-orders.html">Saved Orders</a>
     </div>
-    <div id="authStatus" style="position: absolute; top: 10px; right: 20px;"></div>
+
+    <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
+      Loading login status...
+    </div>
+
     <h1>Saved Orders</h1>
-    <div id="ordersUI"></div>
+    <div id="content"></div>
   </div>
 
   <script type="module">
@@ -67,48 +66,53 @@
     );
 
     const { data: { session } } = await supabase.auth.getSession();
-    const user = session?.user;
-
     const authStatus = document.getElementById("authStatus");
-    const ordersUI = document.getElementById("ordersUI");
+    const content = document.getElementById("content");
 
-    if (!user) {
-      authStatus.innerHTML = `<a href="auth.html" style="color:#00bfff;text-decoration:underline;">Log In / Sign Up</a>`;
-      ordersUI.innerHTML = `<p>Please log in to view and manage saved orders.</p>`;
-    } else {
-      authStatus.innerHTML = `Logged in as <strong>${user.user_metadata?.username || user.email}</strong> <a href="#" id="logoutLink" style="color:#00bfff;text-decoration:underline;margin-left:10px;">Log Out</a>`;
+    if (session?.user) {
+      const user = session.user;
+      authStatus.innerHTML = `Logged in as <strong>${user.user_metadata?.username || user.email}</strong> <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>`;
       document.getElementById("logoutLink").onclick = async () => {
         await supabase.auth.signOut();
         location.reload();
       };
 
       const { data: orders } = await supabase.from("saved_orders").select("*").eq("user_id", user.id);
-      ordersUI.innerHTML = `
-        <input id="item" placeholder="Item Name" />
-        <input id="price" placeholder="Price" />
-        <button id="save">Save Order</button>
+      content.innerHTML = `
+        <div>
+          <input id="itemInput" placeholder="Item Type" />
+          <input id="priceInput" placeholder="Order Price" />
+          <button id="addBtn">+ Add Order</button>
+        </div>
         <div id="ordersList"></div>
       `;
-      const list = document.getElementById("ordersList");
-      function renderOrders() {
-        list.innerHTML = orders.map(o => `
-          <div class="order-row">
-            ${o.item} @ ${o.price}
-            <button onclick="removeOrder('${o.id}')">X</button>
-          </div>`).join("");
-      }
-      renderOrders();
 
-      document.getElementById("save").onclick = async () => {
-        const item = document.getElementById("item").value;
-        const price = document.getElementById("price").value;
-        await supabase.from("saved_orders").insert({ item, price, user_id: user.id });
-        location.reload();
-      };
-      window.removeOrder = async (id) => {
+      const list = document.getElementById("ordersList");
+      function render() {
+        list.innerHTML = orders.map(order => `
+          <div>
+            <a href="index.html?item=${order.item}&track=${order.price}" target="_blank">${order.item} @ ${order.price} coins</a>
+            <button onclick="deleteOrder(${order.id})">–</button>
+          </div>
+        `).join("");
+      }
+      render();
+
+      window.deleteOrder = async (id) => {
         await supabase.from("saved_orders").delete().eq("id", id);
         location.reload();
       };
+
+      document.getElementById("addBtn").onclick = async () => {
+        const item = document.getElementById("itemInput").value.trim();
+        const price = document.getElementById("priceInput").value.trim();
+        if (!item || isNaN(price)) return alert("Invalid input");
+        await supabase.from("saved_orders").insert({ user_id: user.id, item, price });
+        location.reload();
+      };
+    } else {
+      authStatus.innerHTML = `<a href="auth.html" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>`;
+      content.innerHTML = `<p>Please log in to view your saved orders.</p>`;
     }
   </script>
 </body>
