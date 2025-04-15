@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login / Sign Up</title>
-  <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
   <style>
     body {
       margin: 0;
@@ -13,59 +12,71 @@
       background-size: cover;
       background-attachment: fixed;
       color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
     .auth-container {
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 30px 40px;
+      border-radius: 12px;
+      width: 100%;
       max-width: 400px;
-      margin: 100px auto;
-      background-color: rgba(0, 0, 0, 0.75);
-      padding: 30px;
-      border-radius: 16px;
       text-align: center;
     }
-    .auth-tabs {
+    .tabs {
       display: flex;
       justify-content: center;
       margin-bottom: 20px;
     }
-    .auth-tab {
+    .tab {
       padding: 10px 20px;
-      background-color: rgba(255,255,255,0.1);
-      border: none;
-      color: #fff;
       cursor: pointer;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px 8px 0 0;
+      margin: 0 5px;
     }
-    .auth-tab.active {
-      background-color: #00bfff;
+    .tab.active {
+      background: rgba(255,255,255,0.25);
+      border-bottom: 2px solid #00bfff;
     }
     input {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       margin: 10px 0;
+      border-radius: 6px;
       border: none;
-      border-radius: 8px;
+      font-size: 16px;
     }
     button {
-      width: 100%;
-      padding: 12px;
+      padding: 10px 20px;
       background-color: #00bfff;
       border: none;
-      color: #fff;
+      border-radius: 6px;
       font-size: 16px;
-      border-radius: 8px;
       cursor: pointer;
+    }
+    .error {
+      color: red;
       margin-top: 10px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
   <div class="auth-container">
-    <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchMode('login')">Login</button>
-      <button class="auth-tab" onclick="switchMode('signup')">Sign Up</button>
+    <div class="tabs">
+      <div id="loginTab" class="tab active">Login</div>
+      <div id="signupTab" class="tab">Sign Up</div>
     </div>
-    <input type="text" id="username" placeholder="Username" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="handleAuth()">Login</button>
+
+    <div id="form">
+      <input id="username" type="text" placeholder="Username" />
+      <input id="password" type="password" placeholder="Password" />
+      <button id="submitBtn">Login</button>
+      <div class="error" id="errorMsg"></div>
+    </div>
   </div>
 
   <script>
