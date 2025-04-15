@@ -121,10 +121,11 @@
     sessionStorage.setItem("user_id", user.id);
     sessionStorage.setItem("username", user.user_metadata.username);
   
-    authStatus.innerHTML = `
-      Logged in as <strong>${user.user_metadata.username}</strong>
-      <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
-    `;
+    document.getElementById("authStatus").innerHTML = `
+  Logged in as <strong>${user.user_metadata?.username || user.email || "Unknown"}</strong>
+  <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+`;
+
   
     document.getElementById("logoutLink").onclick = async () => {
       await supabase.auth.signOut();
