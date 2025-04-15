@@ -79,82 +79,82 @@
     </div>
   </div>
 
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-    const SUPABASE_URL = 'https://dhgfmbsyndfbsetlhvm.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI';
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const loginTab = document.getElementById('loginTab');
-    const signupTab = document.getElementById('signupTab');
-    const submitBtn = document.getElementById('submitBtn');
-    const errorMsg = document.getElementById('errorMsg');
-
-    let isLogin = true;
-
-    loginTab.onclick = () => {
-      isLogin = true;
-      loginTab.classList.add('active');
-      signupTab.classList.remove('active');
-      submitBtn.textContent = 'Login';
-      errorMsg.textContent = '';
+  <script>
+    const SUPABASE_URL = 'https://dhgfmbsyndfbsretlhvm.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTY5NzYwNzYwMCwiZXhwIjoyMDEyMTg0MDAwLCJzdWIiOiJwdWJsaWMifQ.klUlFh2eMc1x9CRkbQoz0ZzFVmoyAx-gnlV4XehK-K8';
+  
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const submitBtn = document.getElementById("submitBtn");
+    const errorMsg = document.getElementById("errorMsg");
+  
+    let mode = "login";
+    document.getElementById("loginTab").onclick = () => {
+      mode = "login";
+      submitBtn.innerText = "Login";
+      document.getElementById("loginTab").classList.add("active");
+      document.getElementById("signupTab").classList.remove("active");
     };
-
-    signupTab.onclick = () => {
-      isLogin = false;
-      signupTab.classList.add('active');
-      loginTab.classList.remove('active');
-      submitBtn.textContent = 'Sign Up';
-      errorMsg.textContent = '';
+  
+    document.getElementById("signupTab").onclick = () => {
+      mode = "signup";
+      submitBtn.innerText = "Sign Up";
+      document.getElementById("signupTab").classList.add("active");
+      document.getElementById("loginTab").classList.remove("active");
     };
-
+  
     submitBtn.onclick = async () => {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+      errorMsg.innerText = "";
+  
       if (!username || !password) {
-        errorMsg.textContent = "Please enter both username and password.";
+        errorMsg.innerText = "Please enter username and password.";
         return;
       }
-
-      if (isLogin) {
-        const { data, error } = await supabase
-          .from('users')
-          .select()
-          .eq('username', username)
-          .eq('password', password)
-          .single();
-
-        if (error || !data) {
-          errorMsg.textContent = "Invalid login credentials.";
-        } else {
+  
+      if (mode === "signup") {
+        // SIGN UP: Insert new user
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            Prefer: "return=representation"
+          },
+          body: JSON.stringify({ username, password })
+        });
+  
+        if (res.ok) {
           localStorage.setItem("currentUser", username);
-          window.location.href = "index.html";
+          window.location.href = "saved-orders.html";
+        } else {
+          errorMsg.innerText = "Sign up failed.";
         }
+  
       } else {
-        const { data: existing } = await supabase
-          .from('users')
-          .select()
-          .eq('username', username)
-          .maybeSingle();
-
-        if (existing) {
-          errorMsg.textContent = "Username already exists.";
-          return;
-        }
-
-        const { error: insertError } = await supabase
-          .from('users')
-          .insert([{ username, password }]);
-
-        if (insertError) {
-          errorMsg.textContent = "Sign up failed.";
-        } else {
+        // LOGIN: Fetch user with matching credentials
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/users?select=*&username=eq.${username}&password=eq.${password}`,
+          {
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+  
+        const data = await res.json();
+        if (data.length > 0) {
           localStorage.setItem("currentUser", username);
-          window.location.href = "index.html";
+          window.location.href = "saved-orders.html";
+        } else {
+          errorMsg.innerText = "Login failed.";
         }
       }
     };
   </script>
+  
 </body>
 </html>
