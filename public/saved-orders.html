@@ -79,7 +79,6 @@
       margin-top: 30px;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
   <div class="container">
@@ -89,9 +88,12 @@
       <a class="tab active-tab" href="saved-orders.html">Saved Orders</a>
     </div>
 
-    <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;"></div>
+    <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
+      <a href="auth.html" id="loginLink" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>
+    </div>
 
     <h1>Saved Orders</h1>
+
     <div id="content"></div>
   </div>
 
