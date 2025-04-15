@@ -80,81 +80,83 @@
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://dhgfmbsyndfbsretlhvm.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTY5NzYwNzYwMCwiZXhwIjoyMDEyMTg0MDAwLCJzdWIiOiJwdWJsaWMifQ.klUlFh2eMc1x9CRkbQoz0ZzFVmoyAx-gnlV4XehK-K8';
+    const SUPABASE_URL = 'https://dhgfmbsyndfbsretlhvm.supabase.co'; // your project URL
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI';
   
-    const usernameInput = document.getElementById("username");
-    const passwordInput = document.getElementById("password");
-    const submitBtn = document.getElementById("submitBtn");
-    const errorMsg = document.getElementById("errorMsg");
+    let isSignup = false;
   
-    let mode = "login";
     document.getElementById("loginTab").onclick = () => {
-      mode = "login";
-      submitBtn.innerText = "Login";
+      isSignup = false;
       document.getElementById("loginTab").classList.add("active");
       document.getElementById("signupTab").classList.remove("active");
+      document.getElementById("submitBtn").innerText = "Login";
+      document.getElementById("errorMsg").innerText = "";
     };
   
     document.getElementById("signupTab").onclick = () => {
-      mode = "signup";
-      submitBtn.innerText = "Sign Up";
+      isSignup = true;
       document.getElementById("signupTab").classList.add("active");
       document.getElementById("loginTab").classList.remove("active");
+      document.getElementById("submitBtn").innerText = "Sign Up";
+      document.getElementById("errorMsg").innerText = "";
     };
   
-    submitBtn.onclick = async () => {
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value.trim();
+    document.getElementById("submitBtn").onclick = async () => {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const errorMsg = document.getElementById("errorMsg");
       errorMsg.innerText = "";
   
       if (!username || !password) {
-        errorMsg.innerText = "Please enter username and password.";
+        errorMsg.innerText = "Please enter both fields.";
         return;
       }
   
-      if (mode === "signup") {
-        // SIGN UP: Insert new user
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
-          method: "POST",
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            Prefer: "return=representation"
-          },
-          body: JSON.stringify({ username, password })
-        });
+      if (isSignup) {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+            method: "POST",
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+              "Content-Type": "application/json",
+              Prefer: "return=representation"
+            },
+            body: JSON.stringify({ username, password })
+          });
   
-        if (res.ok) {
-          localStorage.setItem("currentUser", username);
-          window.location.href = "saved-orders.html";
-        } else {
-          errorMsg.innerText = "Sign up failed.";
+          if (!res.ok) {
+            const json = await res.json();
+            errorMsg.innerText = json.message || "Sign up failed.";
+          } else {
+            localStorage.setItem("currentUser", username);
+            window.location.href = "index.html";
+          }
+        } catch (e) {
+          errorMsg.innerText = "Request failed.";
         }
   
       } else {
-        // LOGIN: Fetch user with matching credentials
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/users?select=*&username=eq.${username}&password=eq.${password}`,
-          {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/users?select=*&&username=eq.${username}`, {
             headers: {
               apikey: SUPABASE_ANON_KEY,
               Authorization: `Bearer ${SUPABASE_ANON_KEY}`
             }
-          }
-        );
+          });
   
-        const data = await res.json();
-        if (data.length > 0) {
-          localStorage.setItem("currentUser", username);
-          window.location.href = "saved-orders.html";
-        } else {
+          const data = await res.json();
+          if (data.length && data[0].password === password) {
+            localStorage.setItem("currentUser", username);
+            window.location.href = "index.html";
+          } else {
+            errorMsg.innerText = "Incorrect login.";
+          }
+        } catch (e) {
           errorMsg.innerText = "Login failed.";
         }
       }
     };
-  </script>
-  
+  </script>  
 </body>
 </html>
