@@ -79,50 +79,82 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
     const SUPABASE_URL = 'https://dhgfmbsyndfbsetlhvm.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI';
-    
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    document.getElementById('authForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    const loginTab = document.getElementById('loginTab');
+    const signupTab = document.getElementById('signupTab');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
 
+    let isLogin = true;
+
+    loginTab.onclick = () => {
+      isLogin = true;
+      loginTab.classList.add('active');
+      signupTab.classList.remove('active');
+      submitBtn.textContent = 'Login';
+      errorMsg.textContent = '';
+    };
+
+    signupTab.onclick = () => {
+      isLogin = false;
+      signupTab.classList.add('active');
+      loginTab.classList.remove('active');
+      submitBtn.textContent = 'Sign Up';
+      errorMsg.textContent = '';
+    };
+
+    submitBtn.onclick = async () => {
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value.trim();
-      const messageEl = document.getElementById('authMessage');
-
       if (!username || !password) {
-        messageEl.textContent = 'Please fill in both fields.';
+        errorMsg.textContent = "Please enter both username and password.";
         return;
       }
 
-      // Attempt to log in
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('username', username)
-        .eq('password', password)
-        .single();
+      if (isLogin) {
+        const { data, error } = await supabase
+          .from('users')
+          .select()
+          .eq('username', username)
+          .eq('password', password)
+          .single();
 
-      if (data) {
-        // Logged in successfully
-        localStorage.setItem('currentUser', username);
-        window.location.href = 'index.html';
+        if (error || !data) {
+          errorMsg.textContent = "Invalid login credentials.";
+        } else {
+          localStorage.setItem("currentUser", username);
+          window.location.href = "index.html";
+        }
       } else {
-        // Try to sign up
-        const { error: signupError } = await supabase
+        const { data: existing } = await supabase
+          .from('users')
+          .select()
+          .eq('username', username)
+          .maybeSingle();
+
+        if (existing) {
+          errorMsg.textContent = "Username already exists.";
+          return;
+        }
+
+        const { error: insertError } = await supabase
           .from('users')
           .insert([{ username, password }]);
 
-        if (signupError) {
-          messageEl.textContent = 'Login failed.';
+        if (insertError) {
+          errorMsg.textContent = "Sign up failed.";
         } else {
-          localStorage.setItem('currentUser', username);
-          window.location.href = 'index.html';
+          localStorage.setItem("currentUser", username);
+          window.location.href = "index.html";
         }
       }
-    });
+    };
   </script>
 </body>
 </html>
