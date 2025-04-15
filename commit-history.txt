@@ -1,0 +1,1121 @@
+commit 70f0a8563e03defea7b6d0e133da0cc4694e48fb
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 22:03:57 2025 +0100
+
+    aaaaaaaaaaaaaaaaaa
+
+ public/auth.html         | 23 +++++++++++++----------
+ public/saved-orders.html | 48 ++++++++++++++++--------------------------------
+ 2 files changed, 29 insertions(+), 42 deletions(-)
+
+commit 4c77dd3c755379c958c85cc6da123d8b4041b29c
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 22:00:24 2025 +0100
+
+    Update saved-orders.html
+
+ public/saved-orders.html | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+commit 7bb1acb03f297c38bba05b1c01cf7c3ba2776d4c
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 21:58:15 2025 +0100
+
+    Update saved-orders.html
+
+ public/saved-orders.html | 104 ++++++++++++++++++++++++-----------------------
+ 1 file changed, 53 insertions(+), 51 deletions(-)
+
+commit c20fa8d6a9606d19b35a30120cf00f6192ba8dc1
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 21:54:02 2025 +0100
+
+    Update saved-orders.html
+
+ public/saved-orders.html | 99 ++++++++++++++++++++++++++++--------------------
+ 1 file changed, 57 insertions(+), 42 deletions(-)
+
+commit a812caf804e494ad179cb9126de8adafbf299164
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 21:48:11 2025 +0100
+
+    Update saved-orders.html
+
+ public/saved-orders.html | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+commit a1d179bf6049cec16f92ee052f3bf43c5680d27d
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 21:45:28 2025 +0100
+
+    Update auth.html
+
+ public/auth.html | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit ac5a99825becde7b95ddff0b15e21c78f5ba0d57
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 21:43:22 2025 +0100
+
+    lalala
+
+ public/auth.html         |  11 ++--
+ public/saved-orders.html | 137 ++++++++++++++++++++++-------------------------
+ 2 files changed, 69 insertions(+), 79 deletions(-)
+
+commit 0fb1f5c796fd8157839de2f38ced028966af54b6
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 21:33:15 2025 +0100
+
+    aaa
+
+ public/auth.html         | 2 +-
+ public/saved-orders.html | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit be2f07b324b49a7c4b666c6bcbf81684977e7b0f
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 20:36:04 2025 +0100
+
+    Update auth.html
+
+ public/auth.html | 126 +++++++++++++++++++++++++++----------------------------
+ 1 file changed, 61 insertions(+), 65 deletions(-)
+
+commit 52ee8e4a9b2061adedf239c079d16dbc5dc2ba78
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 20:33:18 2025 +0100
+
+    Update auth.html
+
+ public/auth.html | 78 ++++++++++++++++++++++++--------------------------------
+ 1 file changed, 33 insertions(+), 45 deletions(-)
+
+commit a41410f85fa12e791d98b63b0d8093bf84334232
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 20:20:27 2025 +0100
+
+    Update auth.html
+
+ public/auth.html | 93 +++++++++++++++++++++++++++-----------------------------
+ 1 file changed, 45 insertions(+), 48 deletions(-)
+
+commit ce976d0db43b4e437bfed57c8b2de272979d9e5c
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 20:17:22 2025 +0100
+
+    Update auth.html
+
+ public/auth.html | 147 +++++++++++++++++++++++++++++--------------------------
+ 1 file changed, 77 insertions(+), 70 deletions(-)
+
+commit d406e7be5ab8edeccbd36d1bc230537447821fea
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 20:12:18 2025 +0100
+
+    ...
+
+ public/auth.html         | 120 ++++++++++++++++---------------
+ public/saved-orders.html | 184 +++++++++++++++++++++--------------------------
+ 2 files changed, 142 insertions(+), 162 deletions(-)
+
+commit c6e7aecfd77e8d5a79d9a26227eee5d0e8df248a
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 20:00:48 2025 +0100
+
+    Update saved-orders.html
+
+ public/saved-orders.html | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 50c2428f2a53ac8264e6c70de006411b7d7413cf
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 19:58:36 2025 +0100
+
+    Update saved-orders.html
+
+ public/saved-orders.html | 168 +++++++++++++++++++++++++++++------------------
+ 1 file changed, 103 insertions(+), 65 deletions(-)
+
+commit d5982f2475e69f569a4bc5020fb4adcc24f35593
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 18:25:06 2025 +0100
+
+    Update auth.html
+
+ public/auth.html | 92 +++++++++++++++++++++++++++++---------------------------
+ 1 file changed, 47 insertions(+), 45 deletions(-)
+
+commit 304d178f7d5db407366358ff9d47f541479a1bb5
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 18:22:07 2025 +0100
+
+    Update auth.html
+
+ public/auth.html | 126 +++++++++++++++++++++++++++----------------------------
+ 1 file changed, 63 insertions(+), 63 deletions(-)
+
+commit e0d83b2c4185a5fc8cc0e5e5c7fbf5759d4cdc40
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 17:28:34 2025 +0100
+
+    Update auth.html
+
+ public/auth.html | 84 ++++++++++++++++++++++++++++++++++++++------------------
+ 1 file changed, 58 insertions(+), 26 deletions(-)
+
+commit 7d93ee96e128b8b48eabc9ea221e7d07d51e940a
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 17:24:57 2025 +0100
+
+    fix
+
+ public/auth.html | 59 +++++++++++++++++++++++++++++++++-----------------------
+ 1 file changed, 35 insertions(+), 24 deletions(-)
+
+commit 590d75cdd5e0180f91d61538342b9dadb6b84248
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 17:01:24 2025 +0100
+
+    Update auth.html
+
+ public/auth.html | 58 +++++++++++++++++++++++++++++---------------------------
+ 1 file changed, 30 insertions(+), 28 deletions(-)
+
+commit bae5f6a6dcf1c78bf57d54bfb2f1da08d355494a
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Tue Apr 15 16:49:06 2025 +0100
+
+    start database!
+
+ .DS_Store        | Bin 6148 -> 6148 bytes
+ public/auth.html | 128 ++++++++++++++++++++++++-------------------------------
+ 2 files changed, 56 insertions(+), 72 deletions(-)
+
+commit 6fb627f99b9f9f8c239cb91d84787dacf46123b6
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sun Apr 13 09:18:14 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 76 +++++++++++++++++++++++++++---------------------
+ 1 file changed, 43 insertions(+), 33 deletions(-)
+
+commit cbd1b178fb650a0bf5429c5bfc495ec0f5b7f713
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sun Apr 13 09:07:26 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 81 ++++++++++++++++++++----------------------------
+ 1 file changed, 33 insertions(+), 48 deletions(-)
+
+commit 46100e4d1ba93175d48a9a9e2afb300b47ca1987
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sun Apr 13 09:04:46 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 137 ++++++++++++++++-------------------------------
+ 1 file changed, 47 insertions(+), 90 deletions(-)
+
+commit 8a04544a58d7d77ecbbfe4587f7740ec3b33ba34
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sun Apr 13 00:30:55 2025 +0100
+
+    aaa
+
+ .DS_Store                | Bin 6148 -> 6148 bytes
+ public/volume-drain.html |  15 +++++++--------
+ 2 files changed, 7 insertions(+), 8 deletions(-)
+
+commit a367425a4eb748156b52c3c4f836df2f559f42d1
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sun Apr 13 00:21:27 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 140 +++++++++++++++++++++++++++++++----------------
+ 1 file changed, 94 insertions(+), 46 deletions(-)
+
+commit aa45ed7a149151fb4c0f850daa3ee6a962e22134
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sun Apr 13 00:09:50 2025 +0100
+
+    fix attempt...
+
+ public/volume-drain.html | 77 +++++++++++++++++++++++++++---------------------
+ 1 file changed, 44 insertions(+), 33 deletions(-)
+
+commit f2a9626fd997d7206220cf36542b5e8a215d342e
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sun Apr 13 00:03:59 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 13 ++++---------
+ 1 file changed, 4 insertions(+), 9 deletions(-)
+
+commit 470d419840ea7e7be282b2e2b6c363f24f1512cb
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sun Apr 13 00:01:41 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 61 +++++++++++++++++-------------------------------
+ 1 file changed, 21 insertions(+), 40 deletions(-)
+
+commit 8242cae91e57a569c1e45eafed507bd86f1ee0dc
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sat Apr 12 23:35:39 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 88 +++++++++++++++++++++++-------------------------
+ 1 file changed, 42 insertions(+), 46 deletions(-)
+
+commit 3c4b4469f154a0ea74986d65a25fd87cae554ed3
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sat Apr 12 23:32:46 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 114 +++++++++++++++++++++++++++++------------------
+ 1 file changed, 70 insertions(+), 44 deletions(-)
+
+commit ea9023ea4e71f46e51152e6d215cbad6239f337e
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sat Apr 12 23:28:56 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 51 +++++++++++++++++++++++++++---------------------
+ 1 file changed, 29 insertions(+), 22 deletions(-)
+
+commit 642cade7ef739e55fe0f9d65c5081745c43d8af0
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sat Apr 12 23:26:23 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 121 ++++++++++++-----------------------------------
+ 1 file changed, 31 insertions(+), 90 deletions(-)
+
+commit 73e7f11e017e4c009609b97354561b9247bd96ab
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sat Apr 12 23:19:47 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+commit 806a0200fc869f6b22d0dca3c8e98a0c4967736d
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sat Apr 12 23:17:32 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 292 ++++++++++++++++++++++++-----------------------
+ 1 file changed, 147 insertions(+), 145 deletions(-)
+
+commit a9359bcb82f21f5eac357d03ebb66f2d79f10e1b
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sat Apr 12 23:14:11 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 267 ++++++++++++++++++++++++++---------------------
+ 1 file changed, 149 insertions(+), 118 deletions(-)
+
+commit 8178981f3af3821e4ad40bb2a7cb48bb3d269d0a
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sat Apr 12 23:12:00 2025 +0100
+
+    fix?
+
+ .DS_Store                | Bin 6148 -> 6148 bytes
+ public/saved-orders.html | 209 +++++++++++++++--------------------------------
+ 2 files changed, 64 insertions(+), 145 deletions(-)
+
+commit 40dfcff585990c4d3053f4bc31882f749fe01750
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Sat Apr 12 21:51:06 2025 +0100
+
+    notifications!
+
+ .DS_Store                | Bin 6148 -> 6148 bytes
+ public/saved-orders.html | 212 ++++++++++++++++++++++++++++++++---------------
+ 2 files changed, 145 insertions(+), 67 deletions(-)
+
+commit 5b7221e651458cc1cde8182a41fc8ae932399714
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 20:11:41 2025 +0100
+
+    Update saved-orders.html
+
+ public/saved-orders.html | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+commit b8b718e8209eab7c3fa9286779d6a48c98c987d0
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 20:07:40 2025 +0100
+
+    Update index.html
+
+ public/index.html | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+commit d6bb32ea877b681936624d3792fe8e4ad1253b0e
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 19:55:53 2025 +0100
+
+    Create saved-orders.html
+
+ public/saved-orders.html | 169 +++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 169 insertions(+)
+
+commit fbc6b924ca3515444f7f0df2d0da2530b774f707
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 19:48:04 2025 +0100
+
+    auth button
+
+ public/index.html        | 54 +++++++++++++++++++++++++++++++++++-------------
+ public/volume-drain.html | 20 ++++++++++++++++++
+ 2 files changed, 60 insertions(+), 14 deletions(-)
+
+commit f084338f43351fa2ba8e38cdda6055af56c5802f
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 19:39:41 2025 +0100
+
+    auth
+
+ .DS_Store        | Bin 6148 -> 6148 bytes
+ public/auth.html | 131 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 131 insertions(+)
+
+commit f99b8b297dc43e14980d4541948aabac42cb45bd
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 19:23:25 2025 +0100
+
+    fix
+
+ public/index.html        | 307 ++++++++++++++++++++++++-----------------------
+ public/volume-drain.html |   2 +-
+ 2 files changed, 160 insertions(+), 149 deletions(-)
+
+commit efe4176eff60a15b0142ac5a35538fdd1cafda68
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 15:39:07 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit b549da2ff591058424fb5c014296f185bdf24935
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 15:32:18 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 223 ++++++++++++++++++++++-------------------------
+ 1 file changed, 102 insertions(+), 121 deletions(-)
+
+commit ddb045cabd2718ee9ef9a6fe6a647ff782c3dc6a
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 15:26:07 2025 +0100
+
+    popup
+
+ public/volume-drain.html | 229 +++++++++++++++++++++++++----------------------
+ 1 file changed, 120 insertions(+), 109 deletions(-)
+
+commit 8ed776493e3ebe131ead733b078c7f7ca8f285f5
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 15:16:19 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+commit b4d7055186fefd39624c74d05790c07a3973aa1f
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 15:13:20 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit ff1cfce28655efc4c24f9aa523e942f873a25118
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 15:08:50 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit c73689f95023c97a86a3cf88106ce5dc169404d5
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 15:01:35 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 48 ++++++++++++++++++++++++------------------------
+ 1 file changed, 24 insertions(+), 24 deletions(-)
+
+commit 5b63e3daa41a2e8c1ba2d76fe4fbca279ea9a3a6
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 14:50:44 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 44 +++++++++++++++++++++++++-------------------
+ 1 file changed, 25 insertions(+), 19 deletions(-)
+
+commit 98abb359f747daafc1d554c5bdb40487211dc007
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 14:37:51 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 67 +++++++++++++++++++++++++++++-------------------
+ 1 file changed, 41 insertions(+), 26 deletions(-)
+
+commit 98cbcd635c41a0836955e949d452bb7c4bdf5530
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 12:16:12 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 682a8e257a4b2c08aec17422819bcc5c417b6dc3
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 12:13:18 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 19 ++++++++++---------
+ 1 file changed, 10 insertions(+), 9 deletions(-)
+
+commit 23c5c097c3c6a30ebe1d084862a21e9c387de0c5
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 11:55:12 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 138 ++++++++++++++++++++++++++++-------------------
+ 1 file changed, 84 insertions(+), 54 deletions(-)
+
+commit c5cb936c2d4b613f7974067c72fbbeb8d4cf88fb
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 11:04:18 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+commit 0395e23ba1eef343534910d5f00ed78f87564fd6
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 09:55:28 2025 +0100
+
+    aaaaa
+
+ .DS_Store         | Bin 6148 -> 6148 bytes
+ public/index.html |  53 +++++++++++++++++++++++++++++++++++------------------
+ 2 files changed, 35 insertions(+), 18 deletions(-)
+
+commit 44ae5af8c755b6e9426adf4a47f9e578f8880d31
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 09:40:38 2025 +0100
+
+    Update index.html
+
+ public/index.html | 598 ++++++++++++++++++++++++++----------------------------
+ 1 file changed, 290 insertions(+), 308 deletions(-)
+
+commit 7debcb70f7e8586a82269bff92c385c0898c5827
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 09:35:31 2025 +0100
+
+    Update index.html
+
+ public/index.html | 295 +++++++++++++++++++++++++++++-------------------------
+ 1 file changed, 158 insertions(+), 137 deletions(-)
+
+commit 1c89725c1aee247f115124c8a71dbf715655ecc6
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 09:25:14 2025 +0100
+
+    Update index.html
+
+ public/index.html | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+commit 253368d3fcb1350b5713e6834e58aed24bd9bf61
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 09:19:42 2025 +0100
+
+    2nd tab #5
+
+ public/index.html        | 302 ++++++++++++++++++++++-------------------------
+ public/volume-drain.html | 177 +++++++++++----------------
+ 2 files changed, 213 insertions(+), 266 deletions(-)
+
+commit a35ac81908158a0befe5723ef2dae30ccad67725
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 03:56:11 2025 +0100
+
+    Update index.html
+
+ public/index.html | 656 ++++++++++++++++++++++++++----------------------------
+ 1 file changed, 315 insertions(+), 341 deletions(-)
+
+commit 66949fc64b3bdbed2f9120da2f59206f71b8515a
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 03:52:04 2025 +0100
+
+    Update index.html
+
+ public/index.html | 374 ++++++++++++++++++++++++++----------------------------
+ 1 file changed, 183 insertions(+), 191 deletions(-)
+
+commit 521addbbbe6801e993e2e93604618bb23039800d
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 03:48:26 2025 +0100
+
+    2nd tab #4
+
+ public/index.html        | 257 ++++++++++++++++++++++++-----------------------
+ public/volume-drain.html |  36 ++++---
+ 2 files changed, 156 insertions(+), 137 deletions(-)
+
+commit 222d213d537ee7b51a6430efd84b3d7e50b1d21e
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 03:42:52 2025 +0100
+
+    Update volume-drain.html
+
+ public/volume-drain.html | 87 +++++++++++++++++++++++-------------------------
+ 1 file changed, 42 insertions(+), 45 deletions(-)
+
+commit 20c203aa4052d185642d39dcd3fc92daadf00f01
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 03:38:52 2025 +0100
+
+    2nd tab #3
+
+ public/api.txt           |   1 -
+ public/index.html        |  51 ++++++++++++----
+ public/volume-drain.html | 152 +++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 190 insertions(+), 14 deletions(-)
+
+commit 02c1a55a890cd66e779a5fa583908399a0835f7b
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 03:22:51 2025 +0100
+
+    revert back to 1 tab
+
+ public/index.html | 570 ++++++++++++++++++++++++++++++------------------------
+ 1 file changed, 315 insertions(+), 255 deletions(-)
+
+commit c3be275d98e979c5da75915a5ddc6d127b41f112
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Fri Apr 11 03:09:23 2025 +0100
+
+    2nd tab attempt #2
+
+ public/index.html | 198 +++++++++++++++---------------------------------------
+ 1 file changed, 56 insertions(+), 142 deletions(-)
+
+commit b40131ec20929b50ede6e83135a794a7a9882860
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 22:39:30 2025 +0200
+
+    2nd tab attempt #1
+
+ .DS_Store         | Bin 6148 -> 6148 bytes
+ public/index.html | 111 +++++++++++++++++++++++++++++++++---------------------
+ 2 files changed, 69 insertions(+), 42 deletions(-)
+
+commit f9fe8e43c6dec25a8330b7f188ba1b477d90609c
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 15:17:56 2025 +0200
+
+    Update index.html
+
+ public/index.html | 11 ++---------
+ 1 file changed, 2 insertions(+), 9 deletions(-)
+
+commit 7ef6f6c83f6ab3d2d987e3e85957a8174f91373f
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 15:11:59 2025 +0200
+
+    Update index.html
+
+ public/index.html | 47 ++++++++++++++++++++++++++---------------------
+ 1 file changed, 26 insertions(+), 21 deletions(-)
+
+commit a49db6891b932b08b31a17066ebd5e7b1008a9aa
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 15:08:51 2025 +0200
+
+    Update index.html
+
+ public/index.html | 109 ++++++++++++++++++++++++++++++++++++++++--------------
+ 1 file changed, 82 insertions(+), 27 deletions(-)
+
+commit 48d0436853f7d11164df453628956463f61bf27e
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 14:55:32 2025 +0200
+
+    Update index.html
+
+ public/index.html | 32 ++++++++++++++------------------
+ 1 file changed, 14 insertions(+), 18 deletions(-)
+
+commit 94b26b3eed696eccac0b1535bda7e9ec575e2331
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 11:58:41 2025 +0200
+
+    Update index.html
+
+ public/index.html | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+commit 7cbd2bc4ab3e765ce4158f9c608f0f0f2764fe48
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 11:49:37 2025 +0200
+
+    Fix
+
+ public/index.html | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 11ed1b289e3785a6ed8a9a338884be842a409434
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 11:48:27 2025 +0200
+
+    Update index.html
+
+ public/index.html | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 4ea053e17c8e668c2df3f19995f811c71cb24dac
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 11:46:56 2025 +0200
+
+    Auto update!
+
+ public/index.html | 15 ++++++++++-----
+ 1 file changed, 10 insertions(+), 5 deletions(-)
+
+commit 0a447d68b94a4dd88b0e3989fa88eee77199a2eb
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 10:45:48 2025 +0200
+
+    Update index.html
+
+ public/index.html | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 301ba000fba6a0efd6745b75b34fb21065e76b91
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 10:43:16 2025 +0200
+
+    Update index.html
+
+ public/index.html | 170 ++++++++++++++++++++++++++++++++----------------------
+ 1 file changed, 101 insertions(+), 69 deletions(-)
+
+commit b245b7f3fd0305b2dac8e396ceb25f8690d0cf17
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 10:38:10 2025 +0200
+
+    Revert "Update index.html"
+    
+    This reverts commit 628b89a716c60415212e90a18e09d125bf5a9e6f.
+
+ public/index.html | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 5ea5a120c83414f6daf23a91aeaabb8c8be0e9b4
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 10:29:59 2025 +0200
+
+    Update index.html
+
+ public/index.html | 194 ++++++++++++++++++++++++++----------------------------
+ 1 file changed, 92 insertions(+), 102 deletions(-)
+
+commit 412d676f63cf8c4ebe737547247ef2a1ac2906ef
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 10:23:56 2025 +0200
+
+    Update index.html
+
+ public/index.html | 190 ++++++++++++++++++++++++++++--------------------------
+ 1 file changed, 100 insertions(+), 90 deletions(-)
+
+commit 628b89a716c60415212e90a18e09d125bf5a9e6f
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 10:17:11 2025 +0200
+
+    Update index.html
+
+ public/index.html | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 31856ae9591b36b606f24a86e7c1b9a9803c05d2
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 10:15:58 2025 +0200
+
+    Update index.html
+
+ public/index.html | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 29e0da8a4192f5d7189e1b434be3dc809b3c5746
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 10:07:18 2025 +0200
+
+    Update index.html
+
+ public/index.html | 225 ++++++++++++++++++++++++++++--------------------------
+ 1 file changed, 118 insertions(+), 107 deletions(-)
+
+commit 0ff160d77872d6bb5f13e3d0dd65bb521c5f9bba
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 10:01:59 2025 +0200
+
+    Update index.html
+
+ public/index.html | 110 ++++++++++++++++++++++++++----------------------------
+ 1 file changed, 53 insertions(+), 57 deletions(-)
+
+commit 28e08706a883887db1e01cafdb6fb4caf0ef75f4
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 09:58:11 2025 +0200
+
+    Update index.html
+
+ public/index.html | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit cc23deb6022b0bf75ae87ed933939479423ed067
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 09:56:13 2025 +0200
+
+    Update index.html
+
+ public/index.html | 195 ++++++++++++++++++++++++++----------------------------
+ 1 file changed, 94 insertions(+), 101 deletions(-)
+
+commit 8c8869dec6fdddee8b8085075917e0e109119198
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 09:51:04 2025 +0200
+
+    Update index.html
+
+ public/index.html | 164 ++++++++++++++++++++++++++++++++++--------------------
+ 1 file changed, 105 insertions(+), 59 deletions(-)
+
+commit 97b8459a551b0b4ebd8cda7552491e4baf6704d9
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 09:29:52 2025 +0200
+
+    Update index.html
+
+ public/index.html | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 8061fa388cb38d5f81cc823ecad175260dafd8ac
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 09:27:51 2025 +0200
+
+    Update index.html
+
+ public/index.html | 82 +++++++++++++++++++++++++------------------------------
+ 1 file changed, 37 insertions(+), 45 deletions(-)
+
+commit e20e0ac800b11bc1f30afb1a2393270feaf3ade3
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 09:24:30 2025 +0200
+
+    Update index.html
+
+ public/index.html | 96 ++++++++++++++++++++++++++++++-------------------------
+ 1 file changed, 53 insertions(+), 43 deletions(-)
+
+commit 8e2d5d1881c3c7f7b7b6d70775700ee581af8f16
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 09:17:56 2025 +0200
+
+    Update index.html
+
+ public/index.html | 104 +++++++++++++++++++++++++-----------------------------
+ 1 file changed, 49 insertions(+), 55 deletions(-)
+
+commit f298b7da2ed71a6cc6e16967939961640f413338
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 09:10:25 2025 +0200
+
+    Update index.html
+
+ public/index.html | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
+
+commit ac97f7819e0dc3991dca74607cd72c0fcde6f82c
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 09:07:15 2025 +0200
+
+    Update index.html
+
+ public/index.html | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+commit fc1958f8a1ad40d2f1cea5445f717db6a250a7f7
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Thu Apr 10 09:03:09 2025 +0200
+
+    update!
+
+ public/index.html     | 100 +++++++++++++++++++++++++++++++++++++-------------
+ public/site-icon.jpeg | Bin 0 -> 2802 bytes
+ 2 files changed, 74 insertions(+), 26 deletions(-)
+
+commit 736b123783c7a89a0e14052b44d36ed7cff5e40b
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 23:40:27 2025 +0200
+
+    Update index.html
+
+ public/index.html | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 4599d6bbaf4824a871a57002e51391da1af153d1
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 23:34:58 2025 +0200
+
+    Update index.html
+
+ public/index.html | 149 ++++++++++++++++++++++++------------------------------
+ 1 file changed, 66 insertions(+), 83 deletions(-)
+
+commit 97d831eee86105aa647cad8f9aeb73f93d8eb09a
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 23:24:40 2025 +0200
+
+    Update api.txt
+
+ public/api.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 91c11d99e272bef18e59954cd652127975072874
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 23:20:46 2025 +0200
+
+    Update index.html
+
+ public/index.html | 175 ++++++++++++++++++++++++++++--------------------------
+ 1 file changed, 92 insertions(+), 83 deletions(-)
+
+commit 6e2409b0114952db9ac2c43d779a9555a34127f4
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 23:15:55 2025 +0200
+
+    Update index.html
+
+ public/index.html | 140 +++++++++++++++++++++++++++---------------------------
+ 1 file changed, 69 insertions(+), 71 deletions(-)
+
+commit 5c5c4388c4e7f7b0462d2ee7b9dececc809a28b8
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 23:09:30 2025 +0200
+
+    Update index.html
+
+ public/index.html | 158 ++++++++++++++++++++++++++++++------------------------
+ 1 file changed, 87 insertions(+), 71 deletions(-)
+
+commit b8b5ab2cabc3523c99ed6624a6c0b210f1b8520f
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:59:16 2025 +0200
+
+    api key provided
+
+ public/api.txt    |   1 +
+ public/index.html | 162 +++++++++++++++++++++++++-----------------------------
+ 2 files changed, 77 insertions(+), 86 deletions(-)
+
+commit df6290164b97bb2886bb358edad8595a7f10bedd
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:54:30 2025 +0200
+
+    Update index.html
+
+ public/index.html | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+commit 9524555d45e569a536b015a5e38731946c6e8bc6
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:52:49 2025 +0200
+
+    bg image
+
+ public/{bgimage.png => bgimage.jpeg} | Bin
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit 389012f9386d3c7b8ff1d4ddf3e6143e1dbff98c
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:51:55 2025 +0200
+
+    Create bgimage.png
+
+ public/bgimage.png | Bin 0 -> 2574477 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit 459e2ea93f29eaa0990ccc68da65e4853e490b14
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:49:38 2025 +0200
+
+    Update index.html
+
+ public/index.html | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+commit 4908597f43bfede676697bc3e50f3cf30521a3c8
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:45:35 2025 +0200
+
+    Update index.html
+
+ public/index.html | 281 ++++++++++++++++++++++++++----------------------------
+ 1 file changed, 133 insertions(+), 148 deletions(-)
+
+commit 550a193c8c297579f759b5fc34f41e99f113ad24
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:44:14 2025 +0200
+
+    ......
+
+ public/.DS_Store  | Bin 0 -> 6148 bytes
+ public/index.html | 155 +++++++++++++++++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 154 insertions(+), 1 deletion(-)
+
+commit 6d5e7c874d7c4a2192c42e2820ee848e5c7ceb38
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:34:26 2025 +0200
+
+    Update index.html
+
+ public/index.html | 119 +-----------------------------------------------------
+ 1 file changed, 1 insertion(+), 118 deletions(-)
+
+commit 299d473558b46fd8a14e2cdc8d54921dded2f9be
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:29:31 2025 +0200
+
+    a
+
+ .DS_Store                       | Bin 6148 -> 6148 bytes
+ index.html => public/index.html |   0
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+
+commit 31ae760327b458245d64fe3dce7f95c78f144512
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:25:36 2025 +0200
+
+    Update index.html
+
+ index.html | 96 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 94 insertions(+), 2 deletions(-)
+
+commit e82c4859a30d0801a1bf17c4920c96b22f63699b
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:18:17 2025 +0200
+
+    Delete vercel.json
+
+ vercel.json | 8 --------
+ 1 file changed, 8 deletions(-)
+
+commit 72f9c585346c1b0ec134bd95c4b4f0d51b2827fb
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:10:35 2025 +0200
+
+    Create vercel.json
+
+ vercel.json | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+commit 60c714af229c999854668a6df4d6a88de8f9248a
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:04:38 2025 +0200
+
+    Update index.html
+
+ index.html | 115 ++-----------------------------------------------------------
+ 1 file changed, 3 insertions(+), 112 deletions(-)
+
+commit 586cfcb48659d1139bfbe9092a5299deed938836
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:02:49 2025 +0200
+
+    Delete vercel.json
+
+ vercel.json | 5 -----
+ 1 file changed, 5 deletions(-)
+
+commit b67421e1f6d81737234e5574cea768df483c447e
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 22:01:05 2025 +0200
+
+    aaa
+
+ .DS_Store   | Bin 0 -> 6148 bytes
+ vercel.json |  26 +++++---------------------
+ 2 files changed, 5 insertions(+), 21 deletions(-)
+
+commit 9591b077b961c0673dc90afd9a9744cb41a6774f
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 21:57:23 2025 +0200
+
+    -
+
+ vercel.html => vercel.json | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit 6138071373d3e3faa731b7b6227c4c72cd5271a2
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 21:55:29 2025 +0200
+
+    Create vercel.html
+
+ vercel.html | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+commit 32eba52f45be437ab7db5f546da392985ee0b8cd
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 21:53:24 2025 +0200
+
+    Update index.html
+
+ index.html | 121 ++++++++++++++++++++++++++++++++++++++++++++++++++++++-------
+ 1 file changed, 107 insertions(+), 14 deletions(-)
+
+commit 5d0252ed38d8e906d4f20fbb552bd6a26956fe2c
+Author: MishaBond123 <Eagle.bondarev@gmail.com>
+Date:   Wed Apr 9 21:15:20 2025 +0200
+
+    initial site
+
+ index.html | 42 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)

@@ -71,84 +71,97 @@
     <div id="tables"></div>
   </div>
 
-  <script>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    
+    const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    const authStatus = document.getElementById("authStatus");
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      const user = session.user;
+      authStatus.innerHTML = `
+        Logged in as <strong>${user.user_metadata?.username || user.email}</strong>
+        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+      `;
+      document.getElementById("logoutLink").onclick = async () => {
+        await supabase.auth.signOut();
+        location.reload();
+      };
+    }
+    
     const itemsToTrack = ["PERFECT_AMBER_GEM","PERFECT_TOPAZ_GEM","PERFECT_SAPPHIRE_GEM","PERFECT_AMETHYST_GEM","PERFECT_JASPER_GEM","PERFECT_RUBY_GEM","PERFECT_JADE_GEM","PERFECT_OPAL_GEM","PERFECT_AQUAMARINE_GEM","PERFECT_CITRINE_GEM","PERFECT_ONYX_GEM","PERFECT_PERIDOT_GEM","UMBER_PLATE","TUNGSTEN_PLATE","MITHRIL_PLATE","PERFECT_PLATE","GOLDEN_PLATE","TITANIUM_TESSERACT","HOT_STUFF","FRIGID_HUSK","TUNGSTEN_KEY","UMBER_KEY","SKELETON_KEY"];
-
+    
     async function fetchData() {
       const apiKey = "YOUR_API_KEY_HERE";
       const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
       const json = await res.json();
       categorizeItems(json.products);
     }
-
+    
     function categorizeItems(products) {
       let cat1=[], cat2=[], cat3=[];
-
+    
       itemsToTrack.forEach(id => {
         const data = products[id];
         if (!data) return;
-
-        // REMEMBER: API is inverted
-        const buyOrders = data.sell_summary; // players sell => buy instantly
-        const sellOrders = data.buy_summary; // players buy => sell instantly
+    
+        const buyOrders = data.sell_summary;
+        const sellOrders = data.buy_summary;
         const instaSellsHour = data.quick_status.buyMovingWeek / 168;
-
+    
         if (!buyOrders.length || !sellOrders.length) return;
-
+    
         const activeBuy = buyOrders[0].pricePerUnit;
         const activeSell = sellOrders[0].pricePerUnit;
-
-        // === Category 1 ===
+    
         if (activeBuy * 1.25 <= activeSell) {
           const percentChange = ((activeBuy - activeSell) / activeSell) * 100;
           const coinsGap = activeSell - activeBuy;
-          cat1.push([id, percentChange.toFixed(1), "Already Price Dropped: No Volume", instaSellsHour.toFixed(1), (parseFloat(coinsGap.toFixed(1))/1e6).toFixed(2) + 'M']);
+          cat1.push([id, percentChange.toFixed(1), "Already Price Dropped: No Volume", instaSellsHour.toFixed(1), (coinsGap / 1e6).toFixed(2) + 'M']);
           return;
         }
-
-        // === Category 2 ===
-        let foundCat2 = false;
+    
         for (let i = 1; i < buyOrders.length; i++) {
           const price1 = buyOrders[i - 1].pricePerUnit;
           const price2 = buyOrders[i].pricePerUnit;
           const drop = (price2 - price1) / price2;
-
+    
           if (drop <= -0.2) {
             let volume = 0;
             for (let j = 0; j < i; j++) volume += buyOrders[j].amount;
-
-            if (volume <= 10 * instaSellsHour) {
-              const percentChange = ((price2 - activeSell) / activeSell) * 100;
-              const coinsGap = activeSell - price2;
-              cat2.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (parseFloat(coinsGap.toFixed(1))/1e6).toFixed(2) + 'M']);
-              foundCat2 = true;
-              break;
-            }
+            const percentChange = ((price2 - activeSell) / activeSell) * 100;
+            const coinsGap = activeSell - price2;
+            cat2.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (coinsGap / 1e6).toFixed(2) + 'M']);
+            return;
           }
         }
-        if (foundCat2) return;
-
-        // === Category 3 ===
+    
         let maxDrop = -Infinity;
         let bestIndex = 1;
         for (let i = 1; i < buyOrders.length; i++) {
           const prev = buyOrders[i - 1].pricePerUnit;
           const curr = buyOrders[i].pricePerUnit;
           const drop = (curr - prev) / curr;
-          if (drop < maxDrop) continue;
-          maxDrop = drop;
-          bestIndex = i;
+          if (drop > maxDrop) {
+            maxDrop = drop;
+            bestIndex = i;
+          }
         }
         const bestOrder = buyOrders[bestIndex];
         let volume = 0;
         for (let j = 0; j < bestIndex; j++) volume += buyOrders[j].amount;
         const percentChange = ((bestOrder.pricePerUnit - activeSell) / activeSell) * 100;
         const coinsGap = activeSell - bestOrder.pricePerUnit;
-        cat3.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (parseFloat(coinsGap.toFixed(1))/1e6).toFixed(2) + 'M']);
+        cat3.push([id, percentChange.toFixed(1), volume.toFixed(1), instaSellsHour.toFixed(1), (coinsGap / 1e6).toFixed(2) + 'M']);
       });
-
-      cat2.sort((a,b) => b[4] - a[4]);
-
+    
+      cat2.sort((a, b) => b[4] - a[4]);
+    
       document.getElementById('tables').innerHTML = [
         ['Under Price Drop', cat1],
         ['About To Price Drop', cat2],
@@ -165,7 +178,7 @@
           </tr>
           ${cat[1].map(row => `
             <tr>
-              <td><a href="https://skyblock.finance/items/${row[0]}/chart" target="_blank" style="color: #fff; text-decoration: underline;">${row[0]}</a></td>
+              <td><a href="https://skyblock.finance/items/${row[0]}/chart" target="_blank">${row[0]}</a></td>
               <td>${row[1]}%</td>
               <td>${row[2]}</td>
               <td>${row[3]}</td>
@@ -175,23 +188,9 @@
         </table>
       `).join('');
     }
-
+    
     fetchData();
-    setInterval(fetchData,30000);
-    const currentUser = localStorage.getItem("currentUser");
-const authStatus = document.getElementById("authStatus");
-
-if (currentUser) {
-  authStatus.innerHTML = `
-    Logged in as <strong>${currentUser}</strong>
-    <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
-  `;
-  document.getElementById("logoutLink").onclick = () => {
-    localStorage.removeItem("currentUser");
-    location.reload();
-  };
-}
-
+    setInterval(fetchData, 30000);
     </script>    
 </body>
 </html>
