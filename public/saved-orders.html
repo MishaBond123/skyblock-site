@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Saved Orders</title>
-  <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
+  <link rel="icon" href="site-icon.jpeg" />
   <style>
     body {
       margin: 0;
@@ -40,43 +40,10 @@
       background-color: rgba(255,255,255,0.1);
       border-bottom: 2px solid #00bfff;
     }
-    input {
-      padding: 10px;
-      margin: 5px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: none;
-      width: 200px;
-    }
-    button {
-      padding: 10px 14px;
-      font-size: 14px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      background-color: #00bfff;
-      color: #fff;
-    }
     .order-row {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      background-color: rgba(255, 255, 255, 0.05);
-      margin: 8px 0;
-      padding: 10px 16px;
-      border-radius: 8px;
-    }
-    .order-row a {
-      color: #00bfff;
-      text-decoration: underline;
-    }
-    .remove-btn {
-      background-color: crimson;
-      margin-left: 12px;
-    }
-    .center {
-      text-align: center;
-      margin-top: 30px;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -86,97 +53,63 @@
       <a class="tab" href="index.html">Orders</a>
       <a class="tab active-tab" href="saved-orders.html">Saved Orders</a>
     </div>
-
-    <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
-      <a href="auth.html" id="loginLink" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>
-    </div>
-
+    <div id="authStatus" style="position: absolute; top: 10px; right: 20px;"></div>
     <h1>Saved Orders</h1>
-    <div id="content"></div>
-  
-    <script type="module">
-      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-    
-      const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-      const content = document.getElementById("content");
-      const authStatus = document.getElementById("authStatus");
-    
-      const { data: { session }, error } = await supabase.auth.getSession();
-    
-      if (!session || !session.user) {
-        content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your saved orders.</p>`;
-        throw new Error("No user session found");
-      }
-    
-      const user = session.user;
-      const userId = user.id;
-      const username = user.user_metadata?.username || user.email;
-    
-      authStatus.innerHTML = `
-        Logged in as <strong>${username}</strong>
-        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
-      `;
+    <div id="ordersUI"></div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const supabase = createClient(
+      "https://dhgfmbsyndfbsretlhvm.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI"
+    );
+
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
+
+    const authStatus = document.getElementById("authStatus");
+    const ordersUI = document.getElementById("ordersUI");
+
+    if (!user) {
+      authStatus.innerHTML = `<a href="auth.html" style="color:#00bfff;text-decoration:underline;">Log In / Sign Up</a>`;
+      ordersUI.innerHTML = `<p>Please log in to view and manage saved orders.</p>`;
+    } else {
+      authStatus.innerHTML = `Logged in as <strong>${user.user_metadata?.username || user.email}</strong> <a href="#" id="logoutLink" style="color:#00bfff;text-decoration:underline;margin-left:10px;">Log Out</a>`;
       document.getElementById("logoutLink").onclick = async () => {
         await supabase.auth.signOut();
         location.reload();
       };
-    
-      const { data: orders, error: fetchError } = await supabase
-        .from("saved_orders")
-        .select("*")
-        .eq("user_id", userId);
-    
+
+      const { data: orders } = await supabase.from("saved_orders").select("*").eq("user_id", user.id);
+      ordersUI.innerHTML = `
+        <input id="item" placeholder="Item Name" />
+        <input id="price" placeholder="Price" />
+        <button id="save">Save Order</button>
+        <div id="ordersList"></div>
+      `;
+      const list = document.getElementById("ordersList");
       function renderOrders() {
-        content.innerHTML = `
-          <div class="center">
-            <input id="itemInput" placeholder="Item Type" />
-            <input id="priceInput" placeholder="Order Price" />
-            <button id="addBtn">+ Add Order</button>
-          </div>
-          <div id="ordersList" style="margin-top: 30px;"></div>
-        `;
-    
-        const list = document.getElementById("ordersList");
-        if (!orders || orders.length === 0) {
-          list.innerHTML = '<p class="center">No saved orders yet.</p>';
-        } else {
-          list.innerHTML = orders.map((order) => `
-            <div class="order-row">
-              <a href="index.html?item=${order.item}&track=${order.price}" target="_blank">
-                ${order.item} @ ${parseFloat(order.price).toLocaleString()} coins
-              </a>
-              <button class="remove-btn" data-id="${order.id}">–</button>
-            </div>
-          `).join("");
-        }
-    
-        document.querySelectorAll(".remove-btn").forEach(btn => {
-          btn.onclick = async () => {
-            const id = btn.dataset.id;
-            await supabase.from("saved_orders").delete().eq("id", id);
-            location.reload();
-          };
-        });
-    
-        document.getElementById("addBtn").onclick = async () => {
-          const item = document.getElementById("itemInput").value.trim();
-          const price = document.getElementById("priceInput").value.trim();
-          if (!item || !price || isNaN(price)) return alert("Enter a valid item and price.");
-          const { error: insertError } = await supabase.from("saved_orders").insert({
-            user_id: userId,
-            item,
-            price
-          });
-          if (insertError) alert("Error saving order.");
-          else location.reload();
-        };
+        list.innerHTML = orders.map(o => `
+          <div class="order-row">
+            ${o.item} @ ${o.price}
+            <button onclick="removeOrder('${o.id}')">X</button>
+          </div>`).join("");
       }
-    
       renderOrders();
-    </script>      
-  </div>
+
+      document.getElementById("save").onclick = async () => {
+        const item = document.getElementById("item").value;
+        const price = document.getElementById("price").value;
+        await supabase.from("saved_orders").insert({ item, price, user_id: user.id });
+        location.reload();
+      };
+      window.removeOrder = async (id) => {
+        await supabase.from("saved_orders").delete().eq("id", id);
+        location.reload();
+      };
+    }
+  </script>
 </body>
 </html>

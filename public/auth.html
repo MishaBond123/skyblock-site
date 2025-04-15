@@ -21,102 +21,65 @@
       background-color: rgba(0, 0, 0, 0.8);
       padding: 30px 40px;
       border-radius: 12px;
-      width: 100%;
-      max-width: 400px;
       text-align: center;
     }
-    .tabs {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    .tab {
-      padding: 10px 20px;
-      cursor: pointer;
-      background: rgba(255,255,255,0.1);
-      border-radius: 8px 8px 0 0;
-      margin: 0 5px;
-    }
-    .tab.active {
-      background: rgba(255,255,255,0.25);
-      border-bottom: 2px solid #00bfff;
-    }
-    input {
+    input, button {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
       border-radius: 6px;
       border: none;
-      font-size: 16px;
     }
     button {
-      padding: 10px 20px;
       background-color: #00bfff;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
+      color: #fff;
       cursor: pointer;
     }
     .error {
       color: red;
-      margin-top: 10px;
       font-size: 14px;
     }
   </style>
 </head>
 <body>
   <div class="auth-container">
-    <div class="tabs">
-      <div id="loginTab" class="tab active">Login</div>
-      <div id="signupTab" class="tab">Sign Up</div>
-    </div>
-
-    <div id="form">
-      <input id="username" type="text" placeholder="Username" />
-      <input id="password" type="password" placeholder="Password" />
-      <button id="submitBtn">Login</button>
-      <div class="error" id="errorMsg"></div>
-    </div>
+    <h2 id="formTitle">Login</h2>
+    <input id="username" placeholder="Username" />
+    <input id="password" type="password" placeholder="Password" />
+    <button id="submitBtn">Login</button>
+    <p><a href="#" id="toggleForm" style="color:#00bfff;">Don't have an account? Sign up</a></p>
+    <div class="error" id="error"></div>
   </div>
 
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-    const SUPABASE_URL = 'https://dhgfmbsyndfbsretlhvm.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI';
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = createClient(
+      "https://dhgfmbsyndfbsretlhvm.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI"
+    );
 
-    const loginTab = document.getElementById("loginTab");
-    const signupTab = document.getElementById("signupTab");
+    const usernameEl = document.getElementById("username");
+    const passwordEl = document.getElementById("password");
+    const errorEl = document.getElementById("error");
     const submitBtn = document.getElementById("submitBtn");
-    const errorMsg = document.getElementById("errorMsg");
+    const toggleForm = document.getElementById("toggleForm");
+    const formTitle = document.getElementById("formTitle");
 
     let isLogin = true;
 
-    loginTab.onclick = () => {
-      isLogin = true;
-      loginTab.classList.add("active");
-      signupTab.classList.remove("active");
-      submitBtn.textContent = "Login";
-      errorMsg.textContent = "";
-    };
-
-    signupTab.onclick = () => {
-      isLogin = false;
-      signupTab.classList.add("active");
-      loginTab.classList.remove("active");
-      submitBtn.textContent = "Sign Up";
-      errorMsg.textContent = "";
+    toggleForm.onclick = () => {
+      isLogin = !isLogin;
+      formTitle.textContent = isLogin ? "Login" : "Sign Up";
+      submitBtn.textContent = isLogin ? "Login" : "Sign Up";
+      toggleForm.textContent = isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in";
+      errorEl.textContent = "";
     };
 
     submitBtn.onclick = async () => {
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
-
-      if (!username || !password) {
-        errorMsg.textContent = "Please enter both fields.";
-        return;
-      }
+      const username = usernameEl.value.trim();
+      const password = passwordEl.value.trim();
+      if (!username || !password) return errorEl.textContent = "Please enter both fields.";
 
       if (isLogin) {
         const { data, error } = await supabase
@@ -125,28 +88,20 @@
           .eq("username", username)
           .eq("password", password)
           .maybeSingle();
-
-        if (error || !data) {
-          errorMsg.textContent = "Invalid login credentials.";
-          return;
-        }
-
+        if (error || !data) return errorEl.textContent = "Invalid login credentials.";
+        await supabase.auth.setSession({ access_token: "manual", user: { id: data.id, user_metadata: { username } } });
         document.cookie = `session_id=${data.id}; path=/`;
-        window.location.href = "index.html";
+        location.href = "index.html";
       } else {
         const { data, error } = await supabase
           .from("users")
-          .insert([{ username, password }])
+          .insert({ username, password })
           .select()
           .maybeSingle();
-
-        if (error || !data) {
-          errorMsg.textContent = "Sign-up failed.";
-          return;
-        }
-
+        if (error || !data) return errorEl.textContent = "Sign-up failed.";
+        await supabase.auth.setSession({ access_token: "manual", user: { id: data.id, user_metadata: { username } } });
         document.cookie = `session_id=${data.id}; path=/`;
-        window.location.href = "index.html";
+        location.href = "index.html";
       }
     };
   </script>
