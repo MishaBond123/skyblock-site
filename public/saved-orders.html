@@ -98,45 +98,44 @@
   </div>
 
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
   
-    const SUPABASE_URL = 'https://dhgfmbsyndfbsetlhvm.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI';
+    const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   
-    const content = document.getElementById('content');
-    const authStatus = document.getElementById('authStatus');
+    const content = document.getElementById("content");
+    const authStatus = document.getElementById("authStatus");
   
-    const userId = sessionStorage.getItem('user_id');
-    const username = sessionStorage.getItem('username');
+    const {
+      data: { session },
+      error: sessionError
+    } = await supabase.auth.getSession();
   
-    // Handle auth status UI
-    if (userId && username) {
-      authStatus.innerHTML = `
-        Logged in as <strong>${username}</strong>
-        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
-      `;
-      document.getElementById('logoutLink').onclick = () => {
-        sessionStorage.clear();
-        location.reload();
-      };
-    } else {
+    if (sessionError || !session) {
       content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your saved orders.</p>`;
       return;
     }
   
-    // Fetch saved orders from Supabase
-    const { data, error } = await supabase
-      .from('saved_orders')
-      .select('*')
-      .eq('user_id', userId);
+    const user = session.user;
+    sessionStorage.setItem("user_id", user.id);
+    sessionStorage.setItem("username", user.user_metadata.username);
   
-    if (error || !data) {
-      content.innerHTML = `<p class="center">Error loading orders. Try <a href="auth.html" style="color:#00bfff;">logging in</a> again.</p>`;
-      return;
-    }
+    authStatus.innerHTML = `
+      Logged in as <strong>${user.user_metadata.username}</strong>
+      <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+    `;
   
-    let orders = data;
+    document.getElementById("logoutLink").onclick = async () => {
+      await supabase.auth.signOut();
+      sessionStorage.clear();
+      location.reload();
+    };
+  
+    const { data: orders, error } = await supabase
+      .from("saved_orders")
+      .select("*")
+      .eq("user_id", user.id);
   
     function renderOrders() {
       content.innerHTML = `
@@ -148,44 +147,47 @@
         <div id="ordersList" style="margin-top: 30px;"></div>
       `;
   
-      const list = document.getElementById('ordersList');
-      if (orders.length === 0) {
+      const list = document.getElementById("ordersList");
+      if (!orders || orders.length === 0) {
         list.innerHTML = '<p class="center">No saved orders yet.</p>';
       } else {
-        list.innerHTML = orders.map((order, index) => `
+        list.innerHTML = orders
+          .map(
+            (order, index) => `
           <div class="order-row">
-            <a href="index.html?item=${order.item}&track=${order.price}" target="_blank">${order.item} @ ${parseFloat(order.price).toLocaleString()} coins</a>
+            <a href="index.html?item=${order.item}&track=${order.price}" target="_blank">
+              ${order.item} @ ${parseFloat(order.price).toLocaleString()} coins
+            </a>
             <button class="remove-btn" data-id="${order.id}">–</button>
           </div>
-        `).join('');
+        `
+          )
+          .join("");
       }
   
-      document.querySelectorAll('.remove-btn').forEach(btn => {
+      document.querySelectorAll(".remove-btn").forEach(btn => {
         btn.onclick = async () => {
-          const orderId = btn.dataset.id;
-          await supabase.from('saved_orders').delete().eq('id', orderId);
-          orders = orders.filter(o => o.id !== orderId);
-          renderOrders();
+          const id = btn.dataset.id;
+          await supabase.from("saved_orders").delete().eq("id", id);
+          location.reload();
         };
       });
   
-      document.getElementById('addBtn').onclick = async () => {
-        const item = document.getElementById('itemInput').value.trim();
-        const price = document.getElementById('priceInput').value.trim();
+      document.getElementById("addBtn").onclick = async () => {
+        const item = document.getElementById("itemInput").value.trim();
+        const price = document.getElementById("priceInput").value.trim();
         if (!item || !price || isNaN(price)) return alert("Enter a valid item and price.");
-  
-        const { data: newOrder, error: insertError } = await supabase
-          .from('saved_orders')
-          .insert([{ user_id: userId, item, price }])
-          .select();
-  
-        if (insertError) return alert("Failed to add order.");
-        orders.push(newOrder[0]);
-        renderOrders();
+        const { error } = await supabase.from("saved_orders").insert({
+          user_id: user.id,
+          item,
+          price
+        });
+        if (error) alert("Error saving order.");
+        else location.reload();
       };
     }
   
     renderOrders();
-  </script>  
+  </script>    
 </body>
 </html>
