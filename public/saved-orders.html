@@ -98,72 +98,110 @@
   </div>
 
   <script>
-    const currentUser = localStorage.getItem("currentUser");
-    const content = document.getElementById("content");
-    const authStatus = document.getElementById("authStatus");
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    // Auth status UI
-    if (currentUser) {
-      authStatus.innerHTML = `
-        Logged in as <strong>${currentUser}</strong>
-        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
-      `;
-      document.getElementById("logoutLink").onclick = () => {
-        localStorage.removeItem("currentUser");
-        location.reload();
-      };
-    }
+    const SUPABASE_URL = 'https://dhgfmbsyndfbsretlhvm.supabase.co'; // your project URL
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Require login
-    if (!currentUser) {
-      content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your saved orders.</p>`;
-    } else {
-      const savedKey = `savedOrders_${currentUser}`;
-      let orders = JSON.parse(localStorage.getItem(savedKey) || "[]");
+const currentUser = localStorage.getItem("currentUser");
+const content = document.getElementById("content");
+const authStatus = document.getElementById("authStatus");
 
-      function renderOrders() {
-        content.innerHTML = `
-          <div class="center">
-            <input id="itemInput" placeholder="Item Type (e.g. HOT_STUFF)" />
-            <input id="priceInput" placeholder="Order Price (e.g. 5000000)" />
-            <button id="addBtn">+ Add Order</button>
-          </div>
-          <div id="ordersList" style="margin-top: 30px;"></div>
-        `;
+let userId = null;
+let orders = [];
 
-        const list = document.getElementById("ordersList");
-        if (orders.length === 0) {
-          list.innerHTML = '<p class="center">No saved orders yet.</p>';
-        } else {
-          list.innerHTML = orders.map((order, index) => `
-            <div class="order-row">
-              <a href="index.html?item=${order.item}&track=${order.price}" target="_blank">${order.item} @ ${parseFloat(order.price).toLocaleString()} coins</a>
-              <button class="remove-btn" data-index="${index}">–</button>
-            </div>
-          `).join("");
-        }
+if (currentUser) {
+  authStatus.innerHTML = `
+    Logged in as <strong>${currentUser}</strong>
+    <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+  `;
+  document.getElementById("logoutLink").onclick = () => {
+    localStorage.removeItem("currentUser");
+    location.reload();
+  };
+  loadUser();
+} else {
+  content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your saved orders.</p>`;
+}
 
-        document.querySelectorAll(".remove-btn").forEach(btn => {
-          btn.onclick = () => {
-            const i = parseInt(btn.dataset.index);
-            orders.splice(i, 1);
-            localStorage.setItem(savedKey, JSON.stringify(orders));
-            renderOrders();
-          };
-        });
+async function loadUser() {
+  const password = localStorage.getItem("password");
+  const { data, error } = await supabase
+    .from("users")
+    .select("id")
+    .eq("username", currentUser)
+    .eq("password", password)
+    .single();
 
-        document.getElementById("addBtn").onclick = () => {
-          const item = document.getElementById("itemInput").value.trim();
-          const price = document.getElementById("priceInput").value.trim();
-          if (!item || !price || isNaN(price)) return alert("Enter a valid item and price.");
-          orders.push({ item, price });
-          localStorage.setItem(savedKey, JSON.stringify(orders));
-          renderOrders();
-        };
-      }
+  if (error || !data) {
+    content.innerHTML = `<p class="center">Session expired. <a href="auth.html" style="color:#00bfff;">Log in</a> again.</p>`;
+    return;
+  }
 
-      renderOrders();
-    }
+  userId = data.id;
+  loadOrders();
+}
+
+async function loadOrders() {
+  const { data, error } = await supabase
+    .from("saved_orders")
+    .select("*")
+    .eq("user_id", userId);
+
+  if (error) {
+    content.innerHTML = `<p class="center">Failed to load orders.</p>`;
+    return;
+  }
+
+  orders = data;
+  renderOrders();
+}
+
+async function addOrder(item, price) {
+  const { error } = await supabase.from("saved_orders").insert([
+    { user_id: userId, item, price }
+  ]);
+  if (error) return alert("Failed to add order.");
+  loadOrders();
+}
+
+async function deleteOrder(id) {
+  await supabase.from("saved_orders").delete().eq("id", id);
+  loadOrders();
+}
+
+function renderOrders() {
+  content.innerHTML = `
+    <div class="center">
+      <input id="itemInput" placeholder="Item Type" />
+      <input id="priceInput" placeholder="Order Price" />
+      <button id="addBtn">+ Add Order</button>
+    </div>
+    <div id="ordersList" style="margin-top: 30px;"></div>
+  `;
+
+  const list = document.getElementById("ordersList");
+  if (orders.length === 0) {
+    list.innerHTML = '<p class="center">No saved orders yet.</p>';
+  } else {
+    list.innerHTML = orders.map(order => `
+      <div class="order-row">
+        <a href="index.html?item=${order.item}&track=${order.price}" target="_blank">${order.item} @ ${parseFloat(order.price).toLocaleString()} coins</a>
+        <button class="remove-btn" onclick="deleteOrder('${order.id}')">–</button>
+      </div>
+    `).join("");
+  }
+
+  document.getElementById("addBtn").onclick = () => {
+    const item = document.getElementById("itemInput").value.trim();
+    const price = document.getElementById("priceInput").value.trim();
+    if (!item || !price || isNaN(price)) return alert("Enter a valid item and price.");
+    addOrder(item, price);
+  };
+}
+
+window.deleteOrder = deleteOrder;
   </script>
 </body>
 </html>
