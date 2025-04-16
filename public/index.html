@@ -182,23 +182,19 @@
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
       const authStatus = document.getElementById("authStatus");
-
-const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-if (sessionError || !session || !session.user) {
-  // Just leave the default "Log In / Sign Up" link in HTML
-} else {
-  const user = session.user;
-  authStatus.innerHTML = `
-    Logged in as <strong>${user.user_metadata?.username || user.email}</strong>
-    <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
-  `;
-  document.getElementById("logoutLink").onclick = async () => {
-    await supabase.auth.signOut();
-    location.reload();
-  };
-}
-
+      const userId = sessionStorage.getItem("user_id");
+      const username = sessionStorage.getItem("username");
+    
+      if (userId && username) {
+        authStatus.innerHTML = `
+          Logged in as <strong>${username}</strong>
+          <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+        `;
+        document.getElementById("logoutLink").onclick = () => {
+          sessionStorage.clear();
+          location.reload();
+        };
+      }
     
       const itemInput = document.getElementById("itemInput");
       const trackInput = document.getElementById("trackInput");
