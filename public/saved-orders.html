@@ -155,17 +155,22 @@
       });
 
       document.getElementById("addBtn").onclick = async () => {
-        const item = document.getElementById("itemInput").value.trim();
-        const price = document.getElementById("priceInput").value.trim();
-        if (!item || !price || isNaN(price)) return alert("Enter a valid item and price.");
-        const { error } = await supabase.from("saved_orders").insert({
-          user_id: userId,
-          item,
-          price
-        });
-        if (error) alert("Error saving order.");
-        else location.reload();
-      };
+  const item = document.getElementById("itemInput").value.trim();
+  const price = document.getElementById("priceInput").value.trim();
+  if (!item || !price || isNaN(price)) return alert("Enter a valid item and price.");
+
+  const { error } = await supabase.from("saved_orders").insert([
+    {
+      user_id: userId,
+      item,
+      price
+    }
+  ]);
+
+  if (error) alert("Error saving order.");
+  else location.reload();
+};
+
     }
   </script>
 </body>
