@@ -176,25 +176,26 @@
 
     <script type="module">
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-  
-      const supabase = createClient(
-        "https://dhgfmbsyndfbsretlhvm.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI"
-      );
-  
-      const { data: { session } } = await supabase.auth.getSession();
+    
+      const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
       const authStatus = document.getElementById("authStatus");
-  
-      if (session?.user) {
-        const username = session.user.user_metadata?.username || session.user.email;
-        authStatus.innerHTML = `Logged in as <strong>${username}</strong> <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>`;
+    
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const user = session.user;
+        authStatus.innerHTML = `
+          Logged in as <strong>${user.user_metadata?.username || user.email}</strong>
+          <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+        `;
         document.getElementById("logoutLink").onclick = async () => {
           await supabase.auth.signOut();
           location.reload();
         };
-      } else {
-        authStatus.innerHTML = `<a href="auth.html" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>`;
       }
+    
       const itemInput = document.getElementById("itemInput");
       const trackInput = document.getElementById("trackInput");
       const buyBody = document.querySelector("#buyTable tbody");
@@ -205,14 +206,14 @@
       const instasells = document.getElementById("instasells");
       const orderInfo = document.getElementById("orderInfo");
       const itemDropdown = document.getElementById("itemDropdown");
-      
+    
       let latestBuySummary = [], latestSellSummary = [], currentItemId = "";
       let allItems = [];
-      
+    
       async function getApiKey() {
         return "YOUR_API_KEY_HERE";
       }
-      
+    
       async function fetchAllItems() {
         const apiKey = await getApiKey();
         const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
@@ -228,7 +229,7 @@
           };
         });
       }
-      
+    
       itemInput.addEventListener("input", () => {
         const query = itemInput.value.trim().toLowerCase();
         itemDropdown.innerHTML = "";
@@ -251,12 +252,12 @@
         }
         itemDropdown.style.display = "block";
       });
-      
+    
       trackInput.addEventListener("change", () => {
         const tracked = parseFloat(trackInput.value.replace(/,/g, ''));
         highlightTrackedOrder(tracked);
       });
-      
+    
       async function loadData(itemId) {
         const apiKey = await getApiKey();
         const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
@@ -271,7 +272,7 @@
         renderTable(latestSellSummary, sellBody, sellFoot, parseFloat(instabuys.textContent));
         highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));
       }
-      
+    
       function renderTable(summary, tbody, tfootRow, hourlyVolume) {
         tbody.innerHTML = "";
         let totalAmount = 0, totalCoins = 0;
@@ -297,7 +298,7 @@
           <td>${totalCoins.toLocaleString()} coins</td>
         `;
       }
-      
+    
       function highlightTrackedOrder(price) {
         orderInfo.innerHTML = "";
         if (!price || isNaN(price)) return;
@@ -328,7 +329,7 @@
           }
         }
       }
-      
+    
       const urlParams = new URLSearchParams(window.location.search);
       const preloadedItem = urlParams.get('item');
       const preloadedTrack = urlParams.get('track');
@@ -340,12 +341,12 @@
       if (preloadedTrack) {
         trackInput.value = preloadedTrack;
       }
-      
+    
       fetchAllItems();
       setInterval(() => {
         if (currentItemId) loadData(currentItemId);
       }, 3000);
-      </script>      
+    </script>    
   </div>
 </body>
 </html>
