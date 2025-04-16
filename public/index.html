@@ -44,7 +44,7 @@
       width: 100%;
       padding: 10px;
       font-size: 16px;
-      margin: 10px 0;
+      margin: 10px 0 10px;
       border-radius: 6px;
       border: none;
     }
@@ -115,6 +115,10 @@
     .dropdown-item:hover {
       background-color: rgba(255, 255, 255, 0.1);
     }
+    .dropdown-label {
+      display: flex;
+      align-items: center;
+    }
     .dropdown-price {
       background-color: goldenrod;
       padding: 4px 8px;
@@ -145,6 +149,7 @@
     <h3>Item ID:</h3>
     <input id="itemInput" placeholder="Enter Item ID (e.g. BOOSTER_COOKIE)" />
     <div id="itemDropdown" class="dropdown"></div>
+    <div id="chartLink" style="margin-top: 8px; font-size: 15px;"></div>
 
     <h3>Track Order By Price:</h3>
     <input id="trackInput" placeholder="Enter price to track (e.g. 10,670,396.3)" />
@@ -181,10 +186,10 @@
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
-      const authStatus = document.getElementById("authStatus");
       const userId = sessionStorage.getItem("user_id");
       const username = sessionStorage.getItem("username");
     
+      const authStatus = document.getElementById("authStatus");
       if (userId && username) {
         authStatus.innerHTML = `
           Logged in as <strong>${username}</strong>
@@ -206,6 +211,7 @@
       const instasells = document.getElementById("instasells");
       const orderInfo = document.getElementById("orderInfo");
       const itemDropdown = document.getElementById("itemDropdown");
+      const chartLink = document.getElementById("chartLink");
     
       let latestBuySummary = [], latestSellSummary = [], currentItemId = "";
       let allItems = [];
@@ -246,6 +252,9 @@
             itemInput.value = item.id;
             itemDropdown.style.display = "none";
             currentItemId = item.id;
+            chartLink.innerHTML = `
+              View the chart on skyblock.finance <a href="https://skyblock.finance/items/${item.id}/chart" target="_blank" style="color: #00bfff; text-decoration: underline;">Here</a>
+            `;
             loadData(item.id);
           };
           itemDropdown.appendChild(div);
@@ -336,6 +345,9 @@
       if (preloadedItem) {
         itemInput.value = preloadedItem;
         currentItemId = preloadedItem;
+        chartLink.innerHTML = `
+          View the chart on skyblock.finance <a href="https://skyblock.finance/items/${preloadedItem}/chart" target="_blank" style="color: #00bfff; text-decoration: underline;">Here</a>
+        `;
         loadData(preloadedItem);
       }
       if (preloadedTrack) {
