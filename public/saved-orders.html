@@ -95,6 +95,30 @@
     <div id="content"></div>
   </div>
 
+  <!-- ⚙️ Settings Popup Modal -->
+<div id="settingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999; justify-content:center; align-items:center;">
+  <div style="background:#111; padding:30px; border-radius:10px; max-width:400px; width:90%; position:relative; color:#fff;">
+    <h2 style="margin-top:0;">User Settings</h2>
+    <label>Minecraft Username:</label>
+    <input id="mcUsernameInput" style="width:100%; padding:10px; margin:8px 0;" />
+
+    <label>SkyBlock Profile:</label>
+    <input id="sbProfileInput" style="width:100%; padding:10px; margin:8px 0;" />
+
+    <label>New Password:</label>
+    <input type="password" id="newPasswordInput" style="width:100%; padding:10px; margin:8px 0;" />
+
+    <label>Confirm New Password:</label>
+    <input type="password" id="confirmPasswordInput" style="width:100%; padding:10px; margin:8px 0;" />
+
+    <div style="margin-top:10px;">
+      <button id="saveSettingsBtn" style="background:#00bfff; color:#fff; padding:10px 16px; border:none; border-radius:6px; cursor:pointer;">Save</button>
+      <button onclick="document.getElementById('settingsModal').style.display='none'" style="margin-left:10px; background:#555; color:#fff; padding:10px 16px; border:none; border-radius:6px; cursor:pointer;">Cancel</button>
+    </div>
+    <div id="settingsError" style="color:crimson; margin-top:10px;"></div>
+  </div>
+</div>
+
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -166,6 +190,68 @@
       price
     }
   ]);
+  // Add Settings link to authStatus if logged in
+if (userId && username) {
+  authStatus.innerHTML = `
+    Logged in as <strong>${username}</strong>
+    <a href="#" id="settingsLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Settings</a>
+    <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+  `;
+
+  document.getElementById("logoutLink").onclick = () => {
+    sessionStorage.clear();
+    location.reload();
+  };
+
+  document.getElementById("settingsLink").onclick = async () => {
+    // Load current values
+    const { data: userData } = await supabase.from("users").select("*").eq("id", userId).single();
+    document.getElementById("mcUsernameInput").value = userData.mc_username || "";
+    document.getElementById("sbProfileInput").value = userData.sb_profile || "";
+    document.getElementById("newPasswordInput").value = "";
+    document.getElementById("confirmPasswordInput").value = "";
+    document.getElementById("settingsError").textContent = "";
+    document.getElementById("settingsModal").style.display = "flex";
+  };
+}
+
+// Handle save settings
+document.getElementById("saveSettingsBtn").onclick = async () => {
+  const mcUsername = document.getElementById("mcUsernameInput").value.trim();
+  const sbProfile = document.getElementById("sbProfileInput").value.trim();
+  const newPassword = document.getElementById("newPasswordInput").value;
+  const confirmPassword = document.getElementById("confirmPasswordInput").value;
+
+  if (newPassword && newPassword !== confirmPassword) {
+    document.getElementById("settingsError").textContent = "Passwords do not match.";
+    return;
+  }
+
+  const updates = {
+    mc_username: mcUsername,
+    sb_profile: sbProfile
+  };
+
+  const { error: updateError } = await supabase.from("users").update(updates).eq("id", userId);
+
+  if (updateError) {
+    document.getElementById("settingsError").textContent = "Failed to update profile.";
+    return;
+  }
+
+  // Optional: update password via auth method
+  if (newPassword) {
+    const { error: pwError } = await supabase.auth.updateUser({ password: newPassword });
+    if (pwError) {
+      document.getElementById("settingsError").textContent = "Password update failed.";
+      return;
+    }
+  }
+
+  alert("Settings updated!");
+  document.getElementById("settingsModal").style.display = "none";
+};
+
 
   if (error) {
     console.error("Supabase insert error:", error);
