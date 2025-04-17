@@ -241,7 +241,20 @@ document.getElementById("saveSettingsBtn").onclick = async () => {
 
   // Optional: update password via auth method
   if (newPassword) {
-    const { error: pwError } = await supabase.auth.updateUser({ password: newPassword });
+    // Re-authenticate using username and password stored or requested
+const { data: userSession } = await supabase.auth.getSession();
+
+if (userSession.session) {
+  const { error: pwError } = await supabase.auth.updateUser({ password: newPassword });
+  if (pwError) {
+    document.getElementById("settingsError").textContent = "Password update failed: " + pwError.message;
+    return;
+  }
+} else {
+  document.getElementById("settingsError").textContent = "Please log in again before changing your password.";
+  return;
+}
+
     if (pwError) {
       document.getElementById("settingsError").textContent = "Password update failed.";
       return;
