@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Networth</title>
+  <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url('bgimage.jpeg');
+      background-size: cover;
+      background-attachment: fixed;
+      color: #fff;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      background-color: rgba(0, 0, 0, 0.75);
+      padding: 30px;
+      border-radius: 16px;
+      position: relative;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      position: absolute;
+      top: -40px;
+      left: 20px;
+    }
+    .tab {
+      padding: 8px 16px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px 8px 0 0;
+    }
+    .active-tab {
+      background-color: rgba(255,255,255,0.1);
+      border-bottom: 2px solid #00bfff;
+    }
+    #chartContainer {
+      margin-top: 30px;
+    }
+    #toggleTimezone {
+      margin-top: 10px;
+    }
+    .center {
+      text-align: center;
+      margin-top: 20px;
+    }
+    #tableView {
+      margin-top: 30px;
+      display: none;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    th {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tabs">
+      <a class="tab" href="index.html">Orders</a>
+      <a class="tab" href="saved-orders.html">Saved Orders</a>
+      <a class="tab active-tab" href="user-networth.html">User Networth</a>
+    </div>
+
+    <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
+      <a href="auth.html" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>
+    </div>
+
+    <h1 id="heading" class="center">User Networth</h1>
+
+    <div id="chartContainer" class="center">
+      <canvas id="networthChart" width="900" height="400"></canvas>
+    </div>
+
+    <div id="toggleTimezone" class="center">
+      <label><input type="radio" name="timezone" value="CET" checked /> CET</label>
+      <label><input type="radio" name="timezone" value="EDT" /> EDT</label>
+    </div>
+
+    <div class="center">
+      Press <a href="#" onclick="document.getElementById('tableView').style.display='block'" style="color: #00bfff;">Here</a> to view your networth data on a table.
+    </div>
+
+    <div id="tableView">
+      <table>
+        <thead>
+          <tr><th>Timestamp</th><th>Networth (coins)</th></tr>
+        </thead>
+        <tbody id="networthTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    import Chart from "https://cdn.jsdelivr.net/npm/chart.js";
+
+    const supabase = createClient("https://dhgfmbsyndfbsretlhvm.supabase.co", "YOUR_PUBLIC_ANON_KEY");
+    const userId = sessionStorage.getItem("user_id");
+    const username = sessionStorage.getItem("username");
+    const heading = document.getElementById("heading");
+    const authStatus = document.getElementById("authStatus");
+
+    if (!userId || !username) {
+      heading.innerHTML = "Please <a href='auth.html' style='color:#00bfff;'>log in</a> to view your networth.";
+      document.getElementById("chartContainer").style.display = "none";
+      document.getElementById("toggleTimezone").style.display = "none";
+      return;
+    }
+
+    authStatus.innerHTML = `
+      Logged in as <strong>${username}</strong>
+      <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+    `;
+    document.getElementById("logoutLink").onclick = () => {
+      sessionStorage.clear();
+      location.reload();
+    };
+
+    heading.textContent = `Networth of ${username} (SkyBlock Profile)`;
+
+    const { data: networthData } = await supabase
+      .from("user_networth")
+      .select("*")
+      .eq("user_id", userId)
+      .order("timestamp", { ascending: true });
+
+    const ctx = document.getElementById("networthChart").getContext("2d");
+    const labels = networthData.map(entry => new Date(entry.timestamp).toLocaleString());
+    const values = networthData.map(entry => entry.networth);
+
+    const minY = Math.min(...values);
+    const maxY = Math.max(...values);
+    const padding = (maxY - minY) * 0.1;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Networth (coins)',
+          data: values,
+          borderColor: '#00bfff',
+          fill: false,
+          tension: 0.1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            min: minY - padding,
+            max: maxY + padding,
+            title: {
+              display: true,
+              text: 'Coins'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Time'
+            }
+          }
+        }
+      }
+    });
+
+    // Populate table
+    const table = document.getElementById("networthTable");
+    networthData.forEach(row => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${new Date(row.timestamp).toLocaleString()}</td><td>${parseInt(row.networth).toLocaleString()}</td>`;
+      table.appendChild(tr);
+    });
+
+    document.querySelectorAll('input[name="timezone"]').forEach(radio => {
+      radio.addEventListener("change", e => {
+        const tz = e.target.value;
+        labels.forEach((_, i) => {
+          const date = new Date(networthData[i].timestamp);
+          labels[i] = tz === "CET"
+            ? date.toLocaleString("en-GB", { timeZone: "Europe/Paris" })
+            : date.toLocaleString("en-US", { timeZone: "America/New_York" });
+        });
+      });
+    });
+  </script>
+</body>
+</html>
