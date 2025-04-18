@@ -108,108 +108,131 @@
 
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-    import Chart from "https://cdn.jsdelivr.net/npm/chart.js";
-
-    const supabase = createClient("https://dhgfmbsyndfbsretlhvm.supabase.co", "YOUR_PUBLIC_ANON_KEY");
-    const { data: { session } } = await supabase.auth.getSession();
-let userId = null;
-let username = null;
-
-if (session && session.user) {
-  userId = session.user.id;
-  username = session.user.user_metadata?.username || session.user.email;
-  sessionStorage.setItem("user_id", userId);
-  sessionStorage.setItem("username", username);
-}
-
-    const heading = document.getElementById("heading");
+  
+    const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
+    const userId = sessionStorage.getItem("user_id");
+    const username = sessionStorage.getItem("username");
     const authStatus = document.getElementById("authStatus");
-
+    const content = document.getElementById("content");
+  
     if (!userId || !username) {
-  heading.innerHTML = "Please <a href='auth.html' style='color:#00bfff;'>log in</a> to view your networth.";
-  document.getElementById("chartContainer").style.display = "none";
-  document.getElementById("toggleTimezone").style.display = "none";
-  document.getElementById("tableView").style.display = "none";
-  document.querySelector(".center a")?.parentElement?.remove(); // remove “Press Here” row if it exists
-  return;
-}
-
-    authStatus.innerHTML = `
-      Logged in as <strong>${username}</strong>
-      <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
-    `;
-    document.getElementById("logoutLink").onclick = () => {
-      sessionStorage.clear();
-      location.reload();
-    };
-
-    heading.textContent = `Networth of ${username} (SkyBlock Profile)`;
-
-    const { data: networthData } = await supabase
-      .from("user_networth")
-      .select("*")
-      .eq("user_id", userId)
-      .order("timestamp", { ascending: true });
-
-    const ctx = document.getElementById("networthChart").getContext("2d");
-    const labels = networthData.map(entry => new Date(entry.timestamp).toLocaleString());
-    const values = networthData.map(entry => entry.networth);
-
-    const minY = Math.min(...values);
-    const maxY = Math.max(...values);
-    const padding = (maxY - minY) * 0.1;
-
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Networth (coins)',
-          data: values,
-          borderColor: '#00bfff',
-          fill: false,
-          tension: 0.1
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            min: minY - padding,
-            max: maxY + padding,
-            title: {
-              display: true,
-              text: 'Coins'
+      content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your networth chart.</p>`;
+    } else {
+      authStatus.innerHTML = `
+        Logged in as <strong>${username}</strong>
+        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+      `;
+      document.getElementById("logoutLink").onclick = () => {
+        sessionStorage.clear();
+        location.reload();
+      };
+  
+      // 🪙 Load user networth history
+      const { data: userData, error: userErr } = await supabase
+        .from("users")
+        .select("mc_username,sb_profile")
+        .eq("id", userId)
+        .single();
+  
+      if (!userData) {
+        content.innerHTML = `<p class="center">Could not load user info.</p>`;
+        return;
+      }
+  
+      const { mc_username, sb_profile } = userData;
+  
+      const { data: networthData, error } = await supabase
+        .from("user_networth")
+        .select("timestamp, networth")
+        .eq("user_id", userId)
+        .order("timestamp", { ascending: true });
+  
+      if (!networthData || networthData.length === 0) {
+        content.innerHTML = `<p class="center">No networth data available.</p>`;
+        return;
+      }
+  
+      content.innerHTML = `
+        <h2 style="text-align:center;">Networth of ${mc_username} on ${sb_profile}</h2>
+        <div>
+          <canvas id="networthChart" style="max-width: 100%; max-height: 400px;"></canvas>
+          <div style="text-align: center; margin-top: 20px;">
+            <label><input type="radio" name="timezone" value="CET" checked /> CET</label>
+            <label style="margin-left: 10px;"><input type="radio" name="timezone" value="EDT" /> EDT</label>
+          </div>
+          <p class="center" style="margin-top: 20px;">
+            Press <a href="#" id="tableLink" style="color:#00bfff;">Here</a> to view your networth data on a table.
+          </p>
+          <div id="networthTable" style="display:none; margin-top: 20px;"></div>
+        </div>
+      `;
+  
+      // Chart.js setup
+      const timestamps = networthData.map(d => new Date(d.timestamp));
+      const values = networthData.map(d => d.networth);
+  
+      const ctx = document.getElementById("networthChart").getContext("2d");
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: timestamps,
+          datasets: [{
+            label: "Networth",
+            data: values,
+            borderWidth: 2,
+            pointRadius: 2,
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: false,
+              suggestedMin: Math.min(...values) * 0.995,
+              suggestedMax: Math.max(...values) * 1.005,
+              ticks: {
+                callback: val => val.toLocaleString()
+              }
+            },
+            x: {
+              type: 'time',
+              time: {
+                tooltipFormat: 'yyyy-MM-dd HH:mm',
+                displayFormats: {
+                  hour: 'HH:mm',
+                  day: 'MMM dd',
+                }
+              }
             }
           },
-          x: {
-            title: {
-              display: true,
-              text: 'Time'
-            }
+          plugins: {
+            legend: { display: false }
           }
         }
-      }
-    });
-
-    // Populate table
-    const table = document.getElementById("networthTable");
-    networthData.forEach(row => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${new Date(row.timestamp).toLocaleString()}</td><td>${parseInt(row.networth).toLocaleString()}</td>`;
-      table.appendChild(tr);
-    });
-
-    document.querySelectorAll('input[name="timezone"]').forEach(radio => {
-      radio.addEventListener("change", e => {
-        const tz = e.target.value;
-        labels.forEach((_, i) => {
-          const date = new Date(networthData[i].timestamp);
-          labels[i] = tz === "CET"
-            ? date.toLocaleString("en-GB", { timeZone: "Europe/Paris" })
-            : date.toLocaleString("en-US", { timeZone: "America/New_York" });
-        });
       });
-    });
-  </script>
+  
+      // Table toggle
+      document.getElementById("tableLink").onclick = () => {
+        const tableDiv = document.getElementById("networthTable");
+        if (tableDiv.style.display === "none") {
+          const rows = networthData.map(row => `
+            <tr><td>${new Date(row.timestamp).toLocaleString()}</td><td>${parseFloat(row.networth).toLocaleString()}</td></tr>
+          `).join("");
+          tableDiv.innerHTML = `
+            <table style="width:100%; margin-top:10px; background:#222; border-collapse:collapse;">
+              <thead><tr><th style="padding:8px; border:1px solid #444;">Time</th><th style="padding:8px; border:1px solid #444;">Networth</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          `;
+          tableDiv.style.display = "block";
+        } else {
+          tableDiv.style.display = "none";
+        }
+      };
+    }
+  </script>  
 </body>
 </html>
