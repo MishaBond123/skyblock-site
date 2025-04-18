@@ -119,7 +119,7 @@
     const content = document.getElementById("content");
   
     if (!userId || !username) {
-      content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your networth chart.</p>`;
+      content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your networth data.</p>`;
     } else {
       authStatus.innerHTML = `
         Logged in as <strong>${username}</strong>
@@ -130,15 +130,14 @@
         location.reload();
       };
   
-      // 🪙 Load user networth history
-      const { data: userData, error: userErr } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from("users")
-        .select("mc_username,sb_profile")
+        .select("mc_username, sb_profile")
         .eq("id", userId)
         .single();
   
       if (!userData) {
-        content.innerHTML = `<p class="center">Could not load user info.</p>`;
+        content.innerHTML = `<p class="center">Unable to fetch user data.</p>`;
         return;
       }
   
@@ -146,84 +145,95 @@
   
       const { data: networthData, error } = await supabase
         .from("user_networth")
-        .select("timestamp, networth")
+        .select("*")
         .eq("user_id", userId)
         .order("timestamp", { ascending: true });
   
       if (!networthData || networthData.length === 0) {
-        content.innerHTML = `<p class="center">No networth data available.</p>`;
+        content.innerHTML = `<p class="center">No networth records found.</p>`;
         return;
       }
   
+      // Build HTML content
       content.innerHTML = `
-        <h2 style="text-align:center;">Networth of ${mc_username} on ${sb_profile}</h2>
-        <div>
-          <canvas id="networthChart" style="max-width: 100%; max-height: 400px;"></canvas>
-          <div style="text-align: center; margin-top: 20px;">
-            <label><input type="radio" name="timezone" value="CET" checked /> CET</label>
-            <label style="margin-left: 10px;"><input type="radio" name="timezone" value="EDT" /> EDT</label>
-          </div>
-          <p class="center" style="margin-top: 20px;">
-            Press <a href="#" id="tableLink" style="color:#00bfff;">Here</a> to view your networth data on a table.
-          </p>
-          <div id="networthTable" style="display:none; margin-top: 20px;"></div>
+        <h2 style="text-align: center;">Networth of ${mc_username} on ${sb_profile}</h2>
+        <canvas id="chartCanvas" style="max-width: 100%; height: 400px;"></canvas>
+        <div style="text-align: center; margin-top: 20px;">
+          <label><input type="radio" name="timezone" value="CET" checked /> CET</label>
+          <label style="margin-left: 10px;"><input type="radio" name="timezone" value="EDT" /> EDT</label>
         </div>
+        <p class="center" style="margin-top: 20px;">
+          Press <a href="#" id="toggleTable" style="color: #00bfff;">Here</a> to view your networth data in a table.
+        </p>
+        <div id="networthTable" style="display:none; margin-top: 20px;"></div>
       `;
   
-      // Chart.js setup
-      const timestamps = networthData.map(d => new Date(d.timestamp));
-      const values = networthData.map(d => d.networth);
+      // Load Chart.js
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/chart.js";
+      script.onload = () => {
+        const labels = networthData.map(d => new Date(d.timestamp));
+        const values = networthData.map(d => d.networth);
   
-      const ctx = document.getElementById("networthChart").getContext("2d");
-      new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: timestamps,
-          datasets: [{
-            label: "Networth",
-            data: values,
-            borderWidth: 2,
-            pointRadius: 2,
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: false,
-              suggestedMin: Math.min(...values) * 0.995,
-              suggestedMax: Math.max(...values) * 1.005,
-              ticks: {
-                callback: val => val.toLocaleString()
-              }
-            },
-            x: {
-              type: 'time',
-              time: {
-                tooltipFormat: 'yyyy-MM-dd HH:mm',
-                displayFormats: {
-                  hour: 'HH:mm',
-                  day: 'MMM dd',
+        const ctx = document.getElementById("chartCanvas").getContext("2d");
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: "Networth",
+              data: values,
+              borderColor: "#00bfff",
+              fill: false,
+              pointRadius: 2,
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: false,
+                suggestedMin: Math.min(...values) * 0.99,
+                suggestedMax: Math.max(...values) * 1.01,
+                ticks: {
+                  callback: value => value.toLocaleString()
+                }
+              },
+              x: {
+                type: "time",
+                time: {
+                  tooltipFormat: 'MMM dd, HH:mm',
+                  displayFormats: {
+                    hour: 'HH:mm',
+                    day: 'MMM dd'
+                  }
                 }
               }
+            },
+            plugins: {
+              legend: { display: false }
             }
-          },
-          plugins: {
-            legend: { display: false }
           }
-        }
-      });
+        });
+      };
+      document.head.appendChild(script);
   
       // Table toggle
-      document.getElementById("tableLink").onclick = () => {
+      document.getElementById("toggleTable").onclick = () => {
         const tableDiv = document.getElementById("networthTable");
         if (tableDiv.style.display === "none") {
           const rows = networthData.map(row => `
-            <tr><td>${new Date(row.timestamp).toLocaleString()}</td><td>${parseFloat(row.networth).toLocaleString()}</td></tr>
+            <tr><td>${new Date(row.timestamp).toLocaleString()}</td><td>${parseFloat(row.networth).toLocaleString()} coins</td></tr>
           `).join("");
           tableDiv.innerHTML = `
-            <table style="width:100%; margin-top:10px; background:#222; border-collapse:collapse;">
-              <thead><tr><th style="padding:8px; border:1px solid #444;">Time</th><th style="padding:8px; border:1px solid #444;">Networth</th></tr></thead>
+            <table style="width:100%; background:#222; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th style="padding:8px; border:1px solid #444;">Timestamp</th>
+                  <th style="padding:8px; border:1px solid #444;">Networth</th>
+                </tr>
+              </thead>
               <tbody>${rows}</tbody>
             </table>
           `;
