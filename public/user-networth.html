@@ -117,11 +117,13 @@
     const authStatus = document.getElementById("authStatus");
 
     if (!userId || !username) {
-      heading.innerHTML = "Please <a href='auth.html' style='color:#00bfff;'>log in</a> to view your networth.";
-      document.getElementById("chartContainer").style.display = "none";
-      document.getElementById("toggleTimezone").style.display = "none";
-      return;
-    }
+  heading.innerHTML = "Please <a href='auth.html' style='color:#00bfff;'>log in</a> to view your networth.";
+  document.getElementById("chartContainer").style.display = "none";
+  document.getElementById("toggleTimezone").style.display = "none";
+  document.getElementById("tableView").style.display = "none";
+  document.querySelector(".center a")?.parentElement?.remove(); // remove “Press Here” row if it exists
+  return;
+}
 
     authStatus.innerHTML = `
       Logged in as <strong>${username}</strong>
