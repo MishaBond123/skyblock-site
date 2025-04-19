@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>User Networth</title>
-  <link rel="icon" type="image/jpeg" href="site-icon.png" />
+  <link rel="icon" type="image/png" href="site-icon.png" />
   <style>
     body {
       margin: 0;
@@ -14,6 +14,7 @@
       background-attachment: fixed;
       color: #fff;
     }
+
     .container {
       max-width: 1200px;
       margin: 40px auto;
@@ -22,6 +23,7 @@
       border-radius: 16px;
       position: relative;
     }
+
     .tabs {
       display: flex;
       gap: 10px;
@@ -29,6 +31,7 @@
       top: -40px;
       left: 20px;
     }
+
     .tab {
       padding: 8px 16px;
       background-color: rgba(0, 0, 0, 0.6);
@@ -36,36 +39,20 @@
       text-decoration: none;
       border-radius: 8px 8px 0 0;
     }
+
     .active-tab {
-      background-color: rgba(255,255,255,0.1);
+      background-color: rgba(255, 255, 255, 0.1);
       border-bottom: 2px solid #00bfff;
     }
-    #chartContainer {
-      margin-top: 30px;
-    }
-    #toggleTimezone {
-      margin-top: 10px;
-    }
+
     .center {
       text-align: center;
-      margin-top: 20px;
-    }
-    #tableView {
       margin-top: 30px;
-      display: none;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: rgba(255, 255, 255, 0.05);
-    }
-    th, td {
-      padding: 10px;
-      text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    th {
-      background-color: rgba(255, 255, 255, 0.1);
+
+    a {
+      color: #00bfff;
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -78,169 +65,52 @@
     </div>
 
     <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
-      <a href="auth.html" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>
+      <a href="auth.html">Log In / Sign Up</a>
     </div>
 
-    <h1 id="heading" class="center">User Networth</h1>
-
-    <div id="chartContainer" class="center">
-      <canvas id="networthChart" width="900" height="400"></canvas>
-    </div>
-
-    <div id="toggleTimezone" class="center">
-      <label><input type="radio" name="timezone" value="CET" checked /> CET</label>
-      <label><input type="radio" name="timezone" value="EDT" /> EDT</label>
-    </div>
-
-    <div class="center">
-      Press <a href="#" onclick="document.getElementById('tableView').style.display='block'" style="color: #00bfff;">Here</a> to view your networth data on a table.
-    </div>
-
-    <div id="tableView">
-      <table>
-        <thead>
-          <tr><th>Timestamp</th><th>Networth (coins)</th></tr>
-        </thead>
-        <tbody id="networthTable"></tbody>
-      </table>
-    </div>
+    <h1 class="center">User Networth</h1>
+    <div id="content" class="center"></div>
   </div>
 
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-  
+
     const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  
+
     const userId = sessionStorage.getItem("user_id");
     const username = sessionStorage.getItem("username");
     const authStatus = document.getElementById("authStatus");
     const content = document.getElementById("content");
-  
+
     if (!userId || !username) {
-      content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your networth data.</p>`;
+      content.innerHTML = `<p>Please <a href="auth.html">log in</a> to view your networth.</p>`;
     } else {
       authStatus.innerHTML = `
         Logged in as <strong>${username}</strong>
-        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px;">Log Out</a>
       `;
       document.getElementById("logoutLink").onclick = () => {
         sessionStorage.clear();
         location.reload();
       };
-  
-      content.innerHTML = `
-        <h2 style="text-align:center;">Networth of <span style="color:#00bfff">${username}</span></h2>
-        <div class="toggle-box" style="text-align:center; margin-bottom: 20px;">
-          <label for="timezoneToggle">Time Zone: </label>
-          <select id="timezoneToggle">
-            <option value="CET">CET</option>
-            <option value="EDT">EDT</option>
-          </select>
-        </div>
-        <canvas id="networthChart" style="max-width: 100%; height: 400px;"></canvas>
-        <p class="center">Press <a href="#" id="viewTable" style="color:#00bfff; text-decoration: underline;">Here</a> to view your networth data as a table.</p>
-        <div id="networthTable" style="display:none; margin-top: 20px;"></div>
-      `;
-  
-      const ctx = document.getElementById("networthChart").getContext("2d");
-  
-      // Fetch networth data for this user from 'networth_history' table
-      const { data: history, error } = await supabase
-        .from("networth_history")
-        .select("*")
-        .eq("user_id", userId)
-        .order("timestamp", { ascending: true });
-  
-      if (error || !history || history.length === 0) {
-        ctx.canvas.parentElement.innerHTML = "<p class='center'>No networth data found yet.</p>";
-        return;
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("mc_username, sb_profile")
+        .eq("id", userId)
+        .single();
+
+      if (error || !data) {
+        content.innerHTML = `<p>Could not load user information.</p>`;
+        console.error(error);
+      } else {
+        content.innerHTML = `
+          <h2>Networth of <strong>${data.mc_username}</strong> on <strong>${data.sb_profile}</strong></h2>
+        `;
       }
-  
-      function formatTimestamps(data, tz) {
-        return data.map(d => {
-          const date = new Date(d.timestamp);
-          if (tz === "EDT") {
-            date.setUTCHours(date.getUTCHours() - 4);
-          } else if (tz === "CET") {
-            date.setUTCHours(date.getUTCHours() + 1);
-          }
-          return date.toLocaleString("en-US");
-        });
-      }
-  
-      function updateChart(timezone) {
-        const timestamps = formatTimestamps(history, timezone);
-        const networths = history.map(d => d.networth);
-  
-        const minNetworth = Math.min(...networths);
-        const maxNetworth = Math.max(...networths);
-        const padding = (maxNetworth - minNetworth) * 0.1;
-  
-        const chart = new Chart(ctx, {
-          type: "line",
-          data: {
-            labels: timestamps,
-            datasets: [{
-              label: "Networth (coins)",
-              data: networths,
-              borderColor: "#00bfff",
-              tension: 0.3,
-              pointRadius: 2,
-              borderWidth: 2
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              y: {
-                beginAtZero: false,
-                min: minNetworth - padding,
-                max: maxNetworth + padding,
-                ticks: {
-                  callback: value => value.toLocaleString()
-                }
-              }
-            }
-          }
-        });
-  
-        return chart;
-      }
-  
-      let currentChart = updateChart("CET");
-  
-      document.getElementById("timezoneToggle").onchange = (e) => {
-        currentChart.destroy();
-        currentChart = updateChart(e.target.value);
-      };
-  
-      document.getElementById("viewTable").onclick = () => {
-        const tableDiv = document.getElementById("networthTable");
-        tableDiv.style.display = tableDiv.style.display === "none" ? "block" : "none";
-  
-        if (tableDiv.innerHTML === "") {
-          tableDiv.innerHTML = `
-            <table style="width:100%; border-collapse:collapse; text-align:center; color:#fff;">
-              <thead>
-                <tr><th style="padding:8px; border-bottom:1px solid #00bfff;">Timestamp</th><th style="padding:8px; border-bottom:1px solid #00bfff;">Networth</th></tr>
-              </thead>
-              <tbody>
-                ${history.map(row => `
-                  <tr>
-                    <td style="padding:6px;">${new Date(row.timestamp).toLocaleString()}</td>
-                    <td style="padding:6px;">${parseFloat(row.networth).toLocaleString()} coins</td>
-                  </tr>`).join("")}
-              </tbody>
-            </table>
-          `;
-        }
-      };
     }
   </script>
-  <script defer src="https://vercel.com/analytics/script.js"></script>
-  <noscript><img src="https://vercel.com/api/analytics/collect" alt="" /></noscript>  
 </body>
 </html>
