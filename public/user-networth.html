@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Networth</title>
-  <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
+  <link rel="icon" type="image/png" href="site-icon.png" />
   <style>
     body {
       margin: 0;
@@ -71,22 +71,20 @@
 
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
+  
     const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+  
     const userId = sessionStorage.getItem("user_id");
     const username = sessionStorage.getItem("username");
-    const mcName = sessionStorage.getItem("mc_name");
-    const sbProfile = sessionStorage.getItem("sb_profile");
-
     const authStatus = document.getElementById("authStatus");
     const content = document.getElementById("content");
-
+  
     if (!userId || !username) {
-      content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your networth.</p>`;
+      content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your networth data.</p>`;
     } else {
+      // Show auth status
       authStatus.innerHTML = `
         Logged in as <strong>${username}</strong>
         <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
@@ -95,31 +93,28 @@
         sessionStorage.clear();
         location.reload();
       };
-
-      async function loadNetworth() {
-        const { data, error } = await supabase
-          .from("user_networth")
-          .select("*")
-          .eq("user_id", userId)
-          .order("timestamp", { ascending: false })
-          .limit(1);
-
-        if (error || !data || data.length === 0) {
-          content.innerHTML = `
-            <h2>Networth of ${mcName} on ${sbProfile}</h2>
-            <p>No networth data found yet.</p>
-          `;
-        } else {
-          const networth = parseFloat(data[0].networth).toLocaleString();
-          content.innerHTML = `
-            <h2>Networth of ${mcName} on ${sbProfile}</h2>
-            <p>Networth: <strong>${networth}</strong> coins</p>
-          `;
-        }
+  
+      // Fetch mc_username and sb_profile for this user
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("mc_username, sb_profile")
+        .eq("id", userId)
+        .single();
+  
+      if (userError || !userData) {
+        console.error("Error fetching user data:", userError);
+        content.innerHTML = `<p class="center">Error loading user data.</p>`;
+      } else {
+        const mcUsername = userData.mc_username;
+        const sbProfile = userData.sb_profile;
+  
+        content.innerHTML = `
+          <h1 style="margin-bottom: 10px;">User Networth</h1>
+          <h2 style="margin-top: 0;">Networth of ${mcUsername} on ${sbProfile}</h2>
+          <p style="margin-top: 20px;">No networth data found yet.</p>
+        `;
       }
-
-      loadNetworth();
     }
-  </script>
+  </script>  
 </body>
 </html>
