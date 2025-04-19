@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Networth</title>
-  <link rel="icon" type="image/png" href="site-icon.png" />
+  <link rel="icon" type="image/jpeg" href="site-icon.jpeg" />
   <style>
     body {
       margin: 0;
@@ -48,9 +48,8 @@
       font-size: 14px;
     }
     .center {
-      text-align: left;
-      margin-top: 20px;
-      padding-left: 10px;
+      text-align: center;
+      margin-top: 30px;
     }
   </style>
 </head>
@@ -67,24 +66,24 @@
     </div>
 
     <h1>User Networth</h1>
-    <div id="content" class="center"></div>
+    <div id="content" style="margin-top: 20px;"></div>
   </div>
 
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-  
+
     const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  
+
     const userId = sessionStorage.getItem("user_id");
     const username = sessionStorage.getItem("username");
     const mcName = sessionStorage.getItem("mc_name");
     const sbProfile = sessionStorage.getItem("sb_profile");
-  
+
     const authStatus = document.getElementById("authStatus");
     const content = document.getElementById("content");
-  
+
     if (!userId || !username) {
       content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your networth.</p>`;
     } else {
@@ -96,7 +95,7 @@
         sessionStorage.clear();
         location.reload();
       };
-  
+
       async function loadNetworth() {
         const { data, error } = await supabase
           .from("user_networth")
@@ -104,7 +103,7 @@
           .eq("user_id", userId)
           .order("timestamp", { ascending: false })
           .limit(1);
-  
+
         if (error || !data || data.length === 0) {
           content.innerHTML = `
             <h2>Networth of ${mcName} on ${sbProfile}</h2>
@@ -118,9 +117,9 @@
           `;
         }
       }
-  
+
       loadNetworth();
     }
-  </script>  
+  </script>
 </body>
 </html>
