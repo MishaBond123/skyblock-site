@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Networth</title>
   <link rel="icon" type="image/png" href="site-icon.png" />
   <style>
@@ -14,7 +14,6 @@
       background-attachment: fixed;
       color: #fff;
     }
-
     .container {
       max-width: 1200px;
       margin: 40px auto;
@@ -23,7 +22,6 @@
       border-radius: 16px;
       position: relative;
     }
-
     .tabs {
       display: flex;
       gap: 10px;
@@ -31,7 +29,6 @@
       top: -40px;
       left: 20px;
     }
-
     .tab {
       padding: 8px 16px;
       background-color: rgba(0, 0, 0, 0.6);
@@ -39,20 +36,20 @@
       text-decoration: none;
       border-radius: 8px 8px 0 0;
     }
-
     .active-tab {
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: rgba(255,255,255,0.1);
       border-bottom: 2px solid #00bfff;
     }
-
-    .center {
-      text-align: center;
-      margin-top: 30px;
+    #authStatus {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 14px;
     }
-
-    a {
-      color: #00bfff;
-      text-decoration: underline;
+    .center {
+      text-align: left;
+      margin-top: 20px;
+      padding-left: 10px;
     }
   </style>
 </head>
@@ -64,11 +61,11 @@
       <a class="tab active-tab" href="user-networth.html">User Networth</a>
     </div>
 
-    <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
-      <a href="auth.html">Log In / Sign Up</a>
+    <div id="authStatus">
+      <a href="auth.html" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>
     </div>
 
-    <h1 class="center">User Networth</h1>
+    <h1>User Networth</h1>
     <div id="content" class="center"></div>
   </div>
 
@@ -81,35 +78,47 @@
 
     const userId = sessionStorage.getItem("user_id");
     const username = sessionStorage.getItem("username");
+    const mcName = sessionStorage.getItem("mc_name");
+    const sbProfile = sessionStorage.getItem("sb_profile");
+
     const authStatus = document.getElementById("authStatus");
     const content = document.getElementById("content");
 
-    if (!userId || !username) {
-      content.innerHTML = `<p>Please <a href="auth.html">log in</a> to view your networth.</p>`;
+    if (!userId || !username || !mcName || !sbProfile) {
+      content.innerHTML = `<p>Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your networth.</p>`;
     } else {
       authStatus.innerHTML = `
         Logged in as <strong>${username}</strong>
-        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px;">Log Out</a>
+        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
       `;
       document.getElementById("logoutLink").onclick = () => {
         sessionStorage.clear();
         location.reload();
       };
 
-      const { data, error } = await supabase
-        .from("users")
-        .select("mc_username, sb_profile")
-        .eq("id", userId)
-        .single();
+      async function loadNetworth() {
+        const { data, error } = await supabase
+          .from("user_networth")
+          .select("*")
+          .eq("user_id", userId)
+          .order("timestamp", { ascending: false })
+          .limit(1);
 
-      if (error || !data) {
-        content.innerHTML = `<p>Could not load user information.</p>`;
-        console.error(error);
-      } else {
-        content.innerHTML = `
-          <h2>Networth of <strong>${data.mc_username}</strong> on <strong>${data.sb_profile}</strong></h2>
-        `;
+        if (error || !data || data.length === 0) {
+          content.innerHTML = `
+            <h2>Networth of ${mcName} on ${sbProfile}</h2>
+            <p>No networth data found yet.</p>
+          `;
+        } else {
+          const networth = parseFloat(data[0].networth).toLocaleString();
+          content.innerHTML = `
+            <h2>Networth of ${mcName} on ${sbProfile}</h2>
+            <p>Networth: <strong>${networth}</strong> coins</p>
+          `;
+        }
       }
+
+      loadNetworth();
     }
   </script>
 </body>
