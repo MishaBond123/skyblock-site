@@ -48,7 +48,7 @@
     }
     .xp-methods {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 20px;
       margin-top: 30px;
     }
@@ -79,115 +79,119 @@
     <div id="authStatus"></div>
 
     <h1>Skyblock XP Calculator</h1>
-    <p>Here you can view a list of the most efficient ways to spend coins on Skyblock xp.</p>
+    <div class="subheading" style="text-align: left;">
+      Here you can view a list of the most efficient ways to spend coins on Skyblock xp.
+    </div>
 
     <div class="xp-methods" id="xpMethodsContainer"></div>
   </div>
 
-  <script src="allMinions_parsed.js"></script>
-  <script type="module">
-    import {{ createClient }} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+  <script src="allMinions.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+  const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI"
+  const API_KEY = "YOUR_HYPIXEL_API_KEY";
 
-    const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
-    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const authStatus = document.getElementById("authStatus");
-    const mcUsername = sessionStorage.getItem("mc_username");
-    const sbProfile = sessionStorage.getItem("sb_profile");
-    const username = sessionStorage.getItem("username");
-    const userId = sessionStorage.getItem("user_id");
+  const authStatus = document.getElementById("authStatus");
+  const mcUsername = sessionStorage.getItem("mc_username");
+  const sbProfile = sessionStorage.getItem("sb_profile");
+  const username = sessionStorage.getItem("username");
+  const userId = sessionStorage.getItem("user_id");
 
-    if (username && userId) {{
-      authStatus.innerHTML = `
-        Logged in as <strong>${{username}}</strong>
-        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+  if (username && userId) {
+    authStatus.innerHTML = `
+      Logged in as <strong>${username}</strong>
+      <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+    `;
+    document.getElementById("logoutLink").onclick = () => {
+      sessionStorage.clear();
+      location.reload();
+    };
+  } else {
+    authStatus.innerHTML = `
+      <a href="auth.html" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>
+    `;
+  }
+
+  const container = document.getElementById("xpMethodsContainer");
+
+  async function fetchUUID(username) {
+    const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
+    const json = await res.json();
+    return json.id;
+  }
+
+  async function fetchProfile(uuid, profileName) {
+    const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${API_KEY}&uuid=${uuid}`);
+    const data = await res.json();
+    return data.profiles.find(p => p.cute_name.toLowerCase() === profileName.toLowerCase());
+  }
+
+  async function fetchBazaar() {
+    const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${API_KEY}`);
+    const json = await res.json();
+    return json.products;
+  }
+
+  function getMinionBase(name) {
+    return name.replace(/_MINION$/, '');
+  }
+
+  async function init() {
+    if (!mcUsername || !sbProfile) {
+      container.innerHTML = "<p>Please log in to see your personalized XP options.</p>";
+      return;
+    }
+
+    const uuid = await fetchUUID(mcUsername);
+    const profile = await fetchProfile(uuid, sbProfile);
+    const memberData = profile.members[uuid];
+    const unlockedTiers = memberData.unlocked_coll_tiers || [];
+
+    const bazaar = await fetchBazaar();
+    const entries = [];
+
+    for (const [minion, data] of Object.entries(allMinions)) {
+      const minionType = getMinionBase(minion);
+
+      for (const [tier, xp, material, amount] of data) {
+        const tierId = `${minionType}_${tier}`;
+        if (unlockedTiers.includes(tierId)) continue;
+
+        const price = bazaar[material]?.quick_status?.buyPrice;
+        if (!price || price <= 0) continue;
+
+        const cost = price * amount;
+        entries.push({
+          name: minion.replace('_MINION', '').replace(/_/g, ' ') + ` Tier ${tier}`,
+          material,
+          amount,
+          xp,
+          cost,
+          efficiency: cost / xp
+        });
+      }
+    }
+
+    entries.sort((a, b) => a.efficiency - b.efficiency);
+
+    for (const entry of entries.slice(0, 50)) {
+      const div = document.createElement('div');
+      div.className = 'xp-card';
+      div.innerHTML = `
+        <div class="xp-title">${entry.name}</div>
+        <div class="xp-desc">
+          Spend ${entry.cost.toLocaleString()} coins on ${entry.amount}x ${entry.material.replace(/_/g, ' ')} for ${entry.xp} XP
+        </div>
       `;
-      document.getElementById("logoutLink").onclick = () => {{
-        sessionStorage.clear();
-        location.reload();
-      }};
-    }} else {{
-      authStatus.innerHTML = `
-        <a href="auth.html" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>
-      `;
-    }}
+      container.appendChild(div);
+    }
+  }
 
-    const API_KEY = "YOUR_HYPIXEL_API_KEY"; // Replace this
-    const container = document.getElementById("xpMethodsContainer");
-
-    async function fetchUUID(username) {{
-      const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
-      const json = await res.json();
-      return json.id;
-    }}
-
-    async function fetchProfile(uuid, profileName) {{
-      const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${{API_KEY}}&uuid=${{uuid}}`);
-      const data = await res.json();
-      return data.profiles.find(p => p.cute_name.toLowerCase() === profileName.toLowerCase());
-    }}
-
-    async function fetchBazaar() {{
-      const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${{API_KEY}}`);
-      const json = await res.json();
-      return json.products;
-    }}
-
-    function getMinionBase(name) {{
-      return name.replace(/_MINION$/, '');
-    }}
-
-    async function init() {{
-      if (!mcUsername || !sbProfile) {{
-        container.innerHTML = "<p>Please log in to see your personalized XP options.</p>";
-        return;
-      }}
-
-      const uuid = await fetchUUID(mcUsername);
-      const profile = await fetchProfile(uuid, sbProfile);
-      const memberData = profile.members[uuid];
-      const unlockedTiers = memberData.unlocked_coll_tiers || [];
-
-      const bazaar = await fetchBazaar();
-      const entries = [];
-
-      for (const [minion, data] of Object.entries(allMinions)) {{
-        const minionType = getMinionBase(minion);
-
-        for (const [tier, xp, material, amount] of data) {{
-          const id = `${{minionType}}_${{tier}}`;
-          if (unlockedTiers.includes(id)) continue;
-
-          const priceData = bazaar[material];
-          if (!priceData || !priceData.quick_status || priceData.quick_status.buyPrice <= 0) continue;
-
-          const cost = amount * priceData.quick_status.buyPrice;
-          entries.push({{
-            name: minion.replace('_MINION', '').replace(/_/g, ' ') + ` Tier ${{tier}}`,
-            material,
-            amount,
-            xp,
-            cost,
-            efficiency: cost / xp
-          }});
-        }}
-      }}
-
-      entries.sort((a, b) => a.efficiency - b.efficiency);
-
-      for (const entry of entries.slice(0, 50)) {{
-        const div = document.createElement('div');
-        div.className = 'xp-card';
-        div.innerHTML = `
-          <div class="xp-title">${{entry.name}}</div>
-          <div class="xp-desc">Spend ${{entry.cost.toLocaleString()}} coins on ${{entry.amount}}x ${{entry.material.replace(/_/g, ' ')}} to gain ${{entry.xp}} XP</div>
-        `;
-        container.appendChild(div);
-      }}
-    }}
-
-    init();
-  </script>
+  init();
+</script>
 </body>
 </html>
