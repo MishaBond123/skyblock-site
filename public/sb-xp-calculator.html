@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Skyblock XP Calculator</title>
-  <link rel="icon" href="site-icon.png" type="image/png" />
+  <link rel="icon" type="image/png" href="site-icon.png" />
   <style>
     body {
       margin: 0;
@@ -39,18 +40,17 @@
       background-color: rgba(255,255,255,0.1);
       border-bottom: 2px solid #00bfff;
     }
-    h1, .subheading {
-      text-align: center;
-    }
-    .subheading {
-      font-size: 18px;
-      margin-bottom: 30px;
-      color: #ccc;
+    #authStatus {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 14px;
     }
     .xp-methods {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
       gap: 20px;
+      margin-top: 30px;
     }
     .xp-card {
       background-color: rgba(255, 255, 255, 0.05);
@@ -76,49 +76,73 @@
       <a class="tab active-tab" href="sb-xp-calculator.html">Skyblock Xp Calculator</a>
     </div>
 
+    <div id="authStatus"></div>
+
     <h1>Skyblock XP Calculator</h1>
-    <div class="subheading">
-      Here you can view a list of the most efficient ways to spend coins on Skyblock xp.
-    </div>
+    <p>Here you can view a list of the most efficient ways to spend coins on Skyblock xp.</p>
 
     <div class="xp-methods" id="xpMethodsContainer"></div>
   </div>
 
   <script src="allMinions_parsed.js"></script>
   <script type="module">
+    import {{ createClient }} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const authStatus = document.getElementById("authStatus");
     const mcUsername = sessionStorage.getItem("mc_username");
     const sbProfile = sessionStorage.getItem("sb_profile");
+    const username = sessionStorage.getItem("username");
+    const userId = sessionStorage.getItem("user_id");
 
-    const API_KEY = "YOUR_HYPIXEL_API_KEY"; // Replace with yours
+    if (username && userId) {{
+      authStatus.innerHTML = `
+        Logged in as <strong>${{username}}</strong>
+        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+      `;
+      document.getElementById("logoutLink").onclick = () => {{
+        sessionStorage.clear();
+        location.reload();
+      }};
+    }} else {{
+      authStatus.innerHTML = `
+        <a href="auth.html" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>
+      `;
+    }}
+
+    const API_KEY = "YOUR_HYPIXEL_API_KEY"; // Replace this
     const container = document.getElementById("xpMethodsContainer");
 
-    async function fetchUUID(username) {
+    async function fetchUUID(username) {{
       const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
       const json = await res.json();
       return json.id;
-    }
+    }}
 
-    async function fetchProfile(uuid, profileName) {
-      const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${API_KEY}&uuid=${uuid}`);
+    async function fetchProfile(uuid, profileName) {{
+      const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${{API_KEY}}&uuid=${{uuid}}`);
       const data = await res.json();
       return data.profiles.find(p => p.cute_name.toLowerCase() === profileName.toLowerCase());
-    }
+    }}
 
-    async function fetchBazaar() {
-      const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${API_KEY}`);
+    async function fetchBazaar() {{
+      const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${{API_KEY}}`);
       const json = await res.json();
       return json.products;
-    }
+    }}
 
-    function getMinionBase(name) {
+    function getMinionBase(name) {{
       return name.replace(/_MINION$/, '');
-    }
+    }}
 
-    async function init() {
-      if (!mcUsername || !sbProfile) {
-        container.innerHTML = "<p>Please log in and select a SkyBlock profile.</p>";
+    async function init() {{
+      if (!mcUsername || !sbProfile) {{
+        container.innerHTML = "<p>Please log in to see your personalized XP options.</p>";
         return;
-      }
+      }}
 
       const uuid = await fetchUUID(mcUsername);
       const profile = await fetchProfile(uuid, sbProfile);
@@ -128,42 +152,40 @@
       const bazaar = await fetchBazaar();
       const entries = [];
 
-      for (const [minion, data] of Object.entries(allMinions)) {
+      for (const [minion, data] of Object.entries(allMinions)) {{
         const minionType = getMinionBase(minion);
 
-        for (const [tier, xp, material, amount] of data) {
-          const id = `${minionType}_${tier}`;
+        for (const [tier, xp, material, amount] of data) {{
+          const id = `${{minionType}}_${{tier}}`;
           if (unlockedTiers.includes(id)) continue;
 
           const priceData = bazaar[material];
-          if (!priceData) continue;
+          if (!priceData || !priceData.quick_status || priceData.quick_status.buyPrice <= 0) continue;
 
           const cost = amount * priceData.quick_status.buyPrice;
-          if (cost <= 0 || xp <= 0) continue;
-
-          entries.push({
-            name: minion.replace("_MINION", "").replace(/_/g, " ") + ` Tier ${tier}`,
+          entries.push({{
+            name: minion.replace('_MINION', '').replace(/_/g, ' ') + ` Tier ${{tier}}`,
             material,
             amount,
-            cost,
             xp,
+            cost,
             efficiency: cost / xp
-          });
-        }
-      }
+          }});
+        }}
+      }}
 
       entries.sort((a, b) => a.efficiency - b.efficiency);
 
-      for (const item of entries.slice(0, 50)) {
-        const div = document.createElement("div");
-        div.className = "xp-card";
+      for (const entry of entries.slice(0, 50)) {{
+        const div = document.createElement('div');
+        div.className = 'xp-card';
         div.innerHTML = `
-          <div class="xp-title">${item.name}</div>
-          <div class="xp-desc">Use ${item.amount}x ${item.material.replace(/_/g, ' ')} — ${item.cost.toLocaleString()} coins for ${item.xp} XP</div>
+          <div class="xp-title">${{entry.name}}</div>
+          <div class="xp-desc">Spend ${{entry.cost.toLocaleString()}} coins on ${{entry.amount}}x ${{entry.material.replace(/_/g, ' ')}} to gain ${{entry.xp}} XP</div>
         `;
         container.appendChild(div);
-      }
-    }
+      }}
+    }}
 
     init();
   </script>
