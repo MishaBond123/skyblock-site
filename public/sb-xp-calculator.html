@@ -1,1 +1,171 @@
-#currently empty
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Skyblock XP Calculator</title>
+  <link rel="icon" href="site-icon.png" type="image/png" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url('bgimage.jpeg');
+      background-size: cover;
+      background-attachment: fixed;
+      color: #fff;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      background-color: rgba(0, 0, 0, 0.75);
+      padding: 30px;
+      border-radius: 16px;
+      position: relative;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      position: absolute;
+      top: -40px;
+      left: 20px;
+    }
+    .tab {
+      padding: 8px 16px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px 8px 0 0;
+    }
+    .active-tab {
+      background-color: rgba(255,255,255,0.1);
+      border-bottom: 2px solid #00bfff;
+    }
+    h1, .subheading {
+      text-align: center;
+    }
+    .subheading {
+      font-size: 18px;
+      margin-bottom: 30px;
+      color: #ccc;
+    }
+    .xp-methods {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .xp-card {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .xp-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+    }
+    .xp-desc {
+      font-size: 14px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tabs">
+      <a class="tab" href="index.html">Orders</a>
+      <a class="tab" href="saved-orders.html">Saved Orders</a>
+      <a class="tab active-tab" href="sb-xp-calculator.html">Skyblock Xp Calculator</a>
+    </div>
+
+    <h1>Skyblock XP Calculator</h1>
+    <div class="subheading">
+      Here you can view a list of the most efficient ways to spend coins on Skyblock xp.
+    </div>
+
+    <div class="xp-methods" id="xpMethodsContainer"></div>
+  </div>
+
+  <script src="allMinions_parsed.js"></script>
+  <script type="module">
+    const mcUsername = sessionStorage.getItem("mc_username");
+    const sbProfile = sessionStorage.getItem("sb_profile");
+
+    const API_KEY = "YOUR_HYPIXEL_API_KEY"; // Replace with yours
+    const container = document.getElementById("xpMethodsContainer");
+
+    async function fetchUUID(username) {
+      const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
+      const json = await res.json();
+      return json.id;
+    }
+
+    async function fetchProfile(uuid, profileName) {
+      const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${API_KEY}&uuid=${uuid}`);
+      const data = await res.json();
+      return data.profiles.find(p => p.cute_name.toLowerCase() === profileName.toLowerCase());
+    }
+
+    async function fetchBazaar() {
+      const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${API_KEY}`);
+      const json = await res.json();
+      return json.products;
+    }
+
+    function getMinionBase(name) {
+      return name.replace(/_MINION$/, '');
+    }
+
+    async function init() {
+      if (!mcUsername || !sbProfile) {
+        container.innerHTML = "<p>Please log in and select a SkyBlock profile.</p>";
+        return;
+      }
+
+      const uuid = await fetchUUID(mcUsername);
+      const profile = await fetchProfile(uuid, sbProfile);
+      const memberData = profile.members[uuid];
+      const unlockedTiers = memberData.unlocked_coll_tiers || [];
+
+      const bazaar = await fetchBazaar();
+      const entries = [];
+
+      for (const [minion, data] of Object.entries(allMinions)) {
+        const minionType = getMinionBase(minion);
+
+        for (const [tier, xp, material, amount] of data) {
+          const id = `${minionType}_${tier}`;
+          if (unlockedTiers.includes(id)) continue;
+
+          const priceData = bazaar[material];
+          if (!priceData) continue;
+
+          const cost = amount * priceData.quick_status.buyPrice;
+          if (cost <= 0 || xp <= 0) continue;
+
+          entries.push({
+            name: minion.replace("_MINION", "").replace(/_/g, " ") + ` Tier ${tier}`,
+            material,
+            amount,
+            cost,
+            xp,
+            efficiency: cost / xp
+          });
+        }
+      }
+
+      entries.sort((a, b) => a.efficiency - b.efficiency);
+
+      for (const item of entries.slice(0, 50)) {
+        const div = document.createElement("div");
+        div.className = "xp-card";
+        div.innerHTML = `
+          <div class="xp-title">${item.name}</div>
+          <div class="xp-desc">Use ${item.amount}x ${item.material.replace(/_/g, ' ')} — ${item.cost.toLocaleString()} coins for ${item.xp} XP</div>
+        `;
+        container.appendChild(div);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

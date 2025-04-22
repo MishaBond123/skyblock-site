@@ -1,0 +1,4195 @@
+6th slot: 741.0 coins
+#1
+	Cobblestone Minion	1	80.9	Wooden Pickaxe
+Cobblestone
+1
+80
+0
+1.0
+80.9
+#2
+	Snow Minion	2	158.6	Snow Block
+32
+5.0
+158.6
+#3
+	Cobblestone Minion	2	161.8	Cobblestone
+160
+1.0
+161.8
+#4
+	Gravel Minion	1	161.8	Wooden Shovel
+Gravel
+1
+80
+0
+2.0
+161.8
+#5
+	End Stone Minion	1	178.0	Wooden Pickaxe
+End Stone
+1
+80
+0
+2.2
+178.0
+7th slot: 2951.2 coins
+#6
+	Hard Stone Minion	1	207.1	Wooden Pickaxe
+Hard Stone
+1
+256
+0
+0.81
+207.1
+#7
+	Gold Minion	1	234.6	Wooden Pickaxe
+Gold Ingot
+1
+80
+0
+2.9
+234.6
+#8
+	Birch Minion	1	275.1	Wooden Axe
+Birch Wood
+1
+80
+0
+3.4
+275.1
+#9
+	Iron Minion	1	291.2	Wooden Pickaxe
+Iron Ingot
+1
+80
+0
+3.6
+291.2
+#10
+	Snow Minion	3	317.1	Snow Block
+64
+5.0
+317.1
+#11
+	Cobblestone Minion	3	323.6	Cobblestone
+320
+1.0
+323.6
+#12
+	Emerald Minion	1	323.6	Wooden Pickaxe
+Emerald
+1
+80
+0
+4.0
+323.6
+#13
+	Gravel Minion	2	323.6	Gravel
+160
+2.0
+323.6
+#14
+	Nether Wart Minion	1	323.6	Wooden Hoe
+Nether Wart
+1
+80
+0
+4.0
+323.6
+#15
+	Cocoa Beans Minion	1	331.7	Wooden Hoe
+Cocoa Beans
+1
+80
+0
+4.1
+331.7
+8th slot: 7093.3 coins
+#16
+	Potato Minion	1	349.5	Wooden Hoe
+Potato
+1
+128
+0
+2.7
+349.5
+#17
+	End Stone Minion	2	356.0	End Stone
+160
+2.2
+356.0
+#18
+	Dark Oak Minion	1	388.3	Wooden Axe
+Dark Oak Wood
+1
+80
+0
+4.9
+388.3
+#19
+	Hard Stone Minion	2	414.2	Hard Stone
+512
+0.81
+414.2
+#20
+	Gold Minion	2	469.2	Gold Ingot
+160
+2.9
+469.2
+#21
+	Wheat Minion	1	469.2	Wooden Hoe
+Wheat
+1
+80
+0
+5.9
+469.2
+#22
+	Sand Minion	1	485.4	Wooden Shovel
+Sand
+1
+80
+0
+6.1
+485.4
+#23
+	Cow Minion	1	498.3	Wooden Sword
+Raw Beef
+1
+64
+0
+7.8
+498.3
+#24
+	Ice Minion	1	501.6	Wooden Pickaxe
+Ice
+1
+80
+0
+6.3
+501.6
+#25
+	Cactus Minion	1	504.8	Wooden Hoe
+Cactus
+1
+128
+0
+3.9
+504.8
+#26
+	Carrot Minion	1	504.8	Wooden Hoe
+Carrot
+1
+128
+0
+3.9
+504.8
+#27
+	Cobblestone Minion	4	517.8	Cobblestone
+512
+1.0
+517.8
+#28
+	Melon Minion	1	517.8	Wooden Hoe
+Melon
+1
+256
+0
+2.0
+517.8
+#29
+	Birch Minion	2	550.1	Birch Wood
+160
+3.4
+550.1
+#30
+	Mithril Minion	1	566.3	Wooden Pickaxe
+Mithril
+1
+80
+0
+7.1
+566.3
+9th slot: 13833.9 coins
+#31
+	Quartz Minion	1	566.3	Wooden Pickaxe
+Nether Quartz
+1
+80
+0
+7.1
+566.3
+#32
+	Red Sand Minion	1	566.3	Wooden Shovel
+Red Sand
+* Requires 500 Barbarian Reputation
+1
+80
+
+0
+7.1
+
+566.3
+#33
+	Iron Minion	2	582.5	Iron Ingot
+160
+3.6
+582.5
+#34
+	Snow Minion	4	634.3	Snow Block
+128
+5.0
+634.3
+#35
+	Emerald Minion	2	647.2	Emerald
+160
+4.0
+647.2
+#36
+	Gravel Minion	3	647.2	Gravel
+320
+2.0
+647.2
+#37
+	Nether Wart Minion	2	647.2	Nether Wart
+160
+4.0
+647.2
+#38
+	Skeleton Minion	1	647.2	Wooden Sword
+Bone
+1
+80
+0
+8.1
+647.2
+#39
+	Sugar Cane Minion	1	647.2	Wooden Hoe
+Sugar Cane
+1
+128
+0
+5.1
+647.2
+#40
+	Cocoa Beans Minion	2	663.4	Cocoa Beans
+160
+4.1
+663.4
+#41
+	Enderman Minion	1	673.1	Wooden Sword
+Ender Pearl
+1
+64
+0
+10.5
+673.1
+#42
+	Potato Minion	2	699.0	Potato
+256
+2.7
+699.0
+#43
+	Mushroom Minion	1	703.8	Wooden Hoe
+Brown Mushroom
+1
+80
+0
+8.8
+703.8
+#44
+	End Stone Minion	3	711.9	End Stone
+320
+2.2
+711.9
+#45
+	Diamond Minion	1	728.1	Wooden Pickaxe
+Diamond
+1
+80
+0
+9.1
+728.1
+#46
+	Clay Minion	1	776.6	Wooden Pickaxe
+Clay
+1
+80
+0
+9.7
+776.6
+#47
+	Dark Oak Minion	2	776.6	Dark Oak Wood
+160
+4.9
+776.6
+#48
+	Chicken Minion	1	809.0	Wooden Sword
+Raw Chicken
+1
+64
+0
+12.6
+809.0
+#49
+	Pumpkin Minion	1	809.0	Wooden Hoe
+Pumpkin
+1
+80
+0
+10.1
+809.0
+#50
+	Mycelium Minion	1	898.0	Wooden Shovel
+Mycelium
+* Requires 500 Mage Reputation
+1
+80
+
+0
+11.2
+
+898.0
+10th slot: 27468.8 coins
+#51
+	Gold Minion	3	938.4	Gold Ingot
+320
+2.9
+938.4
+#52
+	Wheat Minion	2	938.4	Wheat
+160
+5.9
+938.4
+#53
+	Oak Minion	1	946.5	Wooden Axe
+Oak Wood
+1
+80
+0
+11.8
+946.5
+#54
+	Sand Minion	2	970.8	Sand
+160
+6.1
+970.8
+#55
+	Cow Minion	2	996.7	Raw Beef
+128
+7.8
+996.7
+#56
+	Ice Minion	2	1003.2	Ice
+160
+6.3
+1003.2
+#57
+	Cactus Minion	2	1009.6	Cactus
+256
+3.9
+1009.6
+#58
+	Carrot Minion	2	1009.6	Carrot
+256
+3.9
+1009.6
+#59
+	Gravel Minion	4	1035.5	Gravel
+512
+2.0
+1035.5
+#60
+	Melon Minion	2	1035.5	Melon
+512
+2.0
+1035.5
+#61
+	Spider Minion	1	1043.6	Wooden Sword
+String
+1
+80
+0
+13.0
+1043.6
+#62
+	Jungle Minion	1	1084.1	Wooden Axe
+Jungle Wood
+1
+80
+0
+13.6
+1084.1
+#63
+	Birch Minion	3	1100.2	Birch Wood
+320
+3.4
+1100.2
+#64
+	Redstone Minion	1	1100.2	Wooden Pickaxe
+Redstone
+1
+128
+0
+8.6
+1100.2
+#65
+	Mithril Minion	2	1132.6	Mithril
+160
+7.1
+1132.6
+#66
+	Quartz Minion	2	1132.6	Nether Quartz
+160
+7.1
+1132.6
+#67
+	End Stone Minion	4	1139.1	End Stone
+512
+2.2
+1139.1
+#68
+	Cave Spider Minion	1	1140.7	Wooden Sword
+Spider Eye
+1
+80
+0
+14.3
+1140.7
+#69
+	Iron Minion	3	1165.0	Iron Ingot
+320
+3.6
+1165.0
+#70
+	Zombie Minion	1	1189.2	Wooden Sword
+Rotten Flesh
+1
+80
+0
+14.9
+1189.2
+#71
+	Coal Minion	1	1205.4	Wooden Pickaxe
+Coal
+1
+80
+0
+15.1
+1205.4
+#72
+	Snow Minion	5	1268.5	Snow Block
+256
+5.0
+1268.5
+#73
+	Emerald Minion	3	1294.4	Emerald
+320
+4.0
+1294.4
+#74
+	Nether Wart Minion	3	1294.4	Nether Wart
+320
+4.0
+1294.4
+#75
+	Skeleton Minion	2	1294.4	Bone
+160
+8.1
+1294.4
+11th slot: 42174.8 coins
+#76
+	Sugar Cane Minion	2	1294.4	Sugar Cane
+256
+5.1
+1294.4
+#77
+	Cocoa Beans Minion	3	1326.8	Cocoa Beans
+320
+4.1
+1326.8
+#78
+	Enderman Minion	2	1346.2	Ender Pearl
+128
+10.5
+1346.2
+#79
+	Potato Minion	3	1398.0	Potato
+512
+2.7
+1398.0
+#80
+	Mushroom Minion	2	1407.7	Brown Mushroom
+160
+8.8
+1407.7
+#81
+	Diamond Minion	2	1456.2	Diamond
+160
+9.1
+1456.2
+#82
+	Gold Minion	4	1501.5	Gold Ingot
+512
+2.9
+1501.5
+#83
+	Clay Minion	2	1553.3	Clay
+160
+9.7
+1553.3
+#84
+	Dark Oak Minion	3	1553.3	Dark Oak Wood
+320
+4.9
+1553.3
+#85
+	Lapis Minion	1	1553.3	Wooden Pickaxe
+Lapis Lazuli
+1
+256
+0
+6.1
+1553.3
+#86
+	Obsidian Minion	1	1585.6	Wooden Pickaxe
+Obsidian
+1
+80
+0
+19.8
+1585.6
+#87
+	Chicken Minion	2	1618.0	Raw Chicken
+128
+12.6
+1618.0
+#88
+	Pumpkin Minion	2	1618.0	Pumpkin
+160
+10.1
+1618.0
+#89
+	Birch Minion	4	1760.4	Birch Wood
+512
+3.4
+1760.4
+#90
+	Cobblestone Minion	5	1778.2	Enchanted Cobblestone
+8
+222.3
+1778.2
+#91
+	Red Sand Minion	2	1812.2	Red Sand
+* Requires 1000 Barbarian Reputation
+256
+
+7.1
+
+1812.2
+#92
+	Iron Minion	4	1863.9	Iron Ingot
+512
+3.6
+1863.9
+#93
+	Wheat Minion	3	1876.9	Wheat
+320
+5.9
+1876.9
+#94
+	Oak Minion	2	1893.1	Oak Wood
+160
+11.8
+1893.1
+#95
+	Sand Minion	3	1941.6	Sand
+320
+6.1
+1941.6
+#96
+	Cow Minion	3	1993.4	Raw Beef
+256
+7.8
+1993.4
+#97
+	Spruce Minion	1	1998.2	Wooden Axe
+Spruce Wood
+1
+80
+0
+25.0
+1998.2
+#98
+	Ice Minion	3	2006.3	Ice
+320
+6.3
+2006.3
+#99
+	Cactus Minion	3	2019.3	Cactus
+512
+3.9
+2019.3
+#100
+	Carrot Minion	3	2019.3	Carrot
+512
+3.9
+2019.3
+12th slot: 60804.4 coins
+#101
+	Emerald Minion	4	2071.0	Emerald
+512
+4.0
+2071.0
+#102
+	Nether Wart Minion	4	2071.0	Nether Wart
+512
+4.0
+2071.0
+#103
+	Sheep Minion	1	2071.0	Wooden Sword
+Mutton
+1
+64
+0
+32.4
+2071.0
+#104
+	Spider Minion	2	2087.2	String
+160
+13.0
+2087.2
+#105
+	Cocoa Beans Minion	4	2122.8	Cocoa Beans
+512
+4.1
+2122.8
+#106
+	Jungle Minion	2	2168.1	Jungle Wood
+160
+13.6
+2168.1
+#107
+	Redstone Minion	2	2200.5	Redstone
+256
+8.6
+2200.5
+#108
+	Mithril Minion	3	2265.2	Mithril
+320
+7.1
+2265.2
+#109
+	Pig Minion	1	2265.2	Wooden Sword
+Raw Porkchop
+1
+64
+0
+35.4
+2265.2
+#110
+	Quartz Minion	3	2265.2	Nether Quartz
+320
+7.1
+2265.2
+#111
+	Cave Spider Minion	2	2281.4	Spider Eye
+160
+14.3
+2281.4
+#112
+	Melon Minion	3	2329.9	Melon
+1152
+2.0
+2329.9
+#113
+	Zombie Minion	2	2378.5	Rotten Flesh
+160
+14.9
+2378.5
+#114
+	Coal Minion	2	2410.8	Coal
+160
+15.1
+2410.8
+#115
+	Dark Oak Minion	4	2485.2	Dark Oak Wood
+512
+4.9
+2485.2
+#116
+	Snow Minion	6	2537.0	Snow Block
+512
+5.0
+2537.0
+#117
+	Skeleton Minion	3	2588.8	Bone
+320
+8.1
+2588.8
+#118
+	Sugar Cane Minion	3	2588.8	Sugar Cane
+512
+5.1
+2588.8
+#119
+	Enderman Minion	3	2628.4	Enchanted Ender Pearl
+8
+328.6
+2628.4
+#120
+	Acacia Minion	1	2629.3	Wooden Axe
+Acacia Wood
+1
+80
+0
+32.9
+2629.3
+#121
+	End Stone Minion	5	2754.6	Enchanted End Stone
+8
+344.3
+2754.6
+#122
+	Mushroom Minion	3	2815.3	Brown Mushroom
+320
+8.8
+2815.3
+#123
+	Mycelium Minion	2	2873.6	Mycelium
+* Requires 1000 Mage Reputation
+256
+
+11.2
+
+2873.6
+#124
+	Diamond Minion	3	2912.4	Diamond
+320
+9.1
+2912.4
+#125
+	Wheat Minion	4	3003.0	Wheat
+512
+5.9
+3003.0
+13th slot: 940k coins
+#126
+	Zombie Minion	3	4756.9	Rotten Flesh
+320
+14.9
+4756.9
+#127
+	Zombie Minion	4	7611.1	Rotten Flesh
+512
+14.9
+7611.1
+#128
+	Zombie Minion	5	7108.7	Enchanted Rotten Flesh
+8
+888.6
+7108.7
+#129
+	Zombie Minion	6	14217.4	Enchanted Rotten Flesh
+16
+888.6
+14217.4
+#130
+	Zombie Minion	7	28434.7	Enchanted Rotten Flesh
+32
+888.6
+28434.7
+#131
+	Zombie Minion	8	56869.5	Enchanted Rotten Flesh
+64
+888.6
+56869.5
+#132
+	Zombie Minion	9	114k	Enchanted Rotten Flesh
+128
+888.6
+113738.9
+#133
+	Zombie Minion	10	227k	Enchanted Rotten Flesh
+256
+888.6
+227477.9
+#134
+	Zombie Minion	11	455k	Enchanted Rotten Flesh
+512
+888.6
+454955.7
+#135
+	Wheat Minion	5	0	Hay Bale
+96
+0
+0
+#136
+	Wheat Minion	6	0	Hay Bale
+192
+0
+0
+#137
+	Wheat Minion	7	0	Hay Bale
+384
+0
+0
+#138
+	Wheat Minion	8	0	Hay Bale
+512
+0
+0
+#139
+	Wheat Minion	9	0	Enchanted Hay Bale
+8
+0
+0
+#140
+	Wheat Minion	10	0	Enchanted Hay Bale
+16
+0
+0
+#141
+	Wheat Minion	11	0	Enchanted Hay Bale
+32
+0
+0
+#142
+	Wheat Minion	12	0	Enchanted Hay Bale
+Pelts
+64
+75
+0
+0
+0
+#143
+	Slime Minion	1	3041.8	Wooden Sword
+Slimeball
+1
+80
+0
+38.0
+3041.8
+#144
+	Birch Minion	5	3070.2	Enchanted Birch Wood
+8
+383.8
+3070.2
+#145
+	Clay Minion	3	3106.6	Clay
+320
+9.7
+3106.6
+#146
+	Lapis Minion	2	3106.6	Lapis Lazuli
+512
+6.1
+3106.6
+#147
+	Sand Minion	4	3106.6	Sand
+512
+6.1
+3106.6
+#148
+	Obsidian Minion	2	3171.3	Obsidian
+160
+19.8
+3171.3
+#149
+	Ice Minion	4	3210.1	Ice
+512
+6.3
+3210.1
+#150
+	Chicken Minion	3	3236.0	Raw Chicken
+256
+12.6
+3236.0
+14th slot: 100k coins
+#151
+	Pumpkin Minion	3	3236.0	Pumpkin
+320
+10.1
+3236.0
+#152
+	Blaze Minion	1	3252.2	Wooden Sword
+Blaze Rod
+1
+80
+0
+40.7
+3252.2
+#153
+	Glowstone Minion	1	3546.7	Wooden Pickaxe
+Glowstone Dust
+1
+128
+0
+27.7
+3546.7
+#154
+	Cobblestone Minion	6	3556.4	Enchanted Cobblestone
+16
+222.3
+3556.4
+#155
+	Mithril Minion	4	3624.3	Mithril
+512
+7.1
+3624.3
+#156
+	Quartz Minion	4	3624.3	Nether Quartz
+512
+7.1
+3624.3
+#157
+	Red Sand Minion	3	3624.3	Red Sand
+* Requires 1500 Barbarian Reputation
+512
+
+7.1
+
+3624.3
+#158
+	Oak Minion	3	3786.1	Oak Wood
+320
+11.8
+3786.1
+#159
+	Potato Minion	4	3907.5	Enchanted Potato
+8
+488.4
+3907.5
+#160
+	Cocoa Beans Minion	5	3939.0	Enchanted Cocoa Bean
+8
+492.4
+3939.0
+#161
+	Cow Minion	4	3986.8	Raw Beef
+512
+7.8
+3986.8
+#162
+	Spruce Minion	2	3996.5	Spruce Wood
+160
+25.0
+3996.5
+#163
+	Magma Cube Minion	1	4045.0	Wooden Sword
+Magma Cream
+1
+80
+0
+50.6
+4045.0
+#164
+	Sheep Minion	2	4142.1	Mutton
+128
+32.4
+4142.1
+#165
+	Skeleton Minion	4	4142.1	Bone
+512
+8.1
+4142.1
+#166
+	Spider Minion	3	4174.4	String
+320
+13.0
+4174.4
+#167
+	Gold Minion	5	4247.3	Enchanted Gold
+8
+530.9
+4247.3
+#168
+	Iron Minion	5	4272.3	Enchanted Iron
+8
+534.0
+4272.3
+#169
+	Jungle Minion	3	4336.2	Jungle Wood
+320
+13.6
+4336.2
+#170
+	Redstone Minion	3	4401.0	Redstone
+512
+8.6
+4401.0
+#171
+	Mushroom Minion	4	4504.5	Brown Mushroom
+512
+8.8
+4504.5
+#172
+	Sand Minion	5	4509.4	Enchanted Sand
+8
+563.7
+4509.4
+#173
+	Rabbit Minion	1	4523.9	Wooden Sword
+Raw Rabbit
+1
+64
+0
+70.7
+4523.9
+#174
+	Pig Minion	2	4530.4	Raw Porkchop
+128
+35.4
+4530.4
+#175
+	Cave Spider Minion	3	4562.8	Spider Eye
+320
+14.3
+4562.8
+15th slot: 135k coins
+#176
+	Diamond Minion	4	4659.8	Diamond
+512
+9.1
+4659.8
+#177
+	Melon Minion	4	4659.8	Melon
+2304
+2.0
+4659.8
+#178
+	Coal Minion	3	4821.6	Coal
+320
+15.1
+4821.6
+#179
+	Snow Minion	7	4826.5	Enchanted Snow Block
+8
+603.3
+4826.5
+#180
+	Clay Minion	4	4970.5	Clay
+512
+9.7
+4970.5
+#181
+	Clay Minion	5	4242.4	Enchanted Clay
+8
+530.3
+4242.4
+#182
+	Carrot Minion	4	4999.6	Enchanted Carrot
+8
+625.0
+4999.6
+#183
+	Fishing Minion	1	5028.7	Wooden Sword
+Raw Fish
+1
+64
+0
+78.6
+5028.7
+#184
+	Pumpkin Minion	4	5177.6	Pumpkin
+512
+10.1
+5177.6
+#185
+	Acacia Minion	2	5258.5	Acacia Wood
+160
+32.9
+5258.5
+#186
+	Cactus Minion	4	5368.5	Enchanted Cactus Green
+8
+671.1
+5368.5
+#187
+	Dark Oak Minion	5	5388.7	Enchanted Dark Oak Wood
+8
+673.6
+5388.7
+#188
+	Nether Wart Minion	5	5434.9	Enchanted Nether Wart
+8
+679.4
+5434.9
+#189
+	Cow Minion	5	5453.5	Enchanted Raw Beef
+8
+681.7
+5453.5
+#190
+	End Stone Minion	6	5509.3	Enchanted End Stone
+16
+344.3
+5509.3
+#191
+	Sugar Cane Minion	4	5582.1	Enchanted Sugar
+8
+697.8
+5582.1
+#192
+	Mycelium Minion	3	5747.1	Mycelium
+* Requires 1500 Mage Reputation
+512
+
+11.2
+
+5747.1
+#193
+	Ice Minion	5	5811.9	Packed Ice
+128
+45.4
+5811.9
+#194
+	Oak Minion	4	6057.8	Oak Wood
+512
+11.8
+6057.8
+#195
+	Slime Minion	2	6083.7	Slimeball
+160
+38.0
+6083.7
+#196
+	Hard Stone Minion	3	6126.6	Enchanted Hard Stone
+8
+765.8
+6126.6
+#197
+	Birch Minion	6	6140.3	Enchanted Birch Wood
+16
+383.8
+6140.3
+#198
+	Obsidian Minion	3	6342.6	Obsidian
+320
+19.8
+6342.6
+#199
+	Chicken Minion	4	6472.0	Raw Chicken
+512
+12.6
+6472.0
+#200
+	Chicken Minion	5	5215.6	Enchanted Raw Chicken
+8
+652.0
+5215.6
+16th slot: 207k coins
+#201
+	Blaze Minion	2	6504.4	Blaze Rod
+160
+40.7
+6504.4
+#202
+	Lapis Minion	3	6551.3	Enchanted Lapis Lazuli
+8
+818.9
+6551.3
+#203
+	Spider Minion	4	6679.1	String
+512
+13.0
+6679.1
+#204
+	Creeper Minion	1	6868.4	Wooden Sword
+Gunpowder
+1
+80
+0
+85.9
+6868.4
+#205
+	Jungle Minion	4	6938.0	Jungle Wood
+512
+13.6
+6938.0
+#206
+	Glowstone Minion	2	7093.3	Glowstone Dust
+256
+27.7
+7093.3
+#207
+	Cobblestone Minion	7	7112.7	Enchanted Cobblestone
+32
+222.3
+7112.7
+#208
+	Cave Spider Minion	4	7300.4	Spider Eye
+512
+14.3
+7300.4
+#209
+	Coal Minion	4	7714.6	Coal
+512
+15.1
+7714.6
+#210
+	Emerald Minion	5	7837.6	Enchanted Emerald
+8
+979.7
+7837.6
+#211
+	Enderman Minion	4	7885.3	Enchanted Ender Pearl
+24
+328.6
+7885.3
+#212
+	Spruce Minion	3	7992.9	Spruce Wood
+320
+25.0
+7992.9
+#213
+	Magma Cube Minion	2	8090.0	Magma Cream
+160
+50.6
+8090.0
+#214
+	Sheep Minion	3	8284.2	Mutton
+256
+32.4
+8284.2
+#215
+	Clay Minion	6	8484.8	Enchanted Clay
+16
+530.3
+8484.8
+#216
+	Redstone Minion	4	8912.8	Enchanted Redstone
+8
+1114.1
+8912.8
+#217
+	Sand Minion	6	9018.7	Enchanted Sand
+16
+563.7
+9018.7
+#218
+	Rabbit Minion	2	9047.9	Raw Rabbit
+128
+70.7
+9047.9
+#219
+	Pig Minion	3	9060.8	Raw Porkchop
+256
+35.4
+9060.8
+#220
+	Melon Minion	5	9319.7	Melon
+4608
+2.0
+9319.7
+#221
+	Snow Minion	8	9653.0	Enchanted Snow Block
+16
+603.3
+9653.0
+#222
+	Fishing Minion	2	10057.5	Raw Fish
+128
+78.6
+10057.5
+#223
+	Obsidian Minion	4	10148.1	Obsidian
+512
+19.8
+10148.1
+#224
+	Mithril Minion	5	10274.3	Enchanted Mithril
+8
+1284.3
+10274.3
+#225
+	Chicken Minion	6	10431.2	Enchanted Raw Chicken
+16
+652.0
+10431.2
+17th slot: 303k coins
+#226
+	Acacia Minion	3	10517.0	Acacia Wood
+320
+32.9
+10517.0
+#227
+	Dark Oak Minion	6	10777.5	Enchanted Dark Oak Wood
+16
+673.6
+10777.5
+#228
+	Nether Wart Minion	6	10869.7	Enchanted Nether Wart
+16
+679.4
+10869.7
+#229
+	End Stone Minion	7	11018.6	Enchanted End Stone
+32
+344.3
+11018.6
+#230
+	Revenant Minion	2	11042.8	Revenant Flesh
+Rotten Flesh
+^ For Zombie Minion Tier 1
+* Requires Revenant Tier 5
+140
+80
+
+
+70.4
+14.9
+
+
+11042.8
+#231
+	Diamond Minion	5	11126.2	Enchanted Diamond
+8
+1390.8
+11126.2
+#232
+	Coal Minion	5	11283.1	Enchanted Coal
+8
+1410.4
+11283.1
+#233
+	Jungle Minion	5	11613.2	Enchanted Jungle Wood
+8
+1451.6
+11613.2
+#234
+	Ice Minion	6	11623.7	Packed Ice
+256
+45.4
+11623.7
+#235
+	Potato Minion	5	11722.4	Enchanted Potato
+24
+488.4
+11722.4
+#236
+	Cocoa Beans Minion	6	11817.1	Enchanted Cocoa Bean
+24
+492.4
+11817.1
+#237
+	Slime Minion	3	12167.4	Slimeball
+320
+38.0
+12167.4
+#238
+	Hard Stone Minion	4	12253.1	Enchanted Hard Stone
+16
+765.8
+12253.1
+#239
+	Birch Minion	7	12280.6	Enchanted Birch Wood
+32
+383.8
+12280.6
+#240
+	Gold Minion	6	12741.8	Enchanted Gold
+24
+530.9
+12741.8
+#241
+	Spruce Minion	4	12788.7	Spruce Wood
+512
+25.0
+12788.7
+#242
+	Spruce Minion	5	11287.2	Enchanted Spruce Wood
+8
+1410.9
+11287.2
+#243
+	Iron Minion	6	12817.0	Enchanted Iron
+24
+534.0
+12817.0
+#244
+	Skeleton Minion	5	12817.8	Enchanted Bone
+8
+1602.2
+12817.8
+#245
+	Mushroom Minion	5	12884.1	Enchanted Red Mushroom
+8
+1610.5
+12884.1
+#246
+	Blaze Minion	3	13008.7	Blaze Rod
+320
+40.7
+13008.7
+#247
+	Oak Minion	5	13394.6	Enchanted Oak Wood
+8
+1674.3
+13394.6
+#248
+	Pumpkin Minion	5	13446.4	Enchanted Pumpkin
+8
+1680.8
+13446.4
+#249
+	Creeper Minion	2	13736.8	Gunpowder
+160
+85.9
+13736.8
+#250
+	Spider Minion	5	13961.7	Enchanted String
+8
+1745.2
+13961.7
+18th slot: 408k coins
+#251
+	Glowstone Minion	3	14186.6	Glowstone Dust
+512
+27.7
+14186.6
+#252
+	Cobblestone Minion	8	14225.5	Enchanted Cobblestone
+64
+222.3
+14225.5
+#253
+	Cave Spider Minion	5	14501.3	Enchanted Spider Eye
+8
+1812.7
+14501.3
+#254
+	Carrot Minion	5	14998.9	Enchanted Carrot
+24
+625.0
+14998.9
+#255
+	Quartz Minion	5	15229.4	Enchanted Quartz
+8
+1903.7
+15229.4
+#256
+	Enderman Minion	5	15770.6	Enchanted Ender Pearl
+48
+328.6
+15770.6
+#257
+	Cactus Minion	5	16105.6	Enchanted Cactus Green
+24
+671.1
+16105.6
+#258
+	Magma Cube Minion	3	16180.0	Magma Cream
+320
+50.6
+16180.0
+#259
+	Cow Minion	6	16360.4	Enchanted Raw Beef
+24
+681.7
+16360.4
+#260
+	Sheep Minion	4	16568.3	Mutton
+512
+32.4
+16568.3
+#261
+	Sheep Minion	5	14855.7	Enchanted Mutton
+8
+1857.0
+14855.7
+#262
+	Sugar Cane Minion	5	16746.3	Enchanted Sugar
+24
+697.8
+16746.3
+#263
+	Acacia Minion	4	16827.2	Acacia Wood
+512
+32.9
+16827.2
+#264
+	Acacia Minion	5	11675.5	Enchanted Acacia Wood
+8
+1459.4
+11675.5
+#265
+	Clay Minion	7	16969.6	Enchanted Clay
+32
+530.3
+16969.6
+#266
+	Sand Minion	7	18037.5	Enchanted Sand
+32
+563.7
+18037.5
+#267
+	Rabbit Minion	3	18095.7	Raw Rabbit
+256
+70.7
+18095.7
+#268
+	Pig Minion	4	18121.6	Raw Porkchop
+512
+35.4
+18121.6
+#269
+	Red Sand Minion	4	18581.1	Enchanted Red Sand
+* Requires 2000 Barbarian Reputation
+16
+
+1161.3
+
+18581.1
+#270
+	Mycelium Minion	4	19229.9	Enchanted Mycelium
+* Requires 2000 Mage Reputation
+16
+
+1201.9
+
+19229.9
+#271
+	Snow Minion	9	19306.0	Enchanted Snow Block
+32
+603.3
+19306.0
+#272
+	Voidling Minion	1	19328.6	Null Sphere
+Ender Pearl
+^ For Enderman Minion Tier 1
+* Requires Voidling Tier 4
+80
+64
+
+
+233.2
+10.5
+
+
+19328.6
+#273
+	Slime Minion	4	19467.8	Slimeball
+512
+38.0
+19467.8
+#274
+	Slime Minion	5	6996.2	Enchanted Slimeball
+8
+874.5
+6996.2
+#275
+	Glowstone Minion	4	19507.4	Enchanted Glowstone Dust
+8
+2438.4
+19507.4
+19th slot: 562k coins
+#276
+	Lapis Minion	4	19653.8	Enchanted Lapis Lazuli
+24
+818.9
+19653.8
+#277
+	Fishing Minion	3	20115.0	Raw Fish
+256
+78.6
+20115.0
+#278
+	Melon Minion	6	20367.4	Enchanted Melon
+64
+318.2
+20367.4
+#279
+	Blaze Minion	4	20814.0	Blaze Rod
+512
+40.7
+20814.0
+#280
+	Chicken Minion	7	20862.5	Enchanted Raw Chicken
+32
+652.0
+20862.5
+#281
+	Slime Minion	6	20988.7	Enchanted Slimeball
+24
+874.5
+20988.7
+#282
+	Dark Oak Minion	7	21555.0	Enchanted Dark Oak Wood
+32
+673.6
+21555.0
+#283
+	Nether Wart Minion	7	21739.4	Enchanted Nether Wart
+32
+679.4
+21739.4
+#284
+	End Stone Minion	8	22037.2	Enchanted End Stone
+64
+344.3
+22037.2
+#285
+	Spruce Minion	6	22574.3	Enchanted Spruce Wood
+16
+1410.9
+22574.3
+#286
+	Obsidian Minion	5	22937.6	Enchanted Obsidian
+8
+2867.2
+22937.6
+#287
+	Jungle Minion	6	23226.4	Enchanted Jungle Wood
+16
+1451.6
+23226.4
+#288
+	Ice Minion	7	23247.4	Packed Ice
+512
+45.4
+23247.4
+#289
+	Revenant Minion	3	23274.9	Revenant Flesh
+Rotten Flesh
+^ For Zombie Minion Tier 2
+* Requires Revenant Tier 5
+280
+240
+
+
+70.4
+14.9
+
+
+23274.9
+#290
+	Acacia Minion	6	23351.0	Enchanted Acacia Wood
+16
+1459.4
+23351.0
+#291
+	Emerald Minion	6	23512.8	Enchanted Emerald
+24
+979.7
+23512.8
+#292
+	Hard Stone Minion	5	24506.2	Enchanted Hard Stone
+32
+765.8
+24506.2
+#293
+	Birch Minion	8	24561.2	Enchanted Birch Wood
+64
+383.8
+24561.2
+#294
+	Pig Minion	5	24600.9	Enchanted Pork
+8
+3075.1
+24600.9
+#295
+	Skeleton Minion	6	25635.6	Enchanted Bone
+16
+1602.2
+25635.6
+#296
+	Mushroom Minion	6	25768.3	Enchanted Red Mushroom
+16
+1610.5
+25768.3
+#297
+	Magma Cube Minion	4	25888.0	Magma Cream
+512
+50.6
+25888.0
+#298
+	Magma Cube Minion	5	11511.3	Enchanted Magma Cream
+8
+1438.9
+11511.3
+#299
+	Magma Cube Minion	6	23022.5	Enchanted Magma Cream
+16
+1438.9
+23022.5
+#300
+	Redstone Minion	5	26738.3	Enchanted Redstone
+24
+1114.1
+26738.3
+20th slot: 1.86M coins
+#301
+	Oak Minion	6	26789.2	Enchanted Oak Wood
+16
+1674.3
+26789.2
+#302
+	Pumpkin Minion	6	26892.8	Enchanted Pumpkin
+16
+1680.8
+26892.8
+#303
+	Creeper Minion	3	27473.6	Gunpowder
+320
+85.9
+27473.6
+#304
+	Spider Minion	6	27923.4	Enchanted String
+16
+1745.2
+27923.4
+#305
+	Cobblestone Minion	9	28450.9	Enchanted Cobblestone
+128
+222.3
+28450.9
+#306
+	Mithril Minion	6	30822.9	Enchanted Mithril
+24
+1284.3
+30822.9
+#307
+	Potato Minion	6	31259.8	Enchanted Potato
+64
+488.4
+31259.8
+#308
+	Cocoa Beans Minion	7	31512.2	Enchanted Cocoa Bean
+64
+492.4
+31512.2
+#309
+	Enderman Minion	6	31541.3	Enchanted Ender Pearl
+96
+328.6
+31541.3
+#310
+	Gravel Minion	5	31758.9	Enchanted Flint
+8
+3969.9
+31758.9
+#311
+	Ghast Minion	1	32029.9	Wooden Sword
+Ghast Tear
+1
+64
+0
+500.5
+32029.9
+#312
+	Diamond Minion	6	33378.5	Enchanted Diamond
+24
+1390.8
+33378.5
+#313
+	Coal Minion	6	33849.4	Enchanted Coal
+24
+1410.4
+33849.4
+#314
+	Clay Minion	8	33939.2	Enchanted Clay
+64
+530.3
+33939.2
+#315
+	Gold Minion	7	33978.0	Enchanted Gold
+64
+530.9
+33978.0
+#316
+	Ice Minion	8	34101.0	Enchanted Ice
+64
+532.8
+34101.0
+#317
+	Iron Minion	7	34178.6	Enchanted Iron
+64
+534.0
+34178.6
+#318
+	Voidling Minion	2	34232.8	Null Sphere
+Obsidian
+^ For Obsidian Minion Tier 1
+* Requires Voidling Tier 4
+140
+80
+
+
+233.2
+19.8
+
+
+34232.8
+#319
+	Sand Minion	8	36074.9	Enchanted Sand
+64
+563.7
+36074.9
+#320
+	Rabbit Minion	4	36191.4	Raw Rabbit
+512
+70.7
+36191.4
+#321
+	Rabbit Minion	5	30881.1	Enchanted Rabbit Foot
+32
+965.0
+30881.1
+#322
+	Red Sand Minion	5	37162.2	Enchanted Red Sand
+* Requires 3000 Barbarian Reputation
+32
+
+1161.3
+
+37162.2
+#323
+	Mycelium Minion	5	38459.9	Enchanted Mycelium
+* Requires 3000 Mage Reputation
+32
+
+1201.9
+
+38459.9
+#324
+	Snow Minion	10	38612.0	Enchanted Snow Block
+64
+603.3
+38612.0
+#325
+	Revenant Minion	4	39856.2	Revenant Flesh
+Rotten Flesh
+^ For Zombie Minion Tier 3
+* Requires Revenant Tier 5
+448
+560
+
+
+70.4
+14.9
+
+
+39856.2
+#326
+	Carrot Minion	6	39997.0	Enchanted Carrot
+64
+625.0
+39997.0
+#327
+	Fishing Minion	4	40230.0	Raw Fish
+512
+78.6
+40230.0
+#328
+	Fishing Minion	5	10302.6	Enchanted Raw Fish
+8
+1287.8
+10302.6
+#329
+	Fishing Minion	6	30907.8	Enchanted Raw Fish
+24
+1287.8
+30907.8
+#330
+	Melon Minion	7	40734.8	Enchanted Melon
+128
+318.2
+40734.8
+#331
+	Chicken Minion	8	41725.0	Enchanted Raw Chicken
+64
+652.0
+41725.0
+#332
+	Cactus Minion	6	42948.2	Enchanted Cactus Green
+64
+671.1
+42948.2
+#333
+	Dark Oak Minion	8	43110.0	Enchanted Dark Oak Wood
+64
+673.6
+43110.0
+#334
+	Nether Wart Minion	8	43478.9	Enchanted Nether Wart
+64
+679.4
+43478.9
+#335
+	Cave Spider Minion	6	43504.0	Enchanted Spider Eye
+24
+1812.7
+43504.0
+#336
+	Cow Minion	7	43627.8	Enchanted Raw Beef
+64
+681.7
+43627.8
+#337
+	Creeper Minion	4	43957.8	Gunpowder
+512
+85.9
+43957.8
+#338
+	Creeper Minion	5	18430.6	Enchanted Gunpowder
+8
+2303.8
+18430.6
+#339
+	End Stone Minion	9	44074.3	Enchanted End Stone
+128
+344.3
+44074.3
+#340
+	Blaze Minion	5	44186.0	Enchanted Blaze Powder
+8
+5523.2
+44186.0
+#341
+	Sheep Minion	6	44567.0	Enchanted Mutton
+24
+1857.0
+44567.0
+#342
+	Sugar Cane Minion	6	44656.8	Enchanted Sugar
+64
+697.8
+44656.8
+#343
+	Spruce Minion	7	45148.7	Enchanted Spruce Wood
+32
+1410.9
+45148.7
+#344
+	Quartz Minion	6	45688.3	Enchanted Quartz
+24
+1903.7
+45688.3
+#345
+	Obsidian Minion	6	45875.2	Enchanted Obsidian
+16
+2867.2
+45875.2
+#346
+	Magma Cube Minion	7	46045.0	Enchanted Magma Cream
+32
+1438.9
+46045.0
+#347
+	Jungle Minion	7	46452.8	Enchanted Jungle Wood
+32
+1451.6
+46452.8
+#348
+	Acacia Minion	7	46702.0	Enchanted Acacia Wood
+32
+1459.4
+46702.0
+#349
+	Hard Stone Minion	6	49012.5	Enchanted Hard Stone
+64
+765.8
+49012.5
+#350
+	Birch Minion	9	49122.5	Enchanted Birch Wood
+128
+383.8
+49122.5
+21st slot: 3.76M coins
+#351
+	Skeleton Minion	7	51271.2	Enchanted Bone
+32
+1602.2
+51271.2
+#352
+	Mushroom Minion	7	51536.5	Enchanted Red Mushroom
+32
+1610.5
+51536.5
+#353
+	Lapis Minion	5	52410.3	Enchanted Lapis Lazuli
+64
+818.9
+52410.3
+#354
+	Oak Minion	7	53578.5	Enchanted Oak Wood
+32
+1674.3
+53578.5
+#355
+	Pumpkin Minion	7	53785.6	Enchanted Pumpkin
+32
+1680.8
+53785.6
+#356
+	Creeper Minion	6	55291.9	Enchanted Gunpowder
+24
+2303.8
+55291.9
+#357
+	Spider Minion	7	55846.9	Enchanted String
+32
+1745.2
+55846.9
+#358
+	Slime Minion	7	55969.9	Enchanted Slimeball
+64
+874.5
+55969.9
+#359
+	Cobblestone Minion	10	56901.8	Enchanted Cobblestone
+256
+222.3
+56901.8
+#360
+	Glowstone Minion	5	58522.3	Enchanted Glowstone Dust
+24
+2438.4
+58522.3
+#361
+	Rabbit Minion	6	61762.3	Enchanted Rabbit Foot
+64
+965.0
+61762.3
+#362
+	Potato Minion	7	62519.5	Enchanted Potato
+128
+488.4
+62519.5
+#363
+	Emerald Minion	7	62700.7	Enchanted Emerald
+64
+979.7
+62700.7
+#364
+	Cocoa Beans Minion	8	63024.3	Enchanted Cocoa Bean
+128
+492.4
+63024.3
+#365
+	Gravel Minion	6	63517.8	Enchanted Flint
+16
+3969.9
+63517.8
+#366
+	Ghast Minion	2	64059.9	Ghast Tear
+128
+500.5
+64059.9
+#367
+	Voidling Minion	3	67313.7	Null Sphere
+Ender Pearl
+^ For Enderman Minion Tier 2
+* Requires Voidling Tier 4
+280
+192
+
+
+233.2
+10.5
+
+
+67313.7
+#368
+	Clay Minion	9	67878.3	Enchanted Clay
+128
+530.3
+67878.3
+#369
+	Gold Minion	8	67956.0	Enchanted Gold
+128
+530.9
+67956.0
+#370
+	Ice Minion	9	68201.9	Enchanted Ice
+128
+532.8
+68201.9
+#371
+	Iron Minion	8	68357.3	Enchanted Iron
+128
+534.0
+68357.3
+#372
+	Redstone Minion	6	71302.0	Enchanted Redstone
+64
+1114.1
+71302.0
+#373
+	Sand Minion	9	72149.9	Enchanted Sand
+128
+563.7
+72149.9
+#374
+	Pig Minion	6	73802.6	Enchanted Pork
+24
+3075.1
+73802.6
+#375
+	Red Sand Minion	6	74324.4	Enchanted Red Sand
+* Requires 4000 Barbarian Reputation
+64
+
+1161.3
+
+74324.4
+#376
+	Mycelium Minion	6	76919.7	Enchanted Mycelium
+* Requires 4000 Mage Reputation
+64
+
+1201.9
+
+76919.7
+#377
+	Snow Minion	11	77223.9	Enchanted Snow Block
+128
+603.3
+77223.9
+#378
+	Enderman Minion	7	79788.4	Enchanted Eye of Ender
+8
+9973.6
+79788.4
+#379
+	Carrot Minion	7	79993.9	Enchanted Carrot
+128
+625.0
+79993.9
+#380
+	Melon Minion	8	81469.5	Enchanted Melon
+256
+318.2
+81469.5
+#381
+	Mithril Minion	7	82194.4	Enchanted Mithril
+64
+1284.3
+82194.4
+#382
+	Fishing Minion	7	82420.9	Enchanted Raw Fish
+64
+1287.8
+82420.9
+#383
+	Chicken Minion	9	83450.0	Enchanted Raw Chicken
+128
+652.0
+83450.0
+#384
+	Cactus Minion	7	85896.4	Enchanted Cactus Green
+128
+671.1
+85896.4
+#385
+	Dark Oak Minion	9	86220.0	Enchanted Dark Oak Wood
+128
+673.6
+86220.0
+#386
+	Nether Wart Minion	9	86957.8	Enchanted Nether Wart
+128
+679.4
+86957.8
+#387
+	Cow Minion	8	87255.5	Enchanted Raw Beef
+128
+681.7
+87255.5
+#388
+	End Stone Minion	10	88148.6	Enchanted End Stone
+256
+344.3
+88148.6
+#389
+	Diamond Minion	7	89009.4	Enchanted Diamond
+64
+1390.8
+89009.4
+#390
+	Sugar Cane Minion	7	89313.6	Enchanted Sugar
+128
+697.8
+89313.6
+#391
+	Coal Minion	7	90265.0	Enchanted Coal
+64
+1410.4
+90265.0
+#392
+	Spruce Minion	8	90297.3	Enchanted Spruce Wood
+64
+1410.9
+90297.3
+#393
+	Obsidian Minion	7	91750.3	Enchanted Obsidian
+32
+2867.2
+91750.3
+#394
+	Magma Cube Minion	8	92090.1	Enchanted Magma Cream
+64
+1438.9
+92090.1
+#395
+	Jungle Minion	8	92905.6	Enchanted Jungle Wood
+64
+1451.6
+92905.6
+#396
+	Acacia Minion	8	93403.9	Enchanted Acacia Wood
+64
+1459.4
+93403.9
+#397
+	Hard Stone Minion	7	98024.9	Enchanted Hard Stone
+128
+765.8
+98024.9
+#398
+	Birch Minion	10	98245.0	Enchanted Birch Wood
+256
+383.8
+98245.0
+#399
+	Skeleton Minion	8	103k	Enchanted Bone
+64
+1602.2
+102542.4
+#400
+	Mushroom Minion	8	103k	Enchanted Red Mushroom
+64
+1610.5
+103073.1
+22nd slot: 7.51M coins
+#401
+	Lapis Minion	6	105k	Enchanted Lapis Lazuli
+128
+818.9
+104820.5
+#402
+	Oak Minion	8	107k	Enchanted Oak Wood
+64
+1674.3
+107156.9
+#403
+	Pumpkin Minion	8	108k	Enchanted Pumpkin
+64
+1680.8
+107571.1
+#404
+	Spider Minion	8	112k	Enchanted String
+64
+1745.2
+111693.8
+#405
+	Slime Minion	8	112k	Enchanted Slimeball
+128
+874.5
+111939.7
+#406
+	Cobblestone Minion	11	114k	Enchanted Cobblestone
+512
+222.3
+113803.6
+#407
+	Voidling Minion	4	116k	Null Sphere
+Obsidian
+^ For Obsidian Minion Tier 3
+* Requires Voidling Tier 4
+448
+560
+
+
+233.2
+19.8
+
+
+115570.5
+#408
+	Cave Spider Minion	7	116k	Enchanted Spider Eye
+64
+1812.7
+116010.6
+#409
+	Sheep Minion	7	119k	Enchanted Mutton
+64
+1857.0
+118845.3
+#410
+	Tarantula Minion	2	122k	Tarantula Web
+String
+^ For Spider Minion Tier 1
+* Requires Tarantula Tier 5
+140
+80
+
+
+861.6
+13.0
+
+
+121665.5
+#411
+	Quartz Minion	7	122k	Enchanted Quartz
+64
+1903.7
+121835.4
+#412
+	Rabbit Minion	7	124k	Enchanted Rabbit Foot
+128
+965.0
+123524.6
+#413
+	Potato Minion	8	125k	Enchanted Potato
+256
+488.4
+125039.0
+#414
+	Emerald Minion	8	125k	Enchanted Emerald
+128
+979.7
+125401.5
+#415
+	Cocoa Beans Minion	9	126k	Enchanted Cocoa Bean
+256
+492.4
+126048.7
+#416
+	Gravel Minion	7	127k	Enchanted Flint
+32
+3969.9
+127035.7
+#417
+	Ghast Minion	3	128k	Ghast Tear
+256
+500.5
+128119.7
+#418
+	Blaze Minion	6	133k	Enchanted Blaze Powder
+24
+5523.2
+132557.9
+#419
+	Clay Minion	10	136k	Enchanted Clay
+256
+530.3
+135756.7
+#420
+	Gold Minion	9	136k	Enchanted Gold
+256
+530.9
+135912.0
+#421
+	Ice Minion	10	136k	Enchanted Ice
+256
+532.8
+136403.9
+#422
+	Iron Minion	9	137k	Enchanted Iron
+256
+534.0
+136714.5
+#423
+	Redstone Minion	7	143k	Enchanted Redstone
+128
+1114.1
+142604.0
+#424
+	Sand Minion	10	144k	Enchanted Sand
+256
+563.7
+144299.7
+#425
+	Creeper Minion	7	147k	Enchanted Gunpowder
+64
+2303.8
+147445.1
+#426
+	Red Sand Minion	7	149k	Enchanted Red Sand
+* Requires 5500 Barbarian Reputation
+128
+
+1161.3
+
+148648.9
+#427
+	Mycelium Minion	7	154k	Enchanted Mycelium
+* Requires 5500 Mage Reputation
+128
+
+1201.9
+
+153839.4
+#428
+	Glowstone Minion	6	156k	Enchanted Glowstone Dust
+64
+2438.4
+156059.3
+#429
+	Carrot Minion	8	160k	Enchanted Carrot
+256
+625.0
+159987.8
+#430
+	Melon Minion	9	163k	Enchanted Melon
+512
+318.2
+162939.1
+#431
+	Mithril Minion	8	164k	Enchanted Mithril
+128
+1284.3
+164388.8
+#432
+	Fishing Minion	8	165k	Enchanted Raw Fish
+128
+1287.8
+164841.8
+#433
+	Chicken Minion	10	167k	Enchanted Raw Chicken
+256
+652.0
+166899.9
+#434
+	Cactus Minion	8	172k	Enchanted Cactus Green
+256
+671.1
+171792.8
+#435
+	Dark Oak Minion	10	172k	Enchanted Dark Oak Wood
+256
+673.6
+172440.0
+#436
+	Nether Wart Minion	10	174k	Enchanted Nether Wart
+256
+679.4
+173915.6
+#437
+	Cow Minion	9	175k	Enchanted Raw Beef
+256
+681.7
+174511.0
+#438
+	End Stone Minion	11	176k	Enchanted End Stone
+512
+344.3
+176297.3
+#439
+	Diamond Minion	8	178k	Enchanted Diamond
+128
+1390.8
+178018.8
+#440
+	Sugar Cane Minion	8	179k	Enchanted Sugar
+256
+697.8
+178627.2
+#441
+	Coal Minion	8	181k	Enchanted Coal
+128
+1410.4
+180530.0
+#442
+	Spruce Minion	9	181k	Enchanted Spruce Wood
+128
+1410.9
+180594.7
+#443
+	Obsidian Minion	8	184k	Enchanted Obsidian
+64
+2867.2
+183500.6
+#444
+	Magma Cube Minion	9	184k	Enchanted Magma Cream
+128
+1438.9
+184180.2
+#445
+	Jungle Minion	9	186k	Enchanted Jungle Wood
+128
+1451.6
+185811.1
+#446
+	Acacia Minion	9	187k	Enchanted Acacia Wood
+128
+1459.4
+186807.8
+#447
+	Hard Stone Minion	8	196k	Enchanted Hard Stone
+256
+765.8
+196049.8
+#448
+	Birch Minion	11	196k	Enchanted Birch Wood
+512
+383.8
+196489.9
+#449
+	Pig Minion	7	197k	Enchanted Pork
+64
+3075.1
+196807.0
+#450
+	Tarantula Minion	1	200k	Enchanted Fermented Spider Eye
+Tarantula Web
+* Requires Tarantula Tier 5
+1
+80
+
+131k
+861.6
+
+200389.1
+23rd slot: 14.6M coins
+#451
+	Skeleton Minion	9	205k	Enchanted Bone
+128
+1602.2
+205084.7
+#452
+	Mushroom Minion	9	206k	Enchanted Red Mushroom
+128
+1610.5
+206146.1
+#453
+	Lapis Minion	7	210k	Enchanted Lapis Lazuli
+256
+818.9
+209641.0
+#454
+	Oak Minion	9	214k	Enchanted Oak Wood
+128
+1674.3
+214313.8
+#455
+	Pumpkin Minion	9	215k	Enchanted Pumpkin
+128
+1680.8
+215142.2
+#456
+	Spider Minion	9	223k	Enchanted String
+128
+1745.2
+223387.6
+#457
+	Slime Minion	9	224k	Enchanted Slimeball
+256
+874.5
+223879.4
+#458
+	Cave Spider Minion	8	232k	Enchanted Spider Eye
+128
+1812.7
+232021.2
+#459
+	Sheep Minion	8	238k	Enchanted Mutton
+128
+1857.0
+237690.7
+#460
+	Enderman Minion	8	239k	Enchanted Eye of Ender
+24
+9973.6
+239365.3
+#461
+	Quartz Minion	8	244k	Enchanted Quartz
+128
+1903.7
+243670.8
+#462
+	Tarantula Minion	3	244k	Tarantula Web
+String
+^ For Spider Minion Tier 2
+* Requires Tarantula Tier 5
+280
+240
+
+
+861.6
+13.0
+
+
+244374.6
+#463
+	Rabbit Minion	8	247k	Enchanted Rabbit Foot
+256
+965.0
+247049.2
+#464
+	Potato Minion	9	250k	Enchanted Potato
+512
+488.4
+250078.1
+#465
+	Emerald Minion	9	251k	Enchanted Emerald
+256
+979.7
+250802.9
+#466
+	Cocoa Beans Minion	10	252k	Enchanted Cocoa Bean
+512
+492.4
+252097.3
+#467
+	Gravel Minion	8	254k	Enchanted Flint
+64
+3969.9
+254071.3
+#468
+	Ghast Minion	4	256k	Ghast Tear
+512
+500.5
+256239.4
+#469
+	Ghast Minion	5	124k	Enchanted Ghast Tear
+256
+484.9
+124133.0
+#470
+	Ghast Minion	6	248k	Enchanted Ghast Tear
+512
+484.9
+248265.9
+#471
+	Clay Minion	11	272k	Enchanted Clay
+512
+530.3
+271513.3
+#472
+	Gold Minion	10	272k	Enchanted Gold
+512
+530.9
+271824.0
+#473
+	Ice Minion	11	273k	Enchanted Ice
+512
+532.8
+272807.7
+#474
+	Iron Minion	10	273k	Enchanted Iron
+512
+534.0
+273429.1
+#475
+	Redstone Minion	8	285k	Enchanted Redstone
+256
+1114.1
+285208.1
+#476
+	Sand Minion	11	289k	Enchanted Sand
+512
+563.7
+288599.4
+#477
+	Creeper Minion	8	295k	Enchanted Gunpowder
+128
+2303.8
+294890.2
+#478
+	Red Sand Minion	8	297k	Enchanted Red Sand
+* Requires 6500 Barbarian Reputation
+256
+
+1161.3
+
+297297.8
+#479
+	Mycelium Minion	8	308k	Enchanted Mycelium
+* Requires 6500 Mage Reputation
+256
+
+1201.9
+
+307678.9
+#480
+	Glowstone Minion	7	312k	Enchanted Glowstone Dust
+128
+2438.4
+312118.7
+#481
+	Carrot Minion	9	320k	Enchanted Carrot
+512
+625.0
+319975.7
+#482
+	Mithril Minion	9	329k	Enchanted Mithril
+256
+1284.3
+328777.6
+#483
+	Fishing Minion	9	330k	Enchanted Raw Fish
+256
+1287.8
+329683.7
+#484
+	Chicken Minion	11	334k	Enchanted Raw Chicken
+512
+652.0
+333799.9
+#485
+	Cactus Minion	9	344k	Enchanted Cactus Green
+512
+671.1
+343585.5
+#486
+	Dark Oak Minion	11	345k	Enchanted Dark Oak Wood
+512
+673.6
+344879.9
+#487
+	Nether Wart Minion	11	348k	Enchanted Nether Wart
+512
+679.4
+347831.2
+#488
+	Cow Minion	10	349k	Enchanted Raw Beef
+512
+681.7
+349022.0
+#489
+	Blaze Minion	7	353k	Enchanted Blaze Powder
+64
+5523.2
+353487.7
+#490
+	Diamond Minion	9	356k	Enchanted Diamond
+256
+1390.8
+356037.7
+#491
+	Sugar Cane Minion	9	357k	Enchanted Sugar
+512
+697.8
+357254.4
+#492
+	Coal Minion	9	361k	Enchanted Coal
+256
+1410.4
+361059.9
+#493
+	Spruce Minion	10	361k	Enchanted Spruce Wood
+256
+1410.9
+361189.4
+#494
+	Obsidian Minion	9	367k	Enchanted Obsidian
+128
+2867.2
+367001.2
+#495
+	Magma Cube Minion	10	368k	Enchanted Magma Cream
+256
+1438.9
+368360.4
+#496
+	Jungle Minion	10	372k	Enchanted Jungle Wood
+256
+1451.6
+371622.2
+#497
+	Acacia Minion	10	374k	Enchanted Acacia Wood
+256
+1459.4
+373615.6
+#498
+	Ghast Minion	7	388k	Enchanted Ghast Tear
+800
+484.9
+387915.5
+#499
+	Hard Stone Minion	9	392k	Enchanted Hard Stone
+512
+765.8
+392099.6
+#500
+	Tarantula Minion	4	393k	Tarantula Web
+String
+^ For Spider Minion Tier 3
+* Requires Tarantula Tier 5
+448
+560
+
+
+861.6
+13.0
+
+
+393295.4
+24th slot: 29.3M coins
+#501
+	Pig Minion	8	394k	Enchanted Pork
+128
+3075.1
+393614.1
+#502
+	Melon Minion	10	409k	Enchanted Melon Block
+8
+51123.0
+408984.3
+#503
+	Skeleton Minion	10	410k	Enchanted Bone
+256
+1602.2
+410169.5
+#504
+	Mushroom Minion	10	412k	Enchanted Red Mushroom
+256
+1610.5
+412292.3
+#505
+	Lapis Minion	8	419k	Enchanted Lapis Lazuli
+512
+818.9
+419282.0
+#506
+	Oak Minion	10	429k	Enchanted Oak Wood
+256
+1674.3
+428627.6
+#507
+	Pumpkin Minion	10	430k	Enchanted Pumpkin
+256
+1680.8
+430284.4
+#508
+	Spider Minion	10	447k	Enchanted String
+256
+1745.2
+446775.1
+#509
+	Slime Minion	10	448k	Enchanted Slimeball
+512
+874.5
+447758.8
+#510
+	Iron Minion	11	453k	Enchanted Iron Block
+8
+56614.1
+452913.0
+#511
+	Cave Spider Minion	9	464k	Enchanted Spider Eye
+256
+1812.7
+464042.4
+#512
+	Sheep Minion	9	475k	Enchanted Mutton
+256
+1857.0
+475381.3
+#513
+	Enderman Minion	9	479k	Enchanted Eye of Ender
+48
+9973.6
+478730.6
+#514
+	Quartz Minion	9	487k	Enchanted Quartz
+256
+1903.7
+487341.6
+#515
+	Revenant Minion	5	493k	Revenant Viscera
+Rotten Flesh
+^ For Zombie Minion Tier 4
+* Requires Revenant Tier 5
+7
+1072
+
+
+68201.3
+14.9
+
+
+493345.0
+#516
+	Rabbit Minion	9	494k	Enchanted Rabbit Foot
+512
+965.0
+494098.4
+#517
+	Emerald Minion	10	502k	Enchanted Emerald
+512
+979.7
+501605.9
+#518
+	Gravel Minion	9	508k	Enchanted Flint
+128
+3969.9
+508142.6
+#519
+	Cocoa Beans Minion	11	525k	Enchanted Cookie
+8
+65617.0
+524935.8
+#520
+	Redstone Minion	9	570k	Enchanted Redstone
+512
+1114.1
+570416.2
+#521
+	Redstone Minion	10	208k	Enchanted Redstone Block
+8
+26020.1
+208160.6
+#522
+	Redstone Minion	11	416k	Enchanted Redstone Block
+16
+26020.1
+416321.1
+#523
+	Carrot Minion	10	587k	Enchanted Golden Carrot
+8
+73340.2
+586721.6
+#524
+	Revenant Minion	1	589k	Enchanted Rotten Flesh
+Enchanted Diamond
+^ For Crystalized Heart
+Revenant Flesh
+* Requires Revenant Tier 5
+256
+256
+
+80
+
+888.6
+1390.8
+
+70.4
+
+589146.2
+#525
+	Creeper Minion	9	590k	Enchanted Gunpowder
+256
+2303.8
+589780.4
+#526
+	Red Sand Minion	9	595k	Enchanted Red Sand
+* Requires 7500 Barbarian Reputation
+512
+
+1161.3
+
+594595.6
+#527
+	Mycelium Minion	9	615k	Enchanted Mycelium
+* Requires 7500 Mage Reputation
+512
+
+1201.9
+
+615357.8
+#528
+	Potato Minion	10	615k	Enchanted Baked Potato
+8
+76934.6
+615476.7
+#529
+	Glowstone Minion	8	624k	Enchanted Glowstone Dust
+256
+2438.4
+624237.3
+#530
+	Gold Minion	11	647k	Enchanted Gold Block
+8
+80900.0
+647200.0
+#531
+	Mithril Minion	10	658k	Enchanted Mithril
+512
+1284.3
+657555.2
+#532
+	Fishing Minion	10	659k	Enchanted Raw Fish
+512
+1287.8
+659367.4
+#533
+	Chicken Minion	12	668k	Enchanted Raw Chicken
+Pelts
+1024
+75
+652.0
+0
+667599.7
+#534
+	Nether Wart Minion	12	696k	Enchanted Nether Wart
+Pelts
+1024
+75
+679.4
+0
+695662.3
+#535
+	Lapis Minion	9	706k	Enchanted Lapis Block
+8
+88217.4
+705739.2
+#536
+	Blaze Minion	8	707k	Enchanted Blaze Powder
+128
+5523.2
+706975.4
+#537
+	Diamond Minion	10	712k	Enchanted Diamond
+512
+1390.8
+712075.3
+#538
+	Coal Minion	10	722k	Enchanted Coal
+512
+1410.4
+722119.9
+#539
+	Coal Minion	11	493k	Enchanted Block of Coal
+8
+61567.7
+492541.9
+#540
+	Spruce Minion	11	722k	Enchanted Spruce Wood
+512
+1410.9
+722378.8
+#541
+	Obsidian Minion	10	734k	Enchanted Obsidian
+256
+2867.2
+734002.5
+#542
+	Magma Cube Minion	11	737k	Enchanted Magma Cream
+512
+1438.9
+736720.7
+#543
+	Jungle Minion	11	743k	Enchanted Jungle Wood
+512
+1451.6
+743244.5
+#544
+	Acacia Minion	11	747k	Enchanted Acacia Wood
+512
+1459.4
+747231.2
+#545
+	Ghast Minion	8	776k	Enchanted Ghast Tear
+1600
+484.9
+775831.0
+#546
+	Pig Minion	9	787k	Enchanted Pork
+256
+3075.1
+787228.2
+#547
+	Melon Minion	11	818k	Enchanted Melon Block
+16
+51123.0
+817968.6
+#548
+	Skeleton Minion	11	820k	Enchanted Bone
+512
+1602.2
+820338.9
+#549
+	Mushroom Minion	11	825k	Enchanted Red Mushroom
+512
+1610.5
+824584.6
+#550
+	Cactus Minion	10	826k	Enchanted Cactus
+8
+103k
+826091.7
+25th slot: 67.9M coins
+#551
+	Emerald Minion	11	829k	Enchanted Emerald Block
+8
+104k
+829212.9
+#552
+	Oak Minion	11	857k	Enchanted Oak Wood
+512
+1674.3
+857255.2
+#553
+	Sugar Cane Minion	10	858k	Enchanted Sugar Cane
+8
+107k
+857535.1
+#554
+	Pumpkin Minion	11	861k	Enchanted Pumpkin
+512
+1680.8
+860568.9
+#555
+	Voidling Minion	5	891k	Null Ovoid
+Enchanted Ender Pearl
+Ender Pearl
+^ For Enderman Minion Tier 4
+* Requires Voidling Tier 4
+7
+32
+192
+
+
+126k
+328.6
+10.5
+
+
+891495.0
+#556
+	Spider Minion	11	894k	Enchanted String
+512
+1745.2
+893550.2
+#557
+	Cave Spider Minion	10	928k	Enchanted Spider Eye
+512
+1812.7
+928084.8
+#558
+	Sheep Minion	10	951k	Enchanted Mutton
+512
+1857.0
+950762.7
+#559
+	Enderman Minion	10	957k	Enchanted Eye of Ender
+96
+9973.6
+957461.2
+#560
+	Quartz Minion	10	975k	Enchanted Quartz
+512
+1903.7
+974683.2
+#561
+	Revenant Minion	6	978k	Revenant Viscera
+Enchanted Rotten Flesh
+Rotten Flesh
+^ For Zombie Minion Tier 5
+* Requires Revenant Tier 5
+14
+8
+1072
+
+
+68201.3
+888.6
+14.9
+
+
+977863.0
+#562
+	Snow Minion	1	1.01M	White Gift
+* based on 0.4% drop rate
+250
+1
+4029.9
+0
+1007483.1
+#563
+	Gravel Minion	10	1.02M	Enchanted Flint
+256
+3969.9
+1016285.2
+#564
+	Sheep Minion	11	1.02M	Enchanted Cooked Mutton
+8
+128k
+1024220.7
+#565
+	Slime Minion	11	1.03M	Enchanted Slime Block
+8
+128k
+1026163.1
+#566
+	Mycelium Minion	10	1.04M	Enchanted Mycelium Cube
+* Requires 9000 Mage Reputation
+8
+
+130k
+
+1043050.2
+#567
+	Cocoa Beans Minion	12	1.05M	Enchanted Cookie
+Pelts
+16
+75
+65617.0
+0
+1049871.7
+#568
+	Cow Minion	11	1.13M	Enchanted Leather
+256
+4423.9
+1132522.3
+#569
+	Carrot Minion	11	1.17M	Enchanted Golden Carrot
+16
+73340.2
+1173443.2
+#570
+	Creeper Minion	10	1.18M	Enchanted Gunpowder
+512
+2303.8
+1179560.8
+#571
+	Potato Minion	11	1.23M	Enchanted Baked Potato
+16
+76934.6
+1230953.4
+#572
+	Fishing Minion	11	1.24M	Enchanted Cooked Fish
+8
+155k
+1237759.5
+#573
+	Glowstone Minion	9	1.25M	Enchanted Glowstone Dust
+512
+2438.4
+1248474.7
+#574
+	Glowstone Minion	10	417k	Enchanted Glowstone
+8
+52186.7
+417493.3
+#575
+	Glowstone Minion	11	835k	Enchanted Glowstone
+16
+52186.7
+834986.7
+#576
+	Lapis Minion	10	1.41M	Enchanted Lapis Block
+16
+88217.4
+1411478.5
+#577
+	Blaze Minion	9	1.41M	Enchanted Blaze Powder
+256
+5523.2
+1413950.8
+#578
+	Red Sand Minion	10	1.44M	Enchanted Red Sand Cube
+* Requires 9000 Barbarian Reputation
+8
+
+180k
+
+1441729.4
+#579
+	Obsidian Minion	11	1.47M	Enchanted Obsidian
+512
+2867.2
+1468004.9
+#580
+	Ice Minion	12	1.55M	Enchanted Ice
+Coins
+North Stars
+1024
+1000000
+300
+532.8
+1.0
+0
+1545615.5
+#581
+	Ghast Minion	9	1.55M	Enchanted Ghast Tear
+3200
+484.9
+1551662.0
+#582
+	Pig Minion	10	1.57M	Enchanted Pork
+512
+3075.1
+1574456.4
+#583
+	Pig Minion	11	1.04M	Enchanted Grilled Pork
+8
+130k
+1041534.1
+#584
+	Melon Minion	12	1.64M	Enchanted Melon Block
+Pelts
+32
+75
+51123.0
+0
+1635937.1
+#585
+	Diamond Minion	11	1.65M	Enchanted Diamond Block
+8
+206k
+1650333.3
+#586
+	Cactus Minion	11	1.65M	Enchanted Cactus
+16
+103k
+1652183.5
+#587
+	Mushroom Minion	12	1.66M	Enchanted Brown Mushroom
+Enchanted Red Mushroom
+Pelts
+512
+512
+75
+1633.2
+1610.5
+0
+1660767.0
+#588
+	Sugar Cane Minion	11	1.72M	Enchanted Sugar Cane
+16
+107k
+1715070.3
+#589
+	Pumpkin Minion	12	1.72M	Enchanted Pumpkin
+Pelts
+1024
+75
+1680.8
+0
+1721137.8
+#590
+	Tarantula Minion	5	1.75M	Tarantula Silk
+String
+^ For Spider Minion Tier 4
+* Requires Tarantula Tier 5
+7
+1072
+
+
+248k
+13.0
+
+
+1747051.4
+#591
+	Quartz Minion	11	1.78M	Enchanted Quartz Block
+8
+222k
+1779788.7
+#592
+	Voidling Minion	6	1.80M	Null Ovoid
+Enchanted Obsidian
+Obsidian
+^ For Obsidian Minion Tier 5
+* Requires Voidling Tier 4
+14
+8
+1072
+
+
+126k
+2867.2
+19.8
+
+
+1802109.2
+#593
+	Enderman Minion	11	1.91M	Enchanted Eye of Ender
+192
+9973.6
+1914922.4
+#594
+	Revenant Minion	7	1.95M	Revenant Viscera
+Enchanted Rotten Flesh
+Rotten Flesh
+^ For Zombie Minion Tier 6
+* Requires Revenant Tier 5
+28
+24
+1072
+
+
+68201.3
+888.6
+14.9
+
+
+1946899.0
+#595
+	Gravel Minion	11	2.03M	Enchanted Flint
+512
+3969.9
+2032570.4
+#596
+	Sheep Minion	12	2.05M	Enchanted Cooked Mutton
+Pelts
+16
+75
+128k
+0
+2048441.4
+#597
+	Pig Minion	12	2.08M	Enchanted Grilled Pork
+Pelts
+16
+75
+130k
+0
+2083068.2
+#598
+	Mycelium Minion	11	2.09M	Enchanted Mycelium Cube
+* Requires 10000 Mage Reputation
+16
+
+130k
+
+2086100.3
+#599
+	Cave Spider Minion	11	2.10M	Enchanted Fermented Spider Eye
+16
+131k
+2103396.8
+#600
+	Cobblestone Minion	12	2.23M	Enchanted Cobblestone
+Coins
+1024
+2000000
+222.3
+1.0
+2227607.3
+26th slot: 488M coins
+#601
+	Cow Minion	12	2.27M	Enchanted Leather
+Pelts
+512
+75
+4423.9
+0
+2265044.7
+#602
+	Carrot Minion	12	2.35M	Enchanted Golden Carrot
+Pelts
+32
+75
+73340.2
+0
+2346886.3
+#603
+	Potato Minion	12	2.46M	Enchanted Baked Potato
+Pelts
+32
+75
+76934.6
+0
+2461906.7
+#604
+	Snow Minion	12	2.62M	Enchanted Snow Block
+Coins
+North Stars
+1024
+2000000
+500
+603.3
+1.0
+0
+2617791.2
+#605
+	Lapis Minion	11	2.82M	Enchanted Lapis Block
+32
+88217.4
+2822957.0
+#606
+	Blaze Minion	10	2.83M	Enchanted Blaze Powder
+512
+5523.2
+2827901.6
+#607
+	Redstone Minion	12	2.83M	Enchanted Redstone Block
+Coins
+32
+2000000
+26020.1
+1.0
+2832642.2
+#608
+	Red Sand Minion	11	2.88M	Enchanted Red Sand Cube
+* Requires 10000 Barbarian Reputation
+16
+
+180k
+
+2883458.8
+#609
+	Iron Minion	12	2.91M	Enchanted Iron Block
+Coins
+16
+2000000
+56614.1
+1.0
+2905826.0
+#610
+	Coal Minion	12	2.99M	Enchanted Block of Coal
+Coins
+16
+2000000
+61567.7
+1.0
+2985083.7
+#611
+	Ghast Minion	10	3.10M	Enchanted Ghast Tear
+6400
+484.9
+3103324.0
+#612
+	Creeper Minion	11	3.12M	Enchanted Firework Rocket
+16
+195k
+3119136.7
+#613
+	Gold Minion	12	3.29M	Enchanted Gold Block
+Coins
+16
+2000000
+80900.0
+1.0
+3294400.0
+#614
+	Cactus Minion	12	3.30M	Enchanted Cactus
+Pelts
+32
+75
+103k
+0
+3304367.0
+#615
+	Sugar Cane Minion	12	3.43M	Enchanted Sugar Cane
+Pelts
+32
+75
+107k
+0
+3430140.6
+#616
+	Tarantula Minion	6	3.49M	Tarantula Silk
+Enchanted String
+String
+^ For Spider Minion Tier 5
+* Requires Tarantula Tier 5
+14
+8
+1072
+
+
+248k
+1745.2
+13.0
+
+
+3494080.1
+#617
+	Voidling Minion	7	3.58M	Null Ovoid
+Enchanted Ender Pearl
+Ender Pearl
+^ For Enderman Minion Tier 6
+* Requires Voidling Tier 4
+28
+176
+192
+
+
+126k
+328.6
+10.5
+
+
+3575693.0
+#618
+	Emerald Minion	12	3.66M	Enchanted Emerald Block
+Coins
+16
+2000000
+104k
+1.0
+3658425.7
+#619
+	Glowstone Minion	12	3.67M	Enchanted Glowstone
+Coins
+32
+2000000
+52186.7
+1.0
+3669973.4
+#620
+	Revenant Minion	8	3.88M	Revenant Viscera
+Enchanted Rotten Flesh
+Rotten Flesh
+^ For Zombie Minion Tier 7
+* Requires Revenant Tier 5
+56
+56
+1072
+
+
+68201.3
+888.6
+14.9
+
+
+3884970.9
+#621
+	Hard Stone Minion	10	3.97M	Concentrated Stone
+8
+496k
+3968325.4
+#622
+	Rabbit Minion	10	4.04M	Enchanted Rabbit Hide
+256
+15766.3
+4036172.2
+#623
+	Mithril Minion	11	4.16M	Refined Mithril
+8
+520k
+4159598.1
+#624
+	Obsidian Minion	12	4.94M	Enchanted Obsidian
+Coins
+1024
+2000000
+2867.2
+1.0
+4936009.9
+#625
+	Diamond Minion	12	5.30M	Enchanted Diamond Block
+Coins
+16
+2000000
+206k
+1.0
+5300666.6
+#626
+	Quartz Minion	12	5.56M	Enchanted Quartz Block
+Coins
+16
+2000000
+222k
+1.0
+5559577.3
+#627
+	Mycelium Minion	12	6.17M	Enchanted Mycelium Cube
+Coins
+* Requires 12000 Mage Reputation
+32
+2000000
+
+130k
+1.0
+
+6172200.7
+#628
+	Ghast Minion	11	6.21M	Enchanted Ghast Tear
+12800
+484.9
+6206648.0
+#629
+	Blaze Minion	11	6.60M	Enchanted Blaze Rod
+8
+825k
+6599991.9
+#630
+	Tarantula Minion	7	6.99M	Tarantula Silk
+Enchanted String
+String
+^ For Spider Minion Tier 6
+* Requires Tarantula Tier 5
+28
+24
+1072
+
+
+248k
+1745.2
+13.0
+
+
+6988137.6
+#631
+	Voidling Minion	8	7.21M	Null Ovoid
+Enchanted Obsidian
+Obsidian
+^ For Obsidian Minion Tier 7
+* Requires Voidling Tier 4
+56
+56
+1072
+
+
+126k
+2867.2
+19.8
+
+
+7213506.7
+#632
+	Lapis Minion	12	7.65M	Enchanted Lapis Block
+Coins
+64
+2000000
+88217.4
+1.0
+7645913.9
+#633
+	Revenant Minion	9	7.76M	Revenant Viscera
+Enchanted Rotten Flesh
+Rotten Flesh
+^ For Zombie Minion Tier 8
+* Requires Revenant Tier 5
+112
+120
+1072
+
+
+68201.3
+888.6
+14.9
+
+
+7761114.8
+#634
+	Red Sand Minion	12	7.77M	Enchanted Red Sand Cube
+Coins
+* Requires 12000 Barbarian Reputation
+32
+2000000
+
+180k
+1.0
+
+7766917.7
+#635
+	Hard Stone Minion	11	7.94M	Concentrated Stone
+16
+496k
+7936650.8
+#636
+	Rabbit Minion	11	8.07M	Enchanted Rabbit Hide
+512
+15766.3
+8072344.4
+#637
+	Mithril Minion	12	10.3M	Refined Mithril
+Coins
+16
+2000000
+520k
+1.0
+10319196.2
+#638
+	Tarantula Minion	8	14.0M	Tarantula Silk
+Enchanted String
+String
+^ For Spider Minion Tier 7
+* Requires Tarantula Tier 5
+56
+56
+1072
+
+
+248k
+1745.2
+13.0
+
+
+13976252.4
+#639
+	Ghast Minion	12	14.4M	Enchanted Ghast Tear
+Coins
+25600
+2000000
+484.9
+1.0
+14413296.0
+#640
+	Voidling Minion	9	14.4M	Null Ovoid
+Enchanted Eye of Ender
+Enchanted Ender Pearl
+Ender Pearl
+^ For Enderman Minion Tier 8
+* Requires Voidling Tier 4
+112
+32
+176
+192
+
+
+126k
+9973.6
+328.6
+10.5
+
+
+14442391.0
+#641
+	Blaze Minion	12	15.2M	Enchanted Blaze Rod
+Coins
+16
+2000000
+825k
+1.0
+15199983.8
+#642
+	Revenant Minion	10	15.5M	Revenant Viscera
+Enchanted Rotten Flesh
+Rotten Flesh
+^ For Zombie Minion Tier 9
+* Requires Revenant Tier 5
+224
+248
+1072
+
+
+68201.3
+888.6
+14.9
+
+
+15513402.6
+#643
+	Rabbit Minion	12	16.1M	Enchanted Rabbit Hide
+Pelts
+1024
+75
+15766.3
+0
+16144688.8
+#644
+	Hard Stone Minion	12	17.9M	Concentrated Stone
+Coins
+32
+2000000
+496k
+1.0
+17873301.6
+#645
+	Tarantula Minion	9	28.0M	Tarantula Silk
+Enchanted String
+String
+^ For Spider Minion Tier 8
+* Requires Tarantula Tier 5
+112
+120
+1072
+
+
+248k
+1745.2
+13.0
+
+
+27952482.2
+#646
+	Voidling Minion	10	28.9M	Null Ovoid
+Enchanted Obsidian
+Obsidian
+^ For Obsidian Minion Tier 9
+* Requires Voidling Tier 4
+224
+248
+1072
+
+
+126k
+2867.2
+19.8
+
+
+28859097.0
+#647
+	Revenant Minion	11	31.0M	Revenant Viscera
+Enchanted Rotten Flesh
+Rotten Flesh
+^ For Zombie Minion Tier 10
+* Requires Revenant Tier 5
+448
+504
+1072
+
+
+68201.3
+888.6
+14.9
+
+
+31017978.2
+#648
+	Revenant Minion	12	6.36M	Revenant Viscera
+Coins
+* Requires Revenant Tier 9
+64
+2000000
+
+68201.3
+1.0
+
+6364885.1
+#649
+	Tarantula Minion	10	55.9M	Tarantula Silk
+Enchanted String
+String
+^ For Spider Minion Tier 9
+* Requires Tarantula Tier 5
+224
+248
+1072
+
+
+248k
+1745.2
+13.0
+
+
+55904941.8
+#650
+	Voidling Minion	11	58.1M	Null Ovoid
+Enchanted Eye of Ender
+Enchanted Ender Pearl
+Ender Pearl
+^ For Enderman Minion Tier 10
+* Requires Voidling Tier 4
+448
+176
+176
+192
+
+
+126k
+9973.6
+328.6
+10.5
+
+
+58068759.6
+Remaining minions: 1.82B coins
+#651
+	Tarantula Minion	11	112M	Tarantula Silk
+Enchanted String
+String
+^ For Spider Minion Tier 10
+* Requires Tarantula Tier 5
+448
+504
+1072
+
+
+248k
+1745.2
+13.0
+
+
+111809861.0
+#652
+	Magma Cube Minion	12	847M	Enchanted Blaze Rod
+Coins
+1024
+2000000
+825k
+1.0
+846798961.9
+#653
+	Flower Minion	1	0	Bought from Dark Auction
+* Auction House prices not supported
+1
+
+0
+
+0
+#654
+	Flower Minion	2	0	Dandelion
+* Auction House prices not supported
+160
+
+0
+
+0
+#655
+	Flower Minion	3	0	Dandelion
+* Auction House prices not supported
+320
+
+0
+
+0
+#656
+	Flower Minion	4	0	Dandelion
+* Auction House prices not supported
+512
+
+0
+
+0
+#657
+	Flower Minion	5	0	Enchanted Dandelion
+* Auction House prices not supported
+8
+
+0
+
+0
+#658
+	Flower Minion	6	0	Enchanted Dandelion
+* Auction House prices not supported
+24
+
+0
+
+0
+#659
+	Flower Minion	7	0	Enchanted Dandelion
+* Auction House prices not supported
+64
+
+0
+
+0
+#660
+	Flower Minion	8	0	Enchanted Dandelion
+* Auction House prices not supported
+128
+
+0
+
+0
+#661
+	Flower Minion	9	0	Enchanted Dandelion
+* Auction House prices not supported
+256
+
+0
+
+0
+#662
+	Flower Minion	10	0	Enchanted Dandelion
+* Auction House prices not supported
+512
+
+0
+
+0
+#663
+	Flower Minion	11	0	Enchanted Poppy
+* Auction House prices not supported
+8
+
+0
+
+0
+#664
+	Flower Minion	12	0	Enchanted Poppy
+* Auction House prices not supported
+16
+
+0
+
+0
+#665
+	Inferno Minion	1	193k	Derelict Ashe
+Blaze Rod
+^ For Blaze Minion Tier 1
+* Requires Inferno Tier 3
+80
+80
+
+
+2372.9
+40.7
+
+
+193084.0
+#666
+	Inferno Minion	2	759k	Derelict Ashe
+* Requires Inferno Tier 3
+320
+
+2372.9
+
+759327.4
+#667
+	Inferno Minion	3	3.88M	Molten Powder
+* Requires Inferno Tier 3
+8
+
+484k
+
+3875187.7
+#668
+	Inferno Minion	4	7.75M	Molten Powder
+* Requires Inferno Tier 3
+16
+
+484k
+
+7750375.3
+#669
+	Inferno Minion	5	15.5M	Molten Powder
+* Requires Inferno Tier 3
+32
+
+484k
+
+15500750.7
+#670
+	Inferno Minion	6	31.0M	Molten Powder
+* Requires Inferno Tier 3
+64
+
+484k
+
+31001501.3
+#671
+	Inferno Minion	7	62.0M	Molten Powder
+* Requires Inferno Tier 3
+128
+
+484k
+
+62003002.6
+#672
+	Inferno Minion	8	124M	Molten Powder
+* Requires Inferno Tier 3
+256
+
+484k
+
+124006005.2
+#673
+	Inferno Minion	9	150M	Molten Powder
+Inferno Vertex
+* Requires Inferno Tier 3
+256
+16
+
+484k
+1.65M
+
+150350735.9
+#674
+	Inferno Minion	10	203M	Molten Powder
+Inferno Vertex
+* Requires Inferno Tier 3
+256
+48
+
+484k
+1.65M
+
+203040197.2
+#675
+	Inferno Minion	11	263M	Molten Powder
+Inferno Vertex
+Inferno Apex
+* Requires Inferno Tier 3
+256
+48
+1
+
+484k
+1.65M
+60.0M
+
+263045268.5
