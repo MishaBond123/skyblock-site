@@ -92,12 +92,14 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
     const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
-    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY"; // Replace with yours
-    const API_KEY = "YOUR_HYPIXEL_API_KEY"; // Replace with yours
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
+    const API_KEY = "YOUR_HYPIXEL_API_KEY";
 
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const authStatus = document.getElementById("authStatus");
+    const container = document.getElementById("xpMethodsContainer");
+
     const mcUsername = sessionStorage.getItem("mc_username");
     const sbProfile = sessionStorage.getItem("sb_profile");
     const username = sessionStorage.getItem("username");
@@ -115,8 +117,6 @@
     } else {
       authStatus.innerHTML = `<a href="auth.html" class="link">Log In / Sign Up</a>`;
     }
-
-    const container = document.getElementById("xpMethodsContainer");
 
     async function fetchUUID(username) {
       const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
@@ -146,20 +146,17 @@
       const profile = req.profile || {};
       const skills = req.skills || [];
 
-      // Museum milestone
       if (profile.museumMilestone !== undefined) {
         const current = profileData.museum?.milestone || 0;
         if (current < profile.museumMilestone) return false;
       }
 
-      // Collection requirement
       if (collection) {
         const id = collection.name.toUpperCase();
         const amount = profileData.collections?.[id] || 0;
         if (amount < collection.amount) return false;
       }
 
-      // Skills
       for (const s of skills) {
         const lvl = profileData.skills?.[s.type] || 0;
         if (lvl < s.level) return false;
@@ -170,7 +167,10 @@
 
     async function init() {
       if (!mcUsername || !sbProfile) {
-        container.innerHTML = "<p>Please log in to see XP sources.</p>";
+        container.innerHTML = `
+          <p style="font-size: 16px; color: #eee;">
+            You must <a href="auth.html" class="link">log in</a> to view personalized XP recommendations.
+          </p>`;
         return;
       }
 
@@ -211,9 +211,9 @@
             }
             totalCost += price * src.amount;
           } else if (src.type === "ah") {
-            totalCost += src.amount * 1000000; // example fallback
+            totalCost += src.amount * 1000000;
           } else if (src.type === "npc") {
-            totalCost += src.amount * 1; // example static
+            totalCost += src.amount * 1;
           }
         }
 
