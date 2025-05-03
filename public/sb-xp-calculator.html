@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Skyblock XP Calculator</title>
   <link rel="icon" type="image/png" href="site-icon.png" />
   <style>
@@ -60,11 +59,14 @@
     .xp-title {
       font-size: 18px;
       font-weight: bold;
-      color: #fff;
     }
     .xp-desc {
       font-size: 14px;
-      color: #aaa;
+      color: #ccc;
+    }
+    a.link {
+      color: #00bfff;
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -79,119 +81,166 @@
     <div id="authStatus"></div>
 
     <h1>Skyblock XP Calculator</h1>
-    <div class="subheading" style="text-align: left;">
-      Here you can view a list of the most efficient ways to spend coins on Skyblock xp.
+    <div class="subheading" style="text-align:left; margin-bottom:20px;">
+      Here you can view a list of the most efficient ways to spend coins on Skyblock xp.<br/>
+      For most efficient minion crafts, visit <a class="link" href="https://hyminions.herokuapp.com/minionscost" target="_blank">hyminions.herokuapp.com/minionscost</a>.
     </div>
 
     <div class="xp-methods" id="xpMethodsContainer"></div>
   </div>
 
-  <script src="allMinions.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script>
-  const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI"
-  const API_KEY = "YOUR_HYPIXEL_API_KEY";
+  <script>
+    const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY"; // Replace with yours
+    const API_KEY = "YOUR_HYPIXEL_API_KEY"; // Replace with yours
 
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const authStatus = document.getElementById("authStatus");
-  const mcUsername = sessionStorage.getItem("mc_username");
-  const sbProfile = sessionStorage.getItem("sb_profile");
-  const username = sessionStorage.getItem("username");
-  const userId = sessionStorage.getItem("user_id");
+    const authStatus = document.getElementById("authStatus");
+    const mcUsername = sessionStorage.getItem("mc_username");
+    const sbProfile = sessionStorage.getItem("sb_profile");
+    const username = sessionStorage.getItem("username");
+    const userId = sessionStorage.getItem("user_id");
 
-  if (username && userId) {
-    authStatus.innerHTML = `
-      Logged in as <strong>${username}</strong>
-      <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
-    `;
-    document.getElementById("logoutLink").onclick = () => {
-      sessionStorage.clear();
-      location.reload();
-    };
-  } else {
-    authStatus.innerHTML = `
-      <a href="auth.html" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>
-    `;
-  }
-
-  const container = document.getElementById("xpMethodsContainer");
-
-  async function fetchUUID(username) {
-    const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
-    const json = await res.json();
-    return json.id;
-  }
-
-  async function fetchProfile(uuid, profileName) {
-    const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${API_KEY}&uuid=${uuid}`);
-    const data = await res.json();
-    return data.profiles.find(p => p.cute_name.toLowerCase() === profileName.toLowerCase());
-  }
-
-  async function fetchBazaar() {
-    const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${API_KEY}`);
-    const json = await res.json();
-    return json.products;
-  }
-
-  function getMinionBase(name) {
-    return name.replace(/_MINION$/, '');
-  }
-
-  async function init() {
-    if (!mcUsername || !sbProfile) {
-      container.innerHTML = "<p>Please log in to see your personalized XP options.</p>";
-      return;
+    if (username && userId) {
+      authStatus.innerHTML = `
+        Logged in as <strong>${username}</strong>
+        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px;">Log Out</a>
+      `;
+      document.getElementById("logoutLink").onclick = () => {
+        sessionStorage.clear();
+        location.reload();
+      };
+    } else {
+      authStatus.innerHTML = `<a href="auth.html" class="link">Log In / Sign Up</a>`;
     }
 
-    const uuid = await fetchUUID(mcUsername);
-    const profile = await fetchProfile(uuid, sbProfile);
-    const memberData = profile.members[uuid];
-    const unlockedTiers = memberData.unlocked_coll_tiers || [];
+    const container = document.getElementById("xpMethodsContainer");
 
-    const bazaar = await fetchBazaar();
-    const entries = [];
+    async function fetchUUID(username) {
+      const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
+      const json = await res.json();
+      return json.id;
+    }
 
-    for (const [minion, data] of Object.entries(allMinions)) {
-      const minionType = getMinionBase(minion);
+    async function fetchProfile(uuid) {
+      const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${API_KEY}&uuid=${uuid}`);
+      const data = await res.json();
+      return data.profiles.find(p => p.cute_name.toLowerCase() === sbProfile.toLowerCase());
+    }
 
-      for (const [tier, xp, material, amount] of data) {
-        const tierId = `${minionType}_${tier}`;
-        if (unlockedTiers.includes(tierId)) continue;
+    async function fetchBazaar() {
+      const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${API_KEY}`);
+      return (await res.json()).products;
+    }
 
-        const price = bazaar[material]?.quick_status?.buyPrice;
-        if (!price || price <= 0) continue;
+    async function fetchXpMethods() {
+      const res = await fetch("xpMethods.json");
+      return await res.json();
+    }
 
-        const cost = price * amount;
-        entries.push({
-          name: minion.replace('_MINION', '').replace(/_/g, ' ') + ` Tier ${tier}`,
-          material,
-          amount,
-          xp,
-          cost,
-          efficiency: cost / xp
-        });
+    function checkRequirements(method, profileData) {
+      const req = method.requirements || {};
+      const collection = req.collection;
+      const profile = req.profile || {};
+      const skills = req.skills || [];
+
+      // Museum milestone
+      if (profile.museumMilestone !== undefined) {
+        const current = profileData.museum?.milestone || 0;
+        if (current < profile.museumMilestone) return false;
+      }
+
+      // Collection requirement
+      if (collection) {
+        const id = collection.name.toUpperCase();
+        const amount = profileData.collections?.[id] || 0;
+        if (amount < collection.amount) return false;
+      }
+
+      // Skills
+      for (const s of skills) {
+        const lvl = profileData.skills?.[s.type] || 0;
+        if (lvl < s.level) return false;
+      }
+
+      return true;
+    }
+
+    async function init() {
+      if (!mcUsername || !sbProfile) {
+        container.innerHTML = "<p>Please log in to see XP sources.</p>";
+        return;
+      }
+
+      const uuid = await fetchUUID(mcUsername);
+      const profile = await fetchProfile(uuid);
+      const member = profile.members[uuid];
+
+      const collectionData = member.collection || {};
+      const museumData = member.museum || {};
+      const skillsData = member.player_data?.experience_skill || {};
+
+      const profileState = {
+        collections: collectionData,
+        museum: { milestone: museumData.milestone || 0 },
+        skills: {
+          combat: Math.floor((skillsData.combat || 0) / 100),
+          mining: Math.floor((skillsData.mining || 0) / 100),
+          farming: Math.floor((skillsData.farming || 0) / 100)
+        }
+      };
+
+      const [bazaar, methods] = await Promise.all([fetchBazaar(), fetchXpMethods()]);
+
+      const entries = [];
+
+      for (const method of methods) {
+        if (!checkRequirements(method, profileState)) continue;
+
+        let totalCost = 0;
+        let valid = true;
+
+        for (const src of method.sources) {
+          if (src.type === "bazaar") {
+            const price = bazaar[src.id]?.quick_status?.buyPrice || 0;
+            if (price <= 0) {
+              valid = false;
+              break;
+            }
+            totalCost += price * src.amount;
+          } else if (src.type === "ah") {
+            totalCost += src.amount * 1000000; // example fallback
+          } else if (src.type === "npc") {
+            totalCost += src.amount * 1; // example static
+          }
+        }
+
+        if (!valid) continue;
+
+        const cost = method.coins > 0 ? method.coins : totalCost;
+        const efficiency = cost / method.xp;
+
+        entries.push({ ...method, cost, efficiency });
+      }
+
+      entries.sort((a, b) => a.efficiency - b.efficiency);
+
+      for (const entry of entries.slice(0, 50)) {
+        const div = document.createElement("div");
+        div.className = "xp-card";
+        div.innerHTML = `
+          <div class="xp-title">${entry.name}</div>
+          <div class="xp-desc">${entry.description}<br>
+            Cost: ${entry.cost.toLocaleString()} coins | XP: ${entry.xp}
+          </div>
+        `;
+        container.appendChild(div);
       }
     }
 
-    entries.sort((a, b) => a.efficiency - b.efficiency);
-
-    for (const entry of entries.slice(0, 50)) {
-      const div = document.createElement('div');
-      div.className = 'xp-card';
-      div.innerHTML = `
-        <div class="xp-title">${entry.name}</div>
-        <div class="xp-desc">
-          Spend ${entry.cost.toLocaleString()} coins on ${entry.amount}x ${entry.material.replace(/_/g, ' ')} for ${entry.xp} XP
-        </div>
-      `;
-      container.appendChild(div);
-    }
-  }
-
-  init();
-</script>
+    init();
+  </script>
 </body>
 </html>
