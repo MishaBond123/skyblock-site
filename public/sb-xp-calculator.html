@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" href="site-icon.png"/>
+  <link rel="icon" href="site-icon.png" />
   <title>Skyblock XP Calculator</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- NAVIGATION -->
   <div class="nav">
     <a href="index.html" class="navbtn">Orders</a>
     <a href="saved-orders.html" class="navbtn">Saved Orders</a>
@@ -15,6 +16,7 @@
     <span id="authStatus" class="nav-right"></span>
   </div>
 
+  <!-- CONTENT -->
   <div class="container">
     <h1 class="header">Skyblock XP Calculator</h1>
     <p class="subheading" style="text-align: left;">
@@ -26,21 +28,23 @@
     <div class="xp-methods" id="xpMethodsContainer"></div>
   </div>
 
+  <!-- SUPABASE + LOGIC -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
     const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
     const API_KEY = "6d4b47ff-1672-48b9-a1e5-78a97f03883d";
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const authStatus = document.getElementById("authStatus");
     const container = document.getElementById("xpMethodsContainer");
 
-    const mcUsername = sessionStorage.getItem("mc_username");
-    const sbProfile = sessionStorage.getItem("sb_profile");
     const username = sessionStorage.getItem("username");
     const userId = sessionStorage.getItem("user_id");
+    const mcUsername = sessionStorage.getItem("mc_username");
+    const sbProfile = sessionStorage.getItem("sb_profile");
 
+    // Setup navbar login state
     if (username && userId) {
       authStatus.innerHTML = `
         Logged in as <strong>${username}</strong>
@@ -76,13 +80,12 @@
       if (req.profile?.requires_api && !profileData) return false;
 
       if (req.profile?.museumMilestone !== undefined) {
-        const current = profileData.museum || 0;
-        if (current < req.profile.museumMilestone) return false;
+        if ((profileData?.museum || 0) < req.profile.museumMilestone) return false;
       }
 
       if (req.collection) {
         const key = req.collection.name.toUpperCase();
-        const currentAmount = profileData.collections[key] || 0;
+        const currentAmount = profileData?.collections?.[key] || 0;
         if (currentAmount < req.collection.amount) return false;
       }
 
@@ -90,7 +93,7 @@
     }
 
     async function init() {
-      if (!mcUsername || !sbProfile || !username || !userId) {
+      if (!username || !userId || !mcUsername || !sbProfile) {
         container.innerHTML = `<p style="font-size: 16px; color: #eee;">You must <a href="auth.html" class="link">log in</a> to view personalized XP recommendations.</p>`;
         return;
       }
@@ -106,29 +109,25 @@
         };
 
         const methods = await fetchXpMethods();
-        const results = [];
+        const valid = methods.filter(method => meetsRequirements(method, profileData));
 
-        for (const method of methods) {
-          if (!meetsRequirements(method, profileData)) continue;
-          results.push(method);
-        }
-
-        if (results.length === 0) {
-          container.innerHTML = `<p style="font-size: 16px; color: #eee;">No XP methods available for your profile.</p>`;
+        if (valid.length === 0) {
+          container.innerHTML = `<p style="font-size: 16px; color: #eee;">No XP methods match your profile.</p>`;
           return;
         }
 
-        for (const entry of results) {
+        for (const method of valid) {
           const div = document.createElement("div");
           div.className = "order-row";
           div.innerHTML = `
-            <div><strong>${entry.name}</strong>: ${entry.description}</div>
-            <div>+${entry.xp} XP — ${entry.coins?.toLocaleString() || "?"} coins</div>
+            <div><strong>${method.name}</strong></div>
+            <div style="font-size: 14px;">${method.description}</div>
+            <div style="font-size: 14px; margin-top: 4px;">+${method.xp} XP — ${method.coins?.toLocaleString() || "?"} coins</div>
           `;
           container.appendChild(div);
         }
       } catch (err) {
-        container.innerHTML = `<p style="font-size: 16px; color: #eee;">Failed to load data. Check your profile settings and connection.</p>`;
+        container.innerHTML = `<p style="font-size: 16px; color: #eee;">Failed to fetch profile or XP data.</p>`;
         console.error(err);
       }
     }
