@@ -97,11 +97,12 @@
   </div>
 
   <script>
-    const username = sessionStorage.getItem("mc_username");
+    const username = sessionStorage.getItem("username");
+    const mcUsername = sessionStorage.getItem("mc_username");
     const profileName = sessionStorage.getItem("sb_profile");
     const authStatus = document.getElementById("authStatus");
 
-    if (!username || !profileName) {
+    if (!username || !mcUsername || !profileName) {
       authStatus.innerHTML = `<a href="auth.html" id="loginLink">Log In / Sign Up</a>`;
     } else {
       authStatus.innerHTML = `Logged in as <strong>${username}</strong> <a href="#" onclick="logout()">Log Out</a>`;
@@ -150,7 +151,7 @@
     }
 
     async function loadXpMethods() {
-      const uuid = await fetchUUID(username);
+      const uuid = await fetchUUID(mcUsername);
       if (!uuid) return alert("Unable to fetch UUID.");
 
       const [prices, methods, profileData] = await Promise.all([
@@ -164,12 +165,7 @@
 
       const member = profileData.members[uuid];
       const collections = member.collection || {};
-      const milestone = member?.museum?.milestone || 0;
-
-      // Show debugging collection/milestone info
-      const summary = document.createElement("div");
-      summary.innerHTML = `<p><strong>Your Museum Milestone:</strong> ${milestone}</p>`;
-      container.appendChild(summary);
+      const milestone = member?.player_data?.museum?.museumMilestone || 0;
 
       const shown = new Set();
       for (const method of methods) {
@@ -203,7 +199,7 @@
       }
     }
 
-    if (username && profileName) loadXpMethods();
+    if (mcUsername && profileName) loadXpMethods();
   </script>
 </body>
 </html>
