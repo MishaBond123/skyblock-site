@@ -1,109 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Skyblock XP Calculator</title>
-    <link rel="icon" type="image/png" href="site-icon.png" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body style="background-image: url('bgimage.jpeg'); background-size: cover; background-position: center;">
-    <div class="container">
-      <div class="darken">
-        <nav class="nav-bar">
-          <a href="index.html">Orders</a>
-          <a href="saved-orders.html">Saved Orders</a>
-          <a class="active" href="sb-xp-calculator.html">Skyblock Xp Calculator</a>
-          <span id="authLinks" class="auth-links"></span>
-        </nav>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skyblock XP Calculator</title>
+  <link rel="icon" type="image/jpeg" href="site-icon.png" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url('bgimage.jpeg');
+      background-size: cover;
+      background-attachment: fixed;
+      color: #fff;
+    }
 
-        <h1>Skyblock XP Calculator</h1>
-        <div class="subheading" style="text-align: left;">
-          Here you can view a list of the most efficient ways to spend coins on Skyblock xp.<br>
-          For most efficient minion crafts, visit <a href="https://hyminions.herokuapp.com/minionscost" target="_blank">hyminions.herokuapp.com/minionscost</a>.
-        </div>
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      background-color: rgba(0, 0, 0, 0.75);
+      padding: 30px;
+      border-radius: 16px;
+      position: relative;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      position: absolute;
+      top: -40px;
+      left: 20px;
+    }
+    .tab {
+      padding: 8px 16px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px 8px 0 0;
+    }
+    .active-tab {
+      background-color: rgba(255,255,255,0.1);
+      border-bottom: 2px solid #00bfff;
+    }
 
-        <div class="xp-methods" id="xpMethodsContainer"></div>
-      </div>
+    .xp-methods .card {
+      background-color: rgba(255, 255, 255, 0.06);
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+    }
+
+    #authStatus {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 14px;
+    }
+
+    a {
+      color: #00bfff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tabs">
+      <a class="tab" href="index.html">Orders</a>
+      <a class="tab" href="saved-orders.html">Saved Orders</a>
+      <a class="tab active-tab" href="sb-xp-calculator.html">Skyblock Xp Calculator</a>
     </div>
 
-    <script type="module">
-      import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    <div id="authStatus">
+      <a href="auth.html" id="loginLink">Log In / Sign Up</a>
+    </div>
 
-      const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
-      const API_KEY = "6d4b47ff-1672-48b9-a1e5-78a97f03883d";
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <h1>Skyblock XP Calculator</h1>
+    <p style="text-align: left;">
+      Here you can view a list of the most efficient ways to spend coins on Skyblock xp.<br />
+      For most efficient minion crafts, visit
+      <a href="https://hyminions.herokuapp.com/minionscost" target="_blank">hyminions.herokuapp.com/minionscost</a>.
+    </p>
 
-      const authLinks = document.getElementById("authLinks");
-      let currentUser;
+    <div class="xp-methods" id="xpMethodsContainer"></div>
+  </div>
 
-      async function checkAuth() {
-        const { data: { user } } = await supabase.auth.getUser();
-        currentUser = user;
-        if (user) {
-          authLinks.innerHTML = `Logged in as <strong>${user.user_metadata.username}</strong> <a href="#" onclick="logout()">Log Out</a>`;
-          loadXPMethods(user.id);
-        } else {
-          authLinks.innerHTML = `<a href="auth.html">Sign In / Sign Up</a>`;
-        }
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const supabase = createClient(
+      "https://dhgfmbsyndfbsretlhvm.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI"
+    );
+
+    const API_KEY = "6d4b47ff-1672-48b9-a1e5-78a97f03883d";
+
+    const authStatus = document.getElementById("authStatus");
+    const loginLink = document.getElementById("loginLink");
+
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        loginLink.style.display = "inline";
+        return;
       }
 
-      async function logout() {
-        await supabase.auth.signOut();
-        location.reload();
+      const { data: profile } = await supabase
+        .from("users")
+        .select("username")
+        .eq("uuid", user.id)
+        .single();
+
+      if (profile) {
+        authStatus.innerHTML = `Logged in as <strong>${profile.username}</strong> <a href="#" onclick="logout()">Log Out</a>`;
       }
+    }
 
-      async function loadXPMethods(uid) {
-        const xpContainer = document.getElementById("xpMethodsContainer");
-        xpContainer.innerHTML = "Loading...";
+    async function logout() {
+      await supabase.auth.signOut();
+      location.reload();
+    }
 
-        const profileRes = await supabase.from("users").select("sb_profile, ign").eq("id", uid).single();
-        if (!profileRes.data) {
-          xpContainer.innerHTML = "Profile not found. Please set it in your account.";
-          return;
+    async function loadXpMethods() {
+      const response = await fetch("xpMethods.json");
+      const methods = await response.json();
+
+      const container = document.getElementById("xpMethodsContainer");
+      container.innerHTML = "";
+
+      for (const method of methods) {
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+          <h3>${method.name}</h3>
+          <p>${method.description || ""}</p>
+          <p><strong>XP:</strong> ${method.xp} | <strong>Raw Coins:</strong> ${method.coins.toLocaleString()}</p>
+        `;
+
+        if (method.sources?.length) {
+          div.innerHTML += "<p><strong>Materials:</strong></p><ul>" + method.sources.map(
+            s => `<li>${s.amount} × ${s.id} (${s.type})</li>`
+          ).join("") + "</ul>";
         }
 
-        const { ign, sb_profile } = profileRes.data;
-        const profileApiUrl = `https://api.hypixel.net/skyblock/profiles?key=${API_KEY}&uuid=${ign}`;
-        const profileData = await fetch(profileApiUrl).then(res => res.json());
+        if (method.requirements) {
+          div.innerHTML += "<p><strong>Requirements:</strong></p><ul>";
 
-        const playerProfile = profileData.profiles.find(p => p.cute_name === sb_profile);
-        if (!playerProfile) {
-          xpContainer.innerHTML = "Skyblock profile not found.";
-          return;
-        }
-
-        const museum = playerProfile.members[ign].museum ?? {};
-        const collections = playerProfile.members[ign].collection ?? {};
-
-        const raw = await fetch("xpMethods.json").then(r => r.json());
-
-        const filtered = raw.filter(method => {
-          const req = method.requirements || {};
-          if (req.profile?.museum && museum.milestone < req.profile.museum) return false;
-          if (req.collection) {
-            const colAmt = collections[req.collection.name.toUpperCase()] || 0;
-            if (colAmt < req.collection.amount) return false;
+          if (method.requirements.collection) {
+            const { name, type, amount } = method.requirements.collection;
+            div.innerHTML += `<li>${type} collection "${name}" ≥ ${amount.toLocaleString()}</li>`;
           }
-          return true;
-        });
 
-        xpContainer.innerHTML = "";
-        for (const method of filtered) {
-          const div = document.createElement("div");
-          div.className = "xp-card";
-          div.innerHTML = `
-            <h2>${method.name}</h2>
-            <p>${method.description}</p>
-            <p><strong>XP:</strong> ${method.xp} | <strong>Coins:</strong> ${method.coins.toLocaleString()}</p>
-            ${method.sources?.map(s => `<p><strong>From:</strong> ${s.type.toUpperCase()} - ${s.id} × ${s.amount}</p>`).join('') || ""}
-          `;
-          xpContainer.appendChild(div);
+          if (method.requirements.profile?.museum) {
+            div.innerHTML += `<li>Museum milestone ≥ ${method.requirements.profile.museum}</li>`;
+          }
+
+          div.innerHTML += "</ul>";
         }
-      }
 
-      checkAuth();
-    </script>
-  </body>
+        container.appendChild(div);
+      }
+    }
+
+    checkAuth();
+    loadXpMethods();
+  </script>
+</body>
 </html>
