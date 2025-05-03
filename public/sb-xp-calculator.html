@@ -90,157 +90,118 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script>
-    const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
-    const API_KEY = "6d4b47ff-1672-48b9-a1e5-78a97f03883d";
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+  const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
+  const API_KEY = "6d4b47ff-1672-48b9-a1e5-78a97f03883d";
 
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const authStatus = document.getElementById("authStatus");
-    const container = document.getElementById("xpMethodsContainer");
+  const authStatus = document.getElementById("authStatus");
+  const container = document.getElementById("xpMethodsContainer");
 
-    const mcUsername = sessionStorage.getItem("mc_username");
-    const sbProfile = sessionStorage.getItem("sb_profile");
-    const username = sessionStorage.getItem("username");
-    const userId = sessionStorage.getItem("user_id");
+  const mcUsername = sessionStorage.getItem("mc_username");
+  const sbProfile = sessionStorage.getItem("sb_profile");
+  const username = sessionStorage.getItem("username");
+  const userId = sessionStorage.getItem("user_id");
 
-    if (username && userId) {
-      authStatus.innerHTML = `
-        Logged in as <strong>${username}</strong>
-        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px;">Log Out</a>
-      `;
-      document.getElementById("logoutLink").onclick = () => {
-        sessionStorage.clear();
-        location.reload();
-      };
-    } else {
-      authStatus.innerHTML = `<a href="auth.html" class="link">Log In / Sign Up</a>`;
+  if (username && userId) {
+    authStatus.innerHTML = `
+      Logged in as <strong>${username}</strong>
+      <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px;">Log Out</a>
+    `;
+    document.getElementById("logoutLink").onclick = () => {
+      sessionStorage.clear();
+      location.reload();
+    };
+  } else {
+    authStatus.innerHTML = `<a href="auth.html" class="link">Log In / Sign Up</a>`;
+  }
+
+  async function fetchUUID(username) {
+    const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
+    const json = await res.json();
+    return json.id;
+  }
+
+  async function fetchProfile(uuid) {
+    const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${API_KEY}&uuid=${uuid}`);
+    const data = await res.json();
+    return data.profiles.find(p => p.cute_name.toLowerCase() === sbProfile.toLowerCase());
+  }
+
+  async function fetchXpMethods() {
+    const res = await fetch("xpMethods.json");
+    return await res.json();
+  }
+
+  function meetsRequirements(method, profileData) {
+    const req = method.requirements || {};
+    if (req.profile?.requires_api && !profileData) return false;
+
+    if (req.profile?.museumMilestone !== undefined) {
+      const current = profileData.museum || 0;
+      if (current < req.profile.museumMilestone) return false;
     }
 
-    async function fetchUUID(username) {
-      const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
-      const json = await res.json();
-      return json.id;
+    if (req.collection) {
+      const key = req.collection.name.toUpperCase();
+      const currentAmount = profileData.collections[key] || 0;
+      if (currentAmount < req.collection.amount) return false;
     }
 
-    async function fetchProfile(uuid) {
-      const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${API_KEY}&uuid=${uuid}`);
-      const data = await res.json();
-      return data.profiles.find(p => p.cute_name.toLowerCase() === sbProfile.toLowerCase());
+    return true;
+  }
+
+  async function init() {
+    if (!mcUsername || !sbProfile || !username || !userId) {
+      container.innerHTML = `<p style="font-size: 16px; color: #eee;">You must <a href="auth.html" class="link">log in</a> to view personalized XP recommendations.</p>`;
+      return;
     }
 
-    async function fetchBazaar() {
-      const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${API_KEY}`);
-      return (await res.json()).products;
-    }
-
-    async function fetchXpMethods() {
-      const res = await fetch("xpMethods.json");
-      return await res.json();
-    }
-
-    function checkRequirements(method, profileData) {
-      const req = method.requirements || {};
-      const collection = req.collection;
-      const profile = req.profile || {};
-      const skills = req.skills || [];
-
-      if (profile.museumMilestone !== undefined) {
-        const current = profileData.museum?.milestone || 0;
-        if (current < profile.museumMilestone) return false;
-      }
-
-      if (collection) {
-        const id = collection.name.toUpperCase();
-        const amount = profileData.collections?.[id] || 0;
-        if (amount < collection.amount) return false;
-      }
-
-      for (const s of skills) {
-        const lvl = profileData.skills?.[s.type] || 0;
-        if (lvl < s.level) return false;
-      }
-
-      return true;
-    }
-
-    async function init() {
-      if (!mcUsername || !sbProfile) {
-        container.innerHTML = `
-          <p style="font-size: 16px; color: #eee;">
-            You must <a href="auth.html" class="link">log in</a> to view personalized XP recommendations.
-          </p>`;
-        return;
-      }
-
+    try {
       const uuid = await fetchUUID(mcUsername);
       const profile = await fetchProfile(uuid);
       const member = profile.members[uuid];
 
-      const collectionData = member.collection || {};
-      const museumData = member.museum || {};
-      const skillsData = member.player_data?.experience_skill || {};
-
-      const profileState = {
-        collections: collectionData,
-        museum: { milestone: museumData.milestone || 0 },
-        skills: {
-          combat: Math.floor((skillsData.combat || 0) / 100),
-          mining: Math.floor((skillsData.mining || 0) / 100),
-          farming: Math.floor((skillsData.farming || 0) / 100)
-        }
+      const profileData = {
+        museum: member.museum?.milestone || 0,
+        collections: member.collection || {}
       };
 
-      const [bazaar, methods] = await Promise.all([fetchBazaar(), fetchXpMethods()]);
-
-      const entries = [];
+      const methods = await fetchXpMethods();
+      const results = [];
 
       for (const method of methods) {
-        if (!checkRequirements(method, profileState)) continue;
+        if (!meetsRequirements(method, profileData)) continue;
 
-        let totalCost = 0;
-        let valid = true;
-
-        for (const src of method.sources) {
-          if (src.type === "bazaar") {
-            const price = bazaar[src.id]?.quick_status?.buyPrice || 0;
-            if (price <= 0) {
-              valid = false;
-              break;
-            }
-            totalCost += price * src.amount;
-          } else if (src.type === "ah") {
-            totalCost += src.amount * 1000000;
-          } else if (src.type === "npc") {
-            totalCost += src.amount * 1;
-          }
-        }
-
-        if (!valid) continue;
-
-        const cost = method.coins > 0 ? method.coins : totalCost;
-        const efficiency = cost / method.xp;
-
-        entries.push({ ...method, cost, efficiency });
+        results.push(method);
       }
 
-      entries.sort((a, b) => a.efficiency - b.efficiency);
+      if (results.length === 0) {
+        container.innerHTML = `<p style="font-size: 16px; color: #eee;">No XP methods available for your current profile.</p>`;
+        return;
+      }
 
-      for (const entry of entries.slice(0, 50)) {
+      for (const entry of results) {
         const div = document.createElement("div");
         div.className = "xp-card";
         div.innerHTML = `
           <div class="xp-title">${entry.name}</div>
           <div class="xp-desc">${entry.description}<br>
-            Cost: ${entry.cost.toLocaleString()} coins | XP: ${entry.xp}
+            Cost: ${entry.coins?.toLocaleString() || "?"} coins | XP: ${entry.xp}
           </div>
         `;
         container.appendChild(div);
       }
+    } catch (err) {
+      container.innerHTML = `<p style="font-size: 16px; color: #eee;">Error fetching your Skyblock profile. Please check your username and profile settings.</p>`;
+      console.error(err);
     }
+  }
 
-    init();
-  </script>
+  init();
+</script>
 </body>
 </html>
