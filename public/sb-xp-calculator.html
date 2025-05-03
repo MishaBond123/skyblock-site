@@ -135,16 +135,25 @@
     }
     
     function isUnlocked(method, collections, museumMilestone) {
-      const req = method.requirements;
-      if (!req) return true;
-    
-      const hasCollection = req.collection?.type && req.collection.name &&
-        (collections?.[req.collection.type]?.[req.collection.name] || 0) >= req.collection.amount;
-    
-      const hasMuseum = !req.profile?.museumMilestone || museumMilestone >= req.profile.museumMilestone;
-    
-      return hasCollection && hasMuseum;
-    }
+  const req = method.requirements;
+  if (!req) return true;
+
+  let hasCollection = true;
+  if (req.collection) {
+    const type = req.collection.type?.toLowerCase();
+    const name = req.collection.name?.toUpperCase();
+    const colValue = collections?.[type]?.[name] ?? 0;
+    hasCollection = colValue >= req.collection.amount;
+  }
+
+  let hasMuseum = true;
+  if (req.profile?.museumMilestone) {
+    hasMuseum = museumMilestone >= req.profile.museumMilestone;
+  }
+
+  return hasCollection && hasMuseum;
+}
+
     
     function formatNumber(n) {
       return n?.toLocaleString() ?? "0";
