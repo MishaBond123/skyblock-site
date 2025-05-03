@@ -74,6 +74,11 @@
       color: #ccc;
       font-size: 13px;
     }
+    select {
+      margin-top: 12px;
+      font-size: 14px;
+      padding: 4px;
+    }
   </style>
 </head>
 <body>
@@ -90,8 +95,18 @@
 
     <h1>Skyblock XP Calculator</h1>
     <p style="text-align: left;">
-      Here you can view a list of the most efficient ways to spend coins on Skyblock xp.
+      Here you can view a list of the most efficient ways to spend coins on Skyblock xp.<br />
+      For most efficient minion crafts, visit
+      <a href="https://hyminions.herokuapp.com/minionscost" target="_blank">hyminions.herokuapp.com/minionscost</a>.
     </p>
+
+    <label for="methodFilter">Filter by Method Type:</label>
+    <select id="methodFilter">
+      <option value="all">All Methods</option>
+      <option value="bank">Bank Upgrades</option>
+      <option value="minion">Minion Crafts</option>
+      <!-- Add more categories as needed -->
+    </select>
 
     <div class="xp-methods" id="xpMethodsContainer"></div>
   </div>
@@ -161,6 +176,7 @@
       ]);
 
       const container = document.getElementById("xpMethodsContainer");
+      const filter = document.getElementById("methodFilter");
       container.innerHTML = "";
 
       const member = profileData.members[uuid];
@@ -174,6 +190,7 @@
         if (shown.has(id)) continue;
 
         if (!canUnlock(method, collections, milestone)) continue;
+        if (filter.value !== "all" && method.type !== filter.value) continue;
 
         shown.add(id);
         let total = method.coins || 0;
@@ -198,6 +215,8 @@
         container.appendChild(div);
       }
     }
+
+    document.getElementById("methodFilter").addEventListener("change", loadXpMethods);
 
     if (mcUsername && profileName) loadXpMethods();
   </script>
