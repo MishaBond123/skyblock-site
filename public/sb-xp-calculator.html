@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Skyblock XP Calculator</title>
-  <link rel="icon" href="site-icon.png" />
+  <link rel="icon" type="image/jpeg" href="site-icon.png" />
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background-image: url("bgimage.jpeg");
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url('bgimage.jpeg');
       background-size: cover;
       background-attachment: fixed;
-      color: white;
+      color: #fff;
     }
 
     .container {
@@ -52,37 +52,30 @@
       font-size: 14px;
     }
 
-    h1 {
-      margin-top: 10px;
+    a {
+      color: #00bfff;
     }
 
-    .subheading {
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
-
-    .card-grid {
+    .xp-methods {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
     }
 
-    .xp-card {
+    .card {
       background-color: rgba(255, 255, 255, 0.06);
+      padding: 16px;
       border-radius: 10px;
-      padding: 14px;
-      font-size: 13px;
     }
 
-    .xp-title {
-      font-size: 15px;
-      font-weight: bold;
-      color: #fff;
-      margin-bottom: 6px;
+    .card h3 {
+      margin-top: 0;
     }
 
-    .xp-desc {
+    .small {
       color: #ccc;
+      font-size: 13px;
     }
   </style>
 </head>
@@ -94,95 +87,112 @@
       <a class="tab active-tab" href="sb-xp-calculator.html">Skyblock Xp Calculator</a>
     </div>
 
-    <div id="authStatus"></div>
-
-    <h1>Skyblock XP Calculator</h1>
-    <div class="subheading" style="text-align: left;">
-      Here you can view a list of the most efficient ways to spend coins on Skyblock xp.
+    <div id="authStatus">
+      <a href="auth.html" id="loginLink">Log In / Sign Up</a>
     </div>
 
-    <div class="card-grid" id="xpMethodsContainer"></div>
+    <h1>Skyblock XP Calculator</h1>
+    <p style="text-align: left;">
+      Here you can view a list of the most efficient ways to spend coins on Skyblock xp.<br />
+      For most efficient minion crafts, visit
+      <a href="https://hyminions.herokuapp.com/minionscost" target="_blank">hyminions.herokuapp.com/minionscost</a>.
+    </p>
+
+    <div class="xp-methods" id="xpMethodsContainer"></div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script>
-    const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
-    const SUPABASE_ANON_KEY = "your-real-key";
-    const API_KEY = "your-hypixel-api-key";
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = createClient(
+      "https://dhgfmbsyndfbsretlhvm.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI"
+    );
+
+    const API_KEY = "6d4b47ff-1672-48b9-a1e5-78a97f03883d";
 
     const authStatus = document.getElementById("authStatus");
-    const username = sessionStorage.getItem("username");
+    const loginLink = document.getElementById("loginLink");
 
-    if (username) {
-      authStatus.innerHTML = `
-        Logged in as <strong>${username}</strong>
-        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px;">Log Out</a>`;
-      document.getElementById("logoutLink").onclick = () => {
-        sessionStorage.clear();
-        location.reload();
-      };
-    } else {
-      authStatus.innerHTML = `<a href="auth.html" style="color: #00bfff;">Log In / Sign Up</a>`;
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        loginLink.style.display = "inline";
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from("users")
+        .select("username")
+        .eq("uuid", user.id)
+        .single();
+
+      if (profile) {
+        authStatus.innerHTML = `Logged in as <strong>${profile.username}</strong> <a href="#" onclick="logout()">Log Out</a>`;
+      }
     }
 
-    const container = document.getElementById("xpMethodsContainer");
+    async function logout() {
+      await supabase.auth.signOut();
+      location.reload();
+    }
 
     async function fetchBazaarPrices() {
       const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${API_KEY}`);
       const json = await res.json();
       const prices = {};
-      for (const [id, product] of Object.entries(json.products)) {
-        prices[id] = product.quick_status.buyPrice || 0;
+      for (const [id, p] of Object.entries(json.products)) {
+        prices[id] = p.quick_status.buyPrice || 0;
       }
       return prices;
     }
 
-    function formatCoins(n) {
-      return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
-    }
-
-    function createCard(entry) {
-      const coinsPerXp = Math.round(entry.totalCost / entry.xp);
-      const costText = `${entry.xp} XP for ${formatCoins(entry.totalCost)} coins, ${formatCoins(coinsPerXp)} coins/XP`;
-
-      return `
-        <div class="xp-card">
-          <div class="xp-title">${entry.name}</div>
-          <div class="xp-desc">${entry.description}</div>
-          <div class="xp-desc">${costText}</div>
-          ${entry.requirement ? `<div class="xp-desc">Requires ${entry.requirement}</div>` : ""}
-        </div>
-      `;
-    }
-
     async function loadXpMethods() {
+      const response = await fetch("xpMethods.json");
+      const methods = await response.json();
       const prices = await fetchBazaarPrices();
-      const res = await fetch("xpMethods.json");
-      const methods = await res.json();
-      const entries = [];
+      const container = document.getElementById("xpMethodsContainer");
+      container.innerHTML = "";
 
       for (const method of methods) {
         let totalCost = 0;
-        for (const mat of method.materials) {
-          const price = mat.source === "bazaar" ? prices[mat.item_id] || 0 : 0;
-          totalCost += price * mat.quantity;
+        if (method.sources?.length) {
+          for (const mat of method.sources) {
+            const price = mat.type === "bazaar" ? prices[mat.id] || 0 : 0;
+            totalCost += price * mat.amount;
+          }
+        } else {
+          totalCost = method.coins;
         }
 
-        entries.push({
-          name: method.name,
-          description: method.description,
-          xp: method.xp,
-          totalCost,
-          requirement: method.requirement || ""
-        });
-      }
+        const coinsPerXp = Math.round(totalCost / method.xp);
 
-      entries.sort((a, b) => (a.totalCost / a.xp) - (b.totalCost / b.xp));
-      container.innerHTML = entries.map(createCard).join("");
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `
+          <h3>${method.name}</h3>
+          <p>${method.description || ""}</p>
+          <p><strong>${method.xp} XP</strong> for <strong>${totalCost.toLocaleString()}</strong> coins</p>
+          <p class="small">${coinsPerXp.toLocaleString()} coins/XP</p>
+        `;
+
+        if (method.requirements) {
+          div.innerHTML += "<p><strong>Requires:</strong></p><ul>";
+          if (method.requirements.collection) {
+            const c = method.requirements.collection;
+            div.innerHTML += `<li>${c.type} collection '${c.name}' ≥ ${c.amount.toLocaleString()}</li>`;
+          }
+          if (method.requirements.profile?.museum) {
+            div.innerHTML += `<li>Museum milestone ≥ ${method.requirements.profile.museum}</li>`;
+          }
+          div.innerHTML += "</ul>";
+        }
+
+        container.appendChild(div);
+      }
     }
 
+    checkAuth();
     loadXpMethods();
   </script>
 </body>
