@@ -59,23 +59,41 @@
     .xp-methods {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 20px;
+      gap: 16px;
       margin-top: 20px;
     }
 
     .card {
       background-color: rgba(255, 255, 255, 0.06);
-      padding: 16px;
+      padding: 14px 16px;
       border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.4em;
     }
 
     .card h3 {
       margin-top: 0;
+      margin-bottom: 4px;
+      font-size: 16px;
+    }
+
+    .card p {
+      margin: 3px 0;
     }
 
     .small {
       color: #ccc;
       font-size: 13px;
+    }
+
+    ul {
+      margin: 4px 0 0 16px;
+      padding: 0;
+    }
+
+    li {
+      font-size: 13px;
+      margin: 2px 0;
     }
   </style>
 </head>
@@ -101,41 +119,19 @@
     <div class="xp-methods" id="xpMethodsContainer"></div>
   </div>
 
-  <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-    const supabase = createClient(
-      "https://dhgfmbsyndfbsretlhvm.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI"
-    );
-
-    const API_KEY = "6d4b47ff-1672-48b9-a1e5-78a97f03883d";
-
+  <script>
+    // Login state detection using sessionStorage (as expected)
+    const username = sessionStorage.getItem("username");
     const authStatus = document.getElementById("authStatus");
-    const loginLink = document.getElementById("loginLink");
-
-    async function checkAuth() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        loginLink.style.display = "inline";
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from("users")
-        .select("username")
-        .eq("uuid", user.id)
-        .single();
-
-      if (profile) {
-        authStatus.innerHTML = `Logged in as <strong>${profile.username}</strong> <a href="#" onclick="logout()">Log Out</a>`;
-      }
+    if (username) {
+      authStatus.innerHTML = `Logged in as <strong>${username}</strong> <a href="#" onclick="logout()">Log Out</a>`;
     }
-
-    async function logout() {
-      await supabase.auth.signOut();
+    function logout() {
+      sessionStorage.clear();
       location.reload();
     }
+
+    const API_KEY = "6d4b47ff-1672-48b9-a1e5-78a97f03883d";
 
     async function fetchBazaarPrices() {
       const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${API_KEY}`);
@@ -156,6 +152,7 @@
 
       for (const method of methods) {
         let totalCost = 0;
+
         if (method.sources?.length) {
           for (const mat of method.sources) {
             const price = mat.type === "bazaar" ? prices[mat.id] || 0 : 0;
@@ -165,14 +162,15 @@
           totalCost = method.coins;
         }
 
-        const coinsPerXp = Math.round(totalCost / method.xp);
+        const roundedCost = Math.round(totalCost);
+        const coinsPerXp = Math.round(roundedCost / method.xp);
 
         const div = document.createElement("div");
         div.className = "card";
         div.innerHTML = `
           <h3>${method.name}</h3>
           <p>${method.description || ""}</p>
-          <p><strong>${method.xp} XP</strong> for <strong>${totalCost.toLocaleString()}</strong> coins</p>
+          <p><strong>${method.xp} XP</strong> for <strong>${roundedCost.toLocaleString()}</strong> coins</p>
           <p class="small">${coinsPerXp.toLocaleString()} coins/XP</p>
         `;
 
@@ -192,7 +190,6 @@
       }
     }
 
-    checkAuth();
     loadXpMethods();
   </script>
 </body>

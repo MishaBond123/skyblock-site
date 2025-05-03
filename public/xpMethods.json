@@ -8,7 +8,7 @@
       { "type": "bazaar", "id": "ENCHANTED_GOLD_BLOCK", "amount": 1 }
     ],
     "requirements": {
-      "collection": {"name": "GOLD_INGOT", "amount": 100000 },
+      "collection": {"name": "GOLD", "amount": 100000 },
       "profile": { "requires_api": true }
     }
   },
