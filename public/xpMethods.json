@@ -8,7 +8,7 @@
       { "type": "bazaar", "id": "ENCHANTED_GOLD_BLOCK", "amount": 1 }
     ],
     "requirements": {
-      "collection": {"name": "GOLD", "amount": 100000 },
+      "collection": {"type": "mining", "name": "GOLD", "amount": 100000 },
       "profile": { "requires_api": true }
     }
   },
@@ -21,7 +21,7 @@
       { "type": "bazaar", "id": "ENCHANTED_GOLD_BLOCK", "amount": 5 }
     ],
     "requirements": {
-      "collection": {"name": "GOLD", "amount": 250000 },
+      "collection": {"type": "mining", "name": "GOLD", "amount": 250000 },
       "profile": { "museumMilestone": 3, "requires_api": true }
     }
   },
@@ -34,7 +34,7 @@
       { "type": "bazaar", "id": "ENCHANTED_GOLD_BLOCK", "amount": 20 }
     ],
     "requirements": {
-      "collection": {"name": "GOLD", "amount": 500000 },
+      "collection": {"type": "mining", "name": "GOLD", "amount": 500000 },
       "profile": { "museumMilestone": 6, "requires_api": true }
     }
   },
@@ -47,7 +47,7 @@
       { "type": "bazaar", "id": "ENCHANTED_GOLD_BLOCK", "amount": 50 }
     ],
     "requirements": {
-      "collection": {"name": "GOLD", "amount": 1000000 },
+      "collection": {"type": "mining", "name": "GOLD", "amount": 1000000 },
       "profile": { "museumMilestone": 10, "requires_api": true }
     }
   },
@@ -60,7 +60,7 @@
       { "type": "bazaar", "id": "ENCHANTED_GOLD_BLOCK", "amount": 100 }
     ],
     "requirements": {
-      "collection": {"name": "GOLD", "amount": 2000000 },
+      "collection": {"type": "mining", "name": "GOLD", "amount": 2000000 },
       "profile": { "museumMilestone": 14, "requires_api": true }
     }
   },
@@ -73,7 +73,7 @@
       { "type": "bazaar", "id": "ENCHANTED_GOLD_BLOCK", "amount": 200 }
     ],
     "requirements": {
-      "collection": {"name": "GOLD", "amount": 3000000 },
+      "collection": {"type": "mining", "name": "GOLD", "amount": 3000000 },
       "profile": { "museumMilestone": 18, "requires_api": true }
     }
   }

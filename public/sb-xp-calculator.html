@@ -74,14 +74,6 @@
       color: #ccc;
       font-size: 13px;
     }
-    ul {
-      margin: 4px 0 0 16px;
-      padding: 0;
-    }
-    li {
-      font-size: 13px;
-      margin: 2px 0;
-    }
   </style>
 </head>
 <body>
@@ -107,8 +99,24 @@
   </div>
 
   <script>
+    const username = sessionStorage.getItem("username");
+    const uuid = sessionStorage.getItem("uuid");
+    const profileName = sessionStorage.getItem("sb_profile");
+    const authStatus = document.getElementById("authStatus");
+
+    if (username) {
+      authStatus.innerHTML = `Logged in as <strong>${username}</strong> <a href="#" onclick="logout()">Log Out</a>`;
+    }
+
+    function logout() {
+      sessionStorage.clear();
+      location.reload();
+    }
+
+    const API_KEY = "6d4b47ff-1672-48b9-a1e5-78a97f03883d";
+
     async function fetchBazaarPrices() {
-      const res = await fetch("https://api.hypixel.net/skyblock/bazaar?key=6d4b47ff-1672-48b9-a1e5-78a97f03883d");
+      const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${API_KEY}`);
       const json = await res.json();
       const prices = {};
       for (const [id, data] of Object.entries(json.products)) {
@@ -116,76 +124,77 @@
       }
       return prices;
     }
-  
+
     async function fetchProfileData() {
-      const username = sessionStorage.getItem("username");
-      if (!username) return null;
-      const res = await fetch(`https://skyhelper.net/api/v4/profile/${username}`);
-      return await res.json();
+      if (!uuid || !profileName) return null;
+      const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${API_KEY}&uuid=${uuid}`);
+      const json = await res.json();
+      return json.profiles.find(p => p.cute_name.toLowerCase() === profileName.toLowerCase());
     }
-  
+
+    function isUnlocked(method, collections, museumMilestone) {
+      const req = method.requirements;
+      if (!req) return true;
+
+      const hasCollection = req.collection?.type && req.collection.name &&
+        (collections?.[req.collection.type]?.[req.collection.name] || 0) >= req.collection.amount;
+
+      const hasMuseum = !req.profile?.museumMilestone || museumMilestone >= req.profile.museumMilestone;
+
+      return hasCollection && hasMuseum;
+    }
+
     async function loadXpMethods() {
-      const [prices, xpMethods, profile] = await Promise.all([
+      const [prices, xpMethods, profileData] = await Promise.all([
         fetchBazaarPrices(),
         fetch("xpMethods.json").then(r => r.json()),
         fetchProfileData()
       ]);
-  
+
       const container = document.getElementById("xpMethodsContainer");
       container.innerHTML = "";
-  
-      const member = profile?.data?.profile?.members?.[profile.data.uuid];
+
+      const member = profileData?.members?.[uuid];
       const collections = member?.collection || {};
       const museumMilestone = member?.museum?.milestone || 0;
-  
-      function meetsRequirements(method) {
-        const req = method.requirements;
-        if (!req) return true;
-  
-        const hasCollection = req.collection
-          ? (collections[req.collection.name] || 0) >= req.collection.amount
-          : true;
-  
-        const hasMuseum = req.profile?.museumMilestone
-          ? museumMilestone >= req.profile.museumMilestone
-          : true;
-  
-        return hasCollection && hasMuseum;
-      }
-  
-      for (const method of xpMethods) {
-        if (meetsRequirements(method)) {
-          renderMethod(method);
-          break; // show only the first one they qualify for
+
+      let nextMethod = null;
+      let unlockedUpTo = -1;
+
+      for (let i = 0; i < xpMethods.length; i++) {
+        if (isUnlocked(xpMethods[i], collections, museumMilestone)) {
+          unlockedUpTo = i;
+        } else {
+          nextMethod = xpMethods[i];
+          break;
         }
       }
-  
-      function renderMethod(method) {
-        let totalCost = method.coins || 0;
-  
-        if (method.sources?.length) {
-          for (const mat of method.sources) {
+
+      if (nextMethod) {
+        let totalCost = nextMethod.coins || 0;
+        if (nextMethod.sources?.length) {
+          for (const mat of nextMethod.sources) {
             const price = mat.type === "bazaar" ? prices[mat.id] || 0 : 0;
             totalCost += price * mat.amount;
           }
         }
-  
-        const totalRounded = Math.round(totalCost);
-        const costPerXp = Math.round(totalRounded / method.xp);
-  
+
+        const rounded = Math.round(totalCost);
+        const perXp = Math.round(rounded / nextMethod.xp);
+
         const div = document.createElement("div");
         div.className = "card";
         div.innerHTML = `
-          <h3>${method.name}</h3>
-          <p>${method.description}</p>
-          <p><strong>${method.xp} XP</strong> for <strong>${totalRounded.toLocaleString()}</strong> coins</p>
-          <p class="small">${costPerXp.toLocaleString()} coins/XP</p>
+          <h3>${nextMethod.name}</h3>
+          <p>${nextMethod.description}</p>
+          <p><strong>${nextMethod.xp} XP</strong> for <strong>${rounded.toLocaleString()}</strong> coins</p>
+          <p class="small">${perXp.toLocaleString()} coins/XP</p>
         `;
         container.appendChild(div);
       }
     }
-  
+
     loadXpMethods();
-  </script>      
+  </script>
 </body>
 </html>
