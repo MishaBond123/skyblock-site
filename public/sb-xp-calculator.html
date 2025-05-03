@@ -109,7 +109,7 @@
   <script>
     const username = sessionStorage.getItem("username");
     const uuid = sessionStorage.getItem("uuid");
-    const profile = sessionStorage.getItem("sb_profile");
+    const profileName = sessionStorage.getItem("sb_profile");
     const authStatus = document.getElementById("authStatus");
   
     if (username) {
@@ -127,17 +127,29 @@
       const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${API_KEY}`);
       const json = await res.json();
       const prices = {};
-      for (const [id, data] of Object.entries(json.products)) {
-        prices[id] = data.quick_status.buyPrice || 0;
+      for (const [id, p] of Object.entries(json.products)) {
+        prices[id] = p.quick_status.buyPrice || 0;
       }
       return prices;
     }
   
     async function fetchProfileData() {
-      if (!uuid || !profile) return null;
+      if (!uuid || !profileName) return null;
       const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${API_KEY}&uuid=${uuid}`);
       const data = await res.json();
-      return data.profiles.find(p => p.cute_name.toLowerCase() === profile.toLowerCase());
+      return data.profiles.find(p => p.cute_name.toLowerCase() === profileName.toLowerCase());
+    }
+  
+    function isUnlocked(method, collections, museumMilestone) {
+      const req = method.requirements;
+      if (!req) return true;
+  
+      const hasCollection = req.collection?.type && req.collection.name &&
+        (collections?.[req.collection.type]?.[req.collection.name] || 0) >= req.collection.amount;
+  
+      const hasMuseum = !req.profile?.museumMilestone || museumMilestone >= req.profile.museumMilestone;
+  
+      return hasCollection && hasMuseum;
     }
   
     async function loadXpMethods() {
@@ -150,57 +162,48 @@
       const container = document.getElementById("xpMethodsContainer");
       container.innerHTML = "";
   
-      const collections = profileData?.members?.[uuid]?.collection || {};
-      const museum = profileData?.members?.[uuid]?.museum?.milestone || 0;
+      const member = profileData?.members?.[uuid];
+      const collections = member?.collection || {};
+      const museumMilestone = member?.museum?.milestone || 0;
   
-      let unlockedIndex = -1;
+      let lastUnlockedIndex = -1;
   
       for (let i = 0; i < xpMethods.length; i++) {
-        const method = xpMethods[i];
-        const req = method.requirements;
-        let unlocked = true;
-  
-        if (req?.collection && collections[req.collection.name] < req.collection.amount) {
-          unlocked = false;
-        }
-        if (req?.profile?.museumMilestone && museum < req.profile.museumMilestone) {
-          unlocked = false;
-        }
-  
-        if (unlocked) {
-          unlockedIndex = i;
+        if (isUnlocked(xpMethods[i], collections, museumMilestone)) {
+          lastUnlockedIndex = i;
         }
       }
   
-      // Render only methods AFTER unlockedIndex
-      for (let i = unlockedIndex + 1; i < xpMethods.length; i++) {
+      for (let i = Math.max(0, lastUnlockedIndex); i < xpMethods.length; i++) {
         const method = xpMethods[i];
+        if (i !== lastUnlockedIndex && !isUnlocked(method, collections, museumMilestone)) {
+          continue;
+        }
   
-        let total = method.coins || 0;
+        let totalCost = method.coins || 0;
         if (method.sources?.length) {
-          for (const src of method.sources) {
-            const price = src.type === "bazaar" ? prices[src.id] || 0 : 0;
-            total += price * src.amount;
+          for (const mat of method.sources) {
+            const price = mat.type === "bazaar" ? prices[mat.id] || 0 : 0;
+            totalCost += price * mat.amount;
           }
         }
   
-        const roundedTotal = Math.round(total);
-        const coinsPerXp = Math.round(roundedTotal / method.xp);
+        const rounded = Math.round(totalCost);
+        const perXp = Math.round(rounded / method.xp);
   
         const div = document.createElement("div");
         div.className = "card";
         div.innerHTML = `
           <h3>${method.name}</h3>
-          <p>${method.description || ""}</p>
-          <p><strong>${method.xp} XP</strong> for <strong>${roundedTotal.toLocaleString()}</strong> coins</p>
-          <p class="small">${coinsPerXp.toLocaleString()} coins/XP</p>
+          <p>${method.description}</p>
+          <p><strong>${method.xp} XP</strong> for <strong>${rounded.toLocaleString()}</strong> coins</p>
+          <p class="small">${perXp.toLocaleString()} coins/XP</p>
         `;
-  
         container.appendChild(div);
       }
     }
   
     loadXpMethods();
-  </script>  
+  </script>    
 </body>
 </html>
