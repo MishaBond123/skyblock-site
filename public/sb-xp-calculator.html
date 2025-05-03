@@ -94,7 +94,10 @@
       For most efficient minion crafts, visit
       <a href="https://hyminions.herokuapp.com/minionscost" target="_blank">hyminions.herokuapp.com/minionscost</a>.
     </p>
-
+    <details id="debugInfo" style="margin-bottom: 16px;">
+      <summary style="cursor: pointer;">View Profile Unlock Info</summary>
+      <div id="profileInfo" style="font-size: 14px; margin-top: 8px;"></div>
+    </details>    
     <div class="xp-methods" id="xpMethodsContainer"></div>
   </div>
 
@@ -103,98 +106,124 @@
     const uuid = sessionStorage.getItem("uuid");
     const profileName = sessionStorage.getItem("sb_profile");
     const authStatus = document.getElementById("authStatus");
-
+    
     if (username) {
       authStatus.innerHTML = `Logged in as <strong>${username}</strong> <a href="#" onclick="logout()">Log Out</a>`;
     }
-
     function logout() {
       sessionStorage.clear();
       location.reload();
     }
-
+    
     const API_KEY = "6d4b47ff-1672-48b9-a1e5-78a97f03883d";
-
+    
     async function fetchBazaarPrices() {
       const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${API_KEY}`);
       const json = await res.json();
       const prices = {};
-      for (const [id, data] of Object.entries(json.products)) {
-        prices[id] = data.quick_status.buyPrice || 0;
+      for (const [id, p] of Object.entries(json.products)) {
+        prices[id] = p.quick_status.buyPrice || 0;
       }
       return prices;
     }
-
+    
     async function fetchProfileData() {
       if (!uuid || !profileName) return null;
       const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${API_KEY}&uuid=${uuid}`);
-      const json = await res.json();
-      return json.profiles.find(p => p.cute_name.toLowerCase() === profileName.toLowerCase());
+      const data = await res.json();
+      return data.profiles.find(p => p.cute_name.toLowerCase() === profileName.toLowerCase());
     }
-
+    
     function isUnlocked(method, collections, museumMilestone) {
       const req = method.requirements;
       if (!req) return true;
-
+    
       const hasCollection = req.collection?.type && req.collection.name &&
         (collections?.[req.collection.type]?.[req.collection.name] || 0) >= req.collection.amount;
-
+    
       const hasMuseum = !req.profile?.museumMilestone || museumMilestone >= req.profile.museumMilestone;
-
+    
       return hasCollection && hasMuseum;
     }
-
+    
+    function formatNumber(n) {
+      return n?.toLocaleString() ?? "0";
+    }
+    
     async function loadXpMethods() {
       const [prices, xpMethods, profileData] = await Promise.all([
         fetchBazaarPrices(),
         fetch("xpMethods.json").then(r => r.json()),
         fetchProfileData()
       ]);
-
+    
       const container = document.getElementById("xpMethodsContainer");
       container.innerHTML = "";
-
+    
       const member = profileData?.members?.[uuid];
       const collections = member?.collection || {};
       const museumMilestone = member?.museum?.milestone || 0;
-
-      let nextMethod = null;
-      let unlockedUpTo = -1;
-
-      for (let i = 0; i < xpMethods.length; i++) {
-        if (isUnlocked(xpMethods[i], collections, museumMilestone)) {
-          unlockedUpTo = i;
-        } else {
-          nextMethod = xpMethods[i];
-          break;
+    
+      // ✅ Show debug summary
+      const profileInfo = document.getElementById("profileInfo");
+      const collectionTypes = {};
+    
+      for (const method of xpMethods) {
+        const c = method.requirements?.collection;
+        if (c?.type && c?.name) {
+          if (!collectionTypes[c.type]) collectionTypes[c.type] = new Set();
+          collectionTypes[c.type].add(c.name);
         }
       }
-
-      if (nextMethod) {
-        let totalCost = nextMethod.coins || 0;
-        if (nextMethod.sources?.length) {
-          for (const mat of nextMethod.sources) {
+    
+      let html = `<p><strong>Museum Milestone:</strong> ${museumMilestone}</p>`;
+      for (const [type, names] of Object.entries(collectionTypes)) {
+        html += `<p><strong>${type} collections:</strong><ul>`;
+        for (const name of names) {
+          const value = collections?.[type]?.[name] ?? 0;
+          html += `<li>${name}: ${formatNumber(value)}</li>`;
+        }
+        html += `</ul></p>`;
+      }
+      profileInfo.innerHTML = html;
+    
+      // ✅ Find last unlocked
+      let lastUnlockedIndex = -1;
+      for (let i = 0; i < xpMethods.length; i++) {
+        if (isUnlocked(xpMethods[i], collections, museumMilestone)) {
+          lastUnlockedIndex = i;
+        }
+      }
+    
+      // ✅ Display next available upgrade
+      for (let i = lastUnlockedIndex + 1; i < xpMethods.length; i++) {
+        const method = xpMethods[i];
+        let totalCost = method.coins || 0;
+    
+        if (method.sources?.length) {
+          for (const mat of method.sources) {
             const price = mat.type === "bazaar" ? prices[mat.id] || 0 : 0;
             totalCost += price * mat.amount;
           }
         }
-
+    
         const rounded = Math.round(totalCost);
-        const perXp = Math.round(rounded / nextMethod.xp);
-
+        const perXp = Math.round(rounded / method.xp);
+    
         const div = document.createElement("div");
         div.className = "card";
         div.innerHTML = `
-          <h3>${nextMethod.name}</h3>
-          <p>${nextMethod.description}</p>
-          <p><strong>${nextMethod.xp} XP</strong> for <strong>${rounded.toLocaleString()}</strong> coins</p>
+          <h3>${method.name}</h3>
+          <p>${method.description}</p>
+          <p><strong>${method.xp} XP</strong> for <strong>${rounded.toLocaleString()}</strong> coins</p>
           <p class="small">${perXp.toLocaleString()} coins/XP</p>
         `;
         container.appendChild(div);
+        break; // only show next one
       }
     }
-
+    
     loadXpMethods();
-  </script>
+    </script>    
 </body>
 </html>
