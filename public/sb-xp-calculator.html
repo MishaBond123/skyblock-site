@@ -2,206 +2,138 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="site-icon.png"/>
   <title>Skyblock XP Calculator</title>
-  <link rel="icon" type="image/png" href="site-icon.png" />
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-image: url('bgimage.jpeg');
-      background-size: cover;
-      background-attachment: fixed;
-      color: #fff;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 40px auto;
-      background-color: rgba(0, 0, 0, 0.75);
-      padding: 30px;
-      border-radius: 16px;
-      position: relative;
-    }
-    .tabs {
-      display: flex;
-      gap: 10px;
-      position: absolute;
-      top: -40px;
-      left: 20px;
-    }
-    .tab {
-      padding: 8px 16px;
-      background-color: rgba(0, 0, 0, 0.6);
-      color: #fff;
-      text-decoration: none;
-      border-radius: 8px 8px 0 0;
-    }
-    .active-tab {
-      background-color: rgba(255,255,255,0.1);
-      border-bottom: 2px solid #00bfff;
-    }
-    #authStatus {
-      position: absolute;
-      top: 10px;
-      right: 20px;
-      font-size: 14px;
-    }
-    .xp-methods {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
-      margin-top: 30px;
-    }
-    .xp-card {
-      background-color: rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      padding: 16px;
-    }
-    .xp-title {
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .xp-desc {
-      font-size: 14px;
-      color: #ccc;
-    }
-    a.link {
-      color: #00bfff;
-      text-decoration: underline;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
+  <div class="nav">
+    <a href="index.html" class="navbtn">Orders</a>
+    <a href="saved-orders.html" class="navbtn">Saved Orders</a>
+    <a href="sb-xp-calculator.html" class="navbtn active">Skyblock Xp Calculator</a>
+    <span id="authStatus" class="nav-right"></span>
+  </div>
+
   <div class="container">
-    <div class="tabs">
-      <a class="tab" href="index.html">Orders</a>
-      <a class="tab" href="saved-orders.html">Saved Orders</a>
-      <a class="tab active-tab" href="sb-xp-calculator.html">Skyblock Xp Calculator</a>
-    </div>
-
-    <div id="authStatus"></div>
-
-    <h1>Skyblock XP Calculator</h1>
-    <div class="subheading" style="text-align:left; margin-bottom:20px;">
-      Here you can view a list of the most efficient ways to spend coins on Skyblock xp.<br/>
-      For most efficient minion crafts, visit <a class="link" href="https://hyminions.herokuapp.com/minionscost" target="_blank">hyminions.herokuapp.com/minionscost</a>.
-    </div>
+    <h1 class="header">Skyblock XP Calculator</h1>
+    <p class="subheading" style="text-align: left;">
+      Here you can view a list of the most efficient ways to spend coins on Skyblock xp.<br>
+      For most efficient minion crafts, visit 
+      <a href="https://hyminions.herokuapp.com/minionscost" target="_blank">hyminions.herokuapp.com/minionscost</a>.
+    </p>
 
     <div class="xp-methods" id="xpMethodsContainer"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script>
-  const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
-  const API_KEY = "6d4b47ff-1672-48b9-a1e5-78a97f03883d";
+  <script>
+    const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
+    const API_KEY = "6d4b47ff-1672-48b9-a1e5-78a97f03883d";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const authStatus = document.getElementById("authStatus");
+    const container = document.getElementById("xpMethodsContainer");
 
-  const authStatus = document.getElementById("authStatus");
-  const container = document.getElementById("xpMethodsContainer");
+    const mcUsername = sessionStorage.getItem("mc_username");
+    const sbProfile = sessionStorage.getItem("sb_profile");
+    const username = sessionStorage.getItem("username");
+    const userId = sessionStorage.getItem("user_id");
 
-  const mcUsername = sessionStorage.getItem("mc_username");
-  const sbProfile = sessionStorage.getItem("sb_profile");
-  const username = sessionStorage.getItem("username");
-  const userId = sessionStorage.getItem("user_id");
-
-  if (username && userId) {
-    authStatus.innerHTML = `
-      Logged in as <strong>${username}</strong>
-      <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px;">Log Out</a>
-    `;
-    document.getElementById("logoutLink").onclick = () => {
-      sessionStorage.clear();
-      location.reload();
-    };
-  } else {
-    authStatus.innerHTML = `<a href="auth.html" class="link">Log In / Sign Up</a>`;
-  }
-
-  async function fetchUUID(username) {
-    const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
-    const json = await res.json();
-    return json.id;
-  }
-
-  async function fetchProfile(uuid) {
-    const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${API_KEY}&uuid=${uuid}`);
-    const data = await res.json();
-    return data.profiles.find(p => p.cute_name.toLowerCase() === sbProfile.toLowerCase());
-  }
-
-  async function fetchXpMethods() {
-    const res = await fetch("xpMethods.json");
-    return await res.json();
-  }
-
-  function meetsRequirements(method, profileData) {
-    const req = method.requirements || {};
-    if (req.profile?.requires_api && !profileData) return false;
-
-    if (req.profile?.museumMilestone !== undefined) {
-      const current = profileData.museum || 0;
-      if (current < req.profile.museumMilestone) return false;
-    }
-
-    if (req.collection) {
-      const key = req.collection.name.toUpperCase();
-      const currentAmount = profileData.collections[key] || 0;
-      if (currentAmount < req.collection.amount) return false;
-    }
-
-    return true;
-  }
-
-  async function init() {
-    if (!mcUsername || !sbProfile || !username || !userId) {
-      container.innerHTML = `<p style="font-size: 16px; color: #eee;">You must <a href="auth.html" class="link">log in</a> to view personalized XP recommendations.</p>`;
-      return;
-    }
-
-    try {
-      const uuid = await fetchUUID(mcUsername);
-      const profile = await fetchProfile(uuid);
-      const member = profile.members[uuid];
-
-      const profileData = {
-        museum: member.museum?.milestone || 0,
-        collections: member.collection || {}
+    if (username && userId) {
+      authStatus.innerHTML = `
+        Logged in as <strong>${username}</strong>
+        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px;">Log Out</a>
+      `;
+      document.getElementById("logoutLink").onclick = () => {
+        sessionStorage.clear();
+        location.reload();
       };
+    } else {
+      authStatus.innerHTML = `<a href="auth.html" class="link">Log In / Sign Up</a>`;
+    }
 
-      const methods = await fetchXpMethods();
-      const results = [];
+    async function fetchUUID(username) {
+      const res = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
+      const json = await res.json();
+      return json.id;
+    }
 
-      for (const method of methods) {
-        if (!meetsRequirements(method, profileData)) continue;
+    async function fetchProfile(uuid) {
+      const res = await fetch(`https://api.hypixel.net/skyblock/profiles?key=${API_KEY}&uuid=${uuid}`);
+      const data = await res.json();
+      return data.profiles.find(p => p.cute_name.toLowerCase() === sbProfile.toLowerCase());
+    }
 
-        results.push(method);
+    async function fetchXpMethods() {
+      const res = await fetch("xpMethods.json");
+      return await res.json();
+    }
+
+    function meetsRequirements(method, profileData) {
+      const req = method.requirements || {};
+      if (req.profile?.requires_api && !profileData) return false;
+
+      if (req.profile?.museumMilestone !== undefined) {
+        const current = profileData.museum || 0;
+        if (current < req.profile.museumMilestone) return false;
       }
 
-      if (results.length === 0) {
-        container.innerHTML = `<p style="font-size: 16px; color: #eee;">No XP methods available for your current profile.</p>`;
+      if (req.collection) {
+        const key = req.collection.name.toUpperCase();
+        const currentAmount = profileData.collections[key] || 0;
+        if (currentAmount < req.collection.amount) return false;
+      }
+
+      return true;
+    }
+
+    async function init() {
+      if (!mcUsername || !sbProfile || !username || !userId) {
+        container.innerHTML = `<p style="font-size: 16px; color: #eee;">You must <a href="auth.html" class="link">log in</a> to view personalized XP recommendations.</p>`;
         return;
       }
 
-      for (const entry of results) {
-        const div = document.createElement("div");
-        div.className = "xp-card";
-        div.innerHTML = `
-          <div class="xp-title">${entry.name}</div>
-          <div class="xp-desc">${entry.description}<br>
-            Cost: ${entry.coins?.toLocaleString() || "?"} coins | XP: ${entry.xp}
-          </div>
-        `;
-        container.appendChild(div);
-      }
-    } catch (err) {
-      container.innerHTML = `<p style="font-size: 16px; color: #eee;">Error fetching your Skyblock profile. Please check your username and profile settings.</p>`;
-      console.error(err);
-    }
-  }
+      try {
+        const uuid = await fetchUUID(mcUsername);
+        const profile = await fetchProfile(uuid);
+        const member = profile.members[uuid];
 
-  init();
-</script>
+        const profileData = {
+          museum: member.museum?.milestone || 0,
+          collections: member.collection || {}
+        };
+
+        const methods = await fetchXpMethods();
+        const results = [];
+
+        for (const method of methods) {
+          if (!meetsRequirements(method, profileData)) continue;
+          results.push(method);
+        }
+
+        if (results.length === 0) {
+          container.innerHTML = `<p style="font-size: 16px; color: #eee;">No XP methods available for your profile.</p>`;
+          return;
+        }
+
+        for (const entry of results) {
+          const div = document.createElement("div");
+          div.className = "order-row";
+          div.innerHTML = `
+            <div><strong>${entry.name}</strong>: ${entry.description}</div>
+            <div>+${entry.xp} XP — ${entry.coins?.toLocaleString() || "?"} coins</div>
+          `;
+          container.appendChild(div);
+        }
+      } catch (err) {
+        container.innerHTML = `<p style="font-size: 16px; color: #eee;">Failed to load data. Check your profile settings and connection.</p>`;
+        console.error(err);
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
