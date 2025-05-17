@@ -257,6 +257,11 @@
               View the chart on skyblock.finance <a href="https://skyblock.finance/items/${item.id}/chart" target="_blank" style="color: #00bfff; text-decoration: underline;">Here</a>
             `;
             loadData(item.id);
+    
+            // Update URL to include ?item=...
+            const url = new URL(window.location);
+            url.searchParams.set("item", item.id);
+            history.replaceState({}, "", url);
           };
           itemDropdown.appendChild(div);
         }
@@ -280,7 +285,7 @@
         latestSellSummary = data.buy_summary;
         renderTable(latestBuySummary, buyBody, buyFoot, parseFloat(instasells.textContent));
         renderTable(latestSellSummary, sellBody, sellFoot, parseFloat(instabuys.textContent));
-        highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));
+        highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));    
       }
     
       function renderTable(summary, tbody, tfootRow, hourlyVolume) {
