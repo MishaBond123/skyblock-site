@@ -90,12 +90,14 @@
       border-radius: 10px;
     }
     .volume-box {
-      display: flex;
-      justify-content: space-around;
-      margin-bottom: 20px;
+      font-size: 16px;
+      line-height: 1.6;
+      white-space: pre;
+      font-family: 'Segoe UI', sans-serif;
       background-color: rgba(255,255,255,0.05);
-      padding: 20px;
-      border-radius: 12px;
+     padding: 20px;
+     border-radius: 12px;
+     margin-bottom: 20px;
     }
     .dropdown {
       background-color: rgba(0, 0, 0, 0.85);
@@ -302,11 +304,11 @@
 
   // Update volume-box cleanly
   document.querySelector(".volume-box").innerHTML = `
-    <div><strong>Avg instabuys:</strong><div>${avgInstabuys.toFixed(1)}</div></div>
-    <div><strong>Avg instasells:</strong><div>${avgInstasells.toFixed(1)}</div></div>
-    <div><strong>Avg sell order volume:</strong><div>${avgSellOrder.toFixed(1)}</div></div>
-    <div><strong>Avg buy order volume:</strong><div>${avgBuyOrder.toFixed(1)}</div></div>
-  `;
+Avg instabuys: ${avgInstabuys.toFixed(1)}        Avg instasells: ${avgInstasells.toFixed(1)}
+Avg sell order volume: ${avgSellOrder.toFixed(1)}       Avg buy order volume: ${avgBuyOrder.toFixed(1)}
+──────────────────────────────────────────────────
+Market spread: ${isFinite(spread) ? spread + "%" : "N/A"}
+`;
 
   // Add economic info (spread)
   const spreadBox = document.createElement("div");
