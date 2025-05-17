@@ -297,41 +297,40 @@
   const data = json.products[itemId];
   if (!data) return;
 
-  // Calculate volumes
   const avgInstabuys = data.quick_status.buyMovingWeek / 168;
-  const avgInstasells = data.quick_status.sellMovingWeek / 168;
+const avgInstasells = data.quick_status.sellMovingWeek / 168;
 
-  // Extract summaries
-  latestBuySummary = data.sell_summary;
-  latestSellSummary = data.buy_summary;
+latestBuySummary = data.sell_summary;
+latestSellSummary = data.buy_summary;
 
-  renderTable(latestBuySummary, buyBody, buyFoot, avgInstasells); // Buy = sell order
-  renderTable(latestSellSummary, sellBody, sellFoot, avgInstabuys); // Sell = buy order
-  highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));
+renderTable(latestBuySummary, buyBody, buyFoot, avgInstasells);
+renderTable(latestSellSummary, sellBody, sellFoot, avgInstabuys);
 
-  // Calculate average order volumes
-  const avgSellOrder = averageAmount(latestBuySummary); // Sell = buy order summary
-  const avgBuyOrder = averageAmount(latestSellSummary); // Buy = sell order summary
+highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));
 
-  // Calculate spread
-  const topBuy = latestSellSummary[0]?.pricePerUnit || 0;
-  const topSell = latestBuySummary[0]?.pricePerUnit || 0;
-  const spread = ((topSell - topBuy) / topBuy * 100).toFixed(2);
+const avgSellOrder = averageAmount(latestBuySummary);
+const avgBuyOrder = averageAmount(latestSellSummary);
 
-  // Update volume-box cleanly
-  document.querySelector(".volume-box").innerHTML = `
-  <div class="volume-row">
-    <div>Avg instabuys: ${avgInstabuys.toFixed(1)}</div>
-    <div>Avg instasells: ${avgInstasells.toFixed(1)}</div>
+const sellPrice = latestBuySummary[0]?.pricePerUnit || 1;
+const buyPrice = latestSellSummary[0]?.pricePerUnit || 1;
+const spread = ((buyPrice - sellPrice) / sellPrice * 100).toFixed(2);
+
+document.querySelector(".volume-box").innerHTML = `
+  <div style="display: flex; justify-content: space-between; padding: 0 20px;">
+    <div style="text-align: left;">
+      <div><strong>Avg instabuys:</strong> ${avgInstabuys.toFixed(1)}</div>
+      <div><strong>Avg sell order volume:</strong> ${avgSellOrder.toFixed(1)}</div>
+    </div>
+    <div style="text-align: right;">
+      <div><strong>Avg instasells:</strong> ${avgInstasells.toFixed(1)}</div>
+      <div><strong>Avg buy order volume:</strong> ${avgBuyOrder.toFixed(1)}</div>
+    </div>
   </div>
-  <div class="volume-row">
-    <div>Avg sell order volume: ${avgSellOrder.toFixed(1)}</div>
-    <div>Avg buy order volume: ${avgBuyOrder.toFixed(1)}</div>
-  </div>
-  <div class="volume-spread">
+  <div style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 10px; text-align: center; font-weight: bold;">
     Market spread: ${isFinite(spread) ? (spread > 0 ? "+" : "") + spread + "%" : "N/A"}
   </div>
 `;
+
 
 
   // Add economic info (spread)
