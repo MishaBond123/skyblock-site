@@ -273,41 +273,49 @@
       });
     
       async function loadData(itemId) {
-        const apiKey = await getApiKey();
-        const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
-        const json = await res.json();
-        const data = json.products[itemId];
-        if (!data) return;
-    
-        const buyPerHour = data.quick_status.buyMovingWeek / 168;
-        const sellPerHour = data.quick_status.sellMovingWeek / 168;
-        instabuys.textContent = buyPerHour.toFixed(1);
-        instasells.textContent = sellPerHour.toFixed(1);
-    
-        latestBuySummary = data.sell_summary;
-        latestSellSummary = data.buy_summary;
-    
-        renderTable(latestBuySummary, buyBody, buyFoot, sellPerHour); // instasell ↔ buy orders
-        renderTable(latestSellSummary, sellBody, sellFoot, buyPerHour); // instabuy ↔ sell orders
-    
-        highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));
-    
-        // Avg Order Amounts
-        const avgBuyAmount = averageAmount(latestBuySummary);
-        const avgSellAmount = averageAmount(latestSellSummary);
-    
-        // Price Difference %
-        const topBuy = latestSellSummary[0]?.pricePerUnit || 0;
-        const topSell = latestBuySummary[0]?.pricePerUnit || 0;
-        const priceDiff = ((topSell - topBuy) / topBuy * 100).toFixed(2);
-    
-        // Append to volume-box
-        document.querySelector(".volume-box").innerHTML += `
-          <div><strong>Avg Buy Order Amount:</strong><div>${avgBuyAmount.toFixed(1)}</div></div>
-          <div><strong>Avg Sell Order Amount:</strong><div>${avgSellAmount.toFixed(1)}</div></div>
-          <div><strong>% Diff (Sell - Buy):</strong><div>${isFinite(priceDiff) ? priceDiff + "%" : "N/A"}</div></div>
-        `;
-      }
+  const apiKey = await getApiKey();
+  const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
+  const json = await res.json();
+  const data = json.products[itemId];
+  if (!data) return;
+
+  // Calculate volumes
+  const avgInstabuys = data.quick_status.buyMovingWeek / 168;
+  const avgInstasells = data.quick_status.sellMovingWeek / 168;
+
+  // Extract summaries
+  latestBuySummary = data.sell_summary;
+  latestSellSummary = data.buy_summary;
+
+  renderTable(latestBuySummary, buyBody, buyFoot, avgInstasells); // Buy = sell order
+  renderTable(latestSellSummary, sellBody, sellFoot, avgInstabuys); // Sell = buy order
+  highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));
+
+  // Calculate average order volumes
+  const avgSellOrder = averageAmount(latestBuySummary); // Sell = buy order summary
+  const avgBuyOrder = averageAmount(latestSellSummary); // Buy = sell order summary
+
+  // Calculate spread
+  const topBuy = latestSellSummary[0]?.pricePerUnit || 0;
+  const topSell = latestBuySummary[0]?.pricePerUnit || 0;
+  const spread = ((topSell - topBuy) / topBuy * 100).toFixed(2);
+
+  // Update volume-box cleanly
+  document.querySelector(".volume-box").innerHTML = `
+    <div><strong>Avg instabuys:</strong><div>${avgInstabuys.toFixed(1)}</div></div>
+    <div><strong>Avg instasells:</strong><div>${avgInstasells.toFixed(1)}</div></div>
+    <div><strong>Avg sell order volume:</strong><div>${avgSellOrder.toFixed(1)}</div></div>
+    <div><strong>Avg buy order volume:</strong><div>${avgBuyOrder.toFixed(1)}</div></div>
+  `;
+
+  // Add economic info (spread)
+  const spreadBox = document.createElement("div");
+  spreadBox.style.cssText = "margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; text-align: center;";
+  spreadBox.innerHTML = `
+    <strong>Market spread:</strong> ${isFinite(spread) ? spread + "%" : "N/A"}
+  `;
+  document.querySelector(".volume-box").appendChild(spreadBox);
+}
     
       function averageAmount(summary) {
         if (!summary.length) return 0;
