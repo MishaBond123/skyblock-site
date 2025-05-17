@@ -184,7 +184,7 @@
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
     
       const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
       const userId = sessionStorage.getItem("user_id");
@@ -258,7 +258,6 @@
             `;
             loadData(item.id);
     
-            // Update URL to include ?item=...
             const url = new URL(window.location);
             url.searchParams.set("item", item.id);
             history.replaceState({}, "", url);
@@ -279,13 +278,40 @@
         const json = await res.json();
         const data = json.products[itemId];
         if (!data) return;
-        instabuys.textContent = (data.quick_status.buyMovingWeek / 168).toFixed(1);
-        instasells.textContent = (data.quick_status.sellMovingWeek / 168).toFixed(1);
+    
+        const buyPerHour = data.quick_status.buyMovingWeek / 168;
+        const sellPerHour = data.quick_status.sellMovingWeek / 168;
+        instabuys.textContent = buyPerHour.toFixed(1);
+        instasells.textContent = sellPerHour.toFixed(1);
+    
         latestBuySummary = data.sell_summary;
         latestSellSummary = data.buy_summary;
-        renderTable(latestBuySummary, buyBody, buyFoot, parseFloat(instasells.textContent));
-        renderTable(latestSellSummary, sellBody, sellFoot, parseFloat(instabuys.textContent));
-        highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));    
+    
+        renderTable(latestBuySummary, buyBody, buyFoot, sellPerHour); // instasell ↔ buy orders
+        renderTable(latestSellSummary, sellBody, sellFoot, buyPerHour); // instabuy ↔ sell orders
+    
+        highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));
+    
+        // Avg Order Amounts
+        const avgBuyAmount = averageAmount(latestBuySummary);
+        const avgSellAmount = averageAmount(latestSellSummary);
+    
+        // Price Difference %
+        const topBuy = latestSellSummary[0]?.pricePerUnit || 0;
+        const topSell = latestBuySummary[0]?.pricePerUnit || 0;
+        const priceDiff = ((topSell - topBuy) / topBuy * 100).toFixed(2);
+    
+        // Append to volume-box
+        document.querySelector(".volume-box").innerHTML += `
+          <div><strong>Avg Buy Order Amount:</strong><div>${avgBuyAmount.toFixed(1)}</div></div>
+          <div><strong>Avg Sell Order Amount:</strong><div>${avgSellAmount.toFixed(1)}</div></div>
+          <div><strong>% Diff (Sell - Buy):</strong><div>${isFinite(priceDiff) ? priceDiff + "%" : "N/A"}</div></div>
+        `;
+      }
+    
+      function averageAmount(summary) {
+        if (!summary.length) return 0;
+        return summary.reduce((sum, row) => sum + row.amount, 0) / summary.length;
       }
     
       function renderTable(summary, tbody, tfootRow, hourlyVolume) {
