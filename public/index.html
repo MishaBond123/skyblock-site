@@ -316,22 +316,20 @@ const buyPrice = latestSellSummary[0]?.pricePerUnit || 1;
 const spread = ((buyPrice - sellPrice) / sellPrice * 100).toFixed(2);
 
 document.querySelector(".volume-box").innerHTML = `
-  <div style="display: flex; justify-content: space-between; padding: 0 20px;">
-    <div style="text-align: left;">
+  <div style="display: flex; justify-content: center; gap: 80px; text-align: left; font-size: 18px;">
+    <div>
       <div><strong>Avg instabuys:</strong> ${avgInstabuys.toFixed(1)}</div>
       <div><strong>Avg sell order volume:</strong> ${avgSellOrder.toFixed(1)}</div>
     </div>
-    <div style="text-align: right;">
+    <div>
       <div><strong>Avg instasells:</strong> ${avgInstasells.toFixed(1)}</div>
       <div><strong>Avg buy order volume:</strong> ${avgBuyOrder.toFixed(1)}</div>
     </div>
   </div>
-  <div style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 10px; text-align: center; font-weight: bold;">
+  <div style="margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 10px; text-align: center; font-size: 18px; font-weight: bold;">
     Market spread: ${isFinite(spread) ? (spread > 0 ? "+" : "") + spread + "%" : "N/A"}
   </div>
 `;
-
-
 
   // Add economic info (spread)
   const spreadBox = document.createElement("div");
