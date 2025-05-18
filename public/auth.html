@@ -80,8 +80,6 @@
     <div id="form">
       <input id="username" type="text" placeholder="Username" />
       <input id="password" type="password" placeholder="Password" />
-      <input id="mcUsername" type="text" placeholder="Minecraft Username" style="display: none;" />
-      <input id="sbProfile" type="text" placeholder="SkyBlock Profile (e.g. Lemon)" style="display: none;" />
       <button id="submitBtn">Login</button>
       <div class="error" id="errorMsg"></div>
     </div>
@@ -99,9 +97,6 @@
     const submitBtn = document.getElementById("submitBtn");
     const errorMsg = document.getElementById("errorMsg");
 
-    const mcInput = document.getElementById("mcUsername");
-    const profileInput = document.getElementById("sbProfile");
-
     let isLogin = true;
 
     loginTab.onclick = () => {
@@ -109,8 +104,6 @@
       loginTab.classList.add("active");
       signupTab.classList.remove("active");
       submitBtn.textContent = "Login";
-      mcInput.style.display = "none";
-      profileInput.style.display = "none";
     };
 
     signupTab.onclick = () => {
@@ -118,17 +111,13 @@
       signupTab.classList.add("active");
       loginTab.classList.remove("active");
       submitBtn.textContent = "Sign Up";
-      mcInput.style.display = "block";
-      profileInput.style.display = "block";
     };
 
     submitBtn.onclick = async () => {
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
-      const mc_username = mcInput.value.trim();
-      const sb_profile = profileInput.value.trim();
 
-      if (!username || !password || (!isLogin && (!mc_username || !sb_profile))) {
+      if (!username || !password ) {
         errorMsg.textContent = "Please fill in all required fields.";
         return;
       }
@@ -148,13 +137,11 @@
 
         sessionStorage.setItem("user_id", data.id);
         sessionStorage.setItem("username", data.username);
-        sessionStorage.setItem("mc_username", data.mc_username || "");
-        sessionStorage.setItem("sb_profile", data.sb_profile || "");
         window.location.href = "index.html";
       } else {
         const { data, error } = await supabase
           .from("users")
-          .insert([{ username, password, mc_username, sb_profile }])
+          .insert([{ username, password, }])
           .select()
           .maybeSingle();
 
@@ -165,8 +152,6 @@
 
         sessionStorage.setItem("user_id", data.id);
         sessionStorage.setItem("username", data.username);
-        sessionStorage.setItem("mc_username", data.mc_username);
-        sessionStorage.setItem("sb_profile", data.sb_profile);
         window.location.href = "index.html";
       }
     };
