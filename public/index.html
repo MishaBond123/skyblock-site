@@ -151,7 +151,7 @@
   <div class="container">
     <div class="tabs">
       <a class="tab active-tab" href="index.html">Orders</a>
-      <a class="tab" href="saved-orders.html">Saved Orders</a>
+      <a class="tab" href="saved-items.html">Saved Items</a>
     </div>
 
     <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
@@ -274,7 +274,7 @@
         chartLink.innerHTML = `
           View the chart on skyblock.finance <a href="https://skyblock.finance/items/${item.id}/chart" target="_blank" style="color: #00bfff; text-decoration: underline;">Here</a>
         `;
-        addSaveButtonAfterChart(item.id);
+        addSaveButton(item.id);
         loadData(item.id);
 
         const url = new URL(window.location);
@@ -367,7 +367,7 @@
     }
   }
 
-  function addSaveButtonAfterChart(itemId) {
+  function addSaveButton(itemId) {
     let existing = document.getElementById("saveItemButton");
     if (existing) return;
 
@@ -387,10 +387,8 @@
     chartLink.insertAdjacentElement("afterend", button);
 
     button.onclick = async () => {
-      const price = parseFloat(trackInput.value.replace(/,/g, ''));
-      if (!itemId || isNaN(price)) return alert("Please enter a valid item and track price.");
-
-      const { error } = await supabase.from("saved_orders").insert([{ user_id: userId, item: itemId, price }]);
+      if (!userId || !itemId) return;
+      const { error } = await supabase.from("saved_orders").insert([{ user_id: userId, item: itemId }]);
       if (error) return alert("Error saving item: " + error.message);
 
       const popup = document.createElement("div");
@@ -421,7 +419,7 @@
     chartLink.innerHTML = `
       View the chart on skyblock.finance <a href="https://skyblock.finance/items/${preloadedItem}/chart" target="_blank" style="color: #00bfff; text-decoration: underline;">Here</a>
     `;
-    addSaveButtonAfterChart(preloadedItem);
+    addSaveButton(preloadedItem);
     loadData(preloadedItem);
   }
   if (preloadedTrack) {
