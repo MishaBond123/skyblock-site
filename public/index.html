@@ -335,6 +335,17 @@ volumeBox.innerHTML = `
       <div><strong>Avg buy order volume:</strong> ${avgBuyOrder.toFixed(1)}</div>
     </div>
   </div>
+
+  <div style="
+    margin-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.3);
+    padding-top: 10px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+  ">
+    Market spread: ${isFinite(spread) ? (spread > 0 ? "+" : "") + spread + "%" : "N/A"}
+  </div>
 `;
 
   // Add economic info (spread)
