@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Saved Items</title>
+  <title>Saved Orders</title>
   <link rel="icon" type="image/jpeg" href="site-icon.png" />
   <style>
     body {
@@ -39,6 +39,14 @@
     .active-tab {
       background-color: rgba(255,255,255,0.1);
       border-bottom: 2px solid #00bfff;
+    }
+    input {
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      width: 200px;
     }
     button {
       padding: 10px 14px;
@@ -76,14 +84,14 @@
   <div class="container">
     <div class="tabs">
       <a class="tab" href="index.html">Orders</a>
-      <a class="tab active-tab" href="saved-items.html">Saved Items</a>
+      <a class="tab active-tab" href="saved-orders.html">Saved Orders</a>
     </div>
 
     <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
       <a href="auth.html" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>
     </div>
 
-    <h1>Saved Items</h1>
+    <h1>Saved Orders</h1>
     <div id="content"></div>
   </div>
 
@@ -100,7 +108,7 @@
     const content = document.getElementById("content");
 
     if (!userId || !username) {
-      content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your saved items.</p>`;
+      content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your saved orders.</p>`;
     } else {
       authStatus.innerHTML = `
         Logged in as <strong>${username}</strong>
@@ -116,11 +124,18 @@
         .select("*")
         .eq("user_id", userId);
 
-      const list = document.createElement("div");
-      list.style.marginTop = "30px";
+      content.innerHTML = `
+        <div class="center">
+          <input id="itemInput" placeholder="Item Type" />
+          <input id="priceInput" placeholder="Order Price" />
+          <button id="addBtn">+ Add Order</button>
+        </div>
+        <div id="ordersList" style="margin-top: 30px;"></div>
+      `;
 
+      const list = document.getElementById("ordersList");
       if (!orders || orders.length === 0) {
-        list.innerHTML = '<p class="center">No saved items yet.</p>';
+        list.innerHTML = '<p class="center">No saved orders yet.</p>';
       } else {
         list.innerHTML = orders.map(order => `
           <div class="order-row">
@@ -132,15 +147,38 @@
         `).join("");
       }
 
-      content.appendChild(list);
-
       document.querySelectorAll(".remove-btn").forEach(btn => {
         btn.onclick = async () => {
           await supabase.from("saved_orders").delete().eq("id", btn.dataset.id);
           location.reload();
         };
       });
+
+      document.getElementById("addBtn").onclick = async () => {
+  const item = document.getElementById("itemInput").value.trim();
+  const price = document.getElementById("priceInput").value.trim();
+  if (!item || !price || isNaN(price)) return alert("Enter a valid item and price.");
+
+  const { data, error } = await supabase.from("saved_orders").insert([
+    {
+      user_id: userId,
+      item,
+      price
+    }
+  ]);
+
+  if (error) {
+    console.error("Supabase insert error:", error);
+    alert("Error saving order: " + error.message);
+  } else {
+    location.reload();
+  }
+};
+
     }
   </script>
+  <script defer src="https://vercel.com/analytics/script.js"></script>
+  <noscript><img src="https://vercel.com/api/analytics/collect" alt="" /></noscript>
 </body>
 </html>
+
