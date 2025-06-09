@@ -55,102 +55,107 @@
   </div>
 
   <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-    const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
-    const SUPABASE_ANON_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const SUPABASE_URL      = "https://dhgfmbsyndfbsretlhvm.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const userId   = sessionStorage.getItem("user_id");
-    const username = sessionStorage.getItem("username");
-    const authStatus = document.getElementById("authStatus");
-    const content = document.getElementById("content");
+  const userId     = localStorage.getItem("user_id");
+  const username   = localStorage.getItem("username");
+  const authStatus = document.getElementById("authStatus");
+  const content    = document.getElementById("content");
 
-    /* ----------  logged-out view ---------- */
-    if(!userId || !username){
-      content.innerHTML = `
-        <p class="center">
-          Please <a href="auth.html" style="color:#00bfff;">log in / sign up</a>
-          to view your saved items.
-        </p>`;
-      return;
-    }
+  /* ----------  logged-out view ---------- */
+  if (!userId || !username) {
+    content.innerHTML = `
+      <p class="center">
+        Please <a href="auth.html" style="color:#00bfff;">log in / sign up</a>
+        to view your saved items.
+      </p>`;
+    return;
+  }
 
-    /* ----------  auth banner ---------- */
-    authStatus.innerHTML = `
-      Logged in as <strong>${username}</strong>
-      <a href="#" id="logoutLink"
-         style="color:#00bfff;margin-left:10px;text-decoration:underline;">Log Out</a>`;
-    document.getElementById("logoutLink").onclick = () => {
-      sessionStorage.clear(); location.reload();
+  /* ----------  auth banner ---------- */
+  authStatus.innerHTML = `
+    Logged in as <strong>${username}</strong>
+    <a href="#" id="logoutLink"
+       style="color:#00bfff;margin-left:10px;text-decoration:underline;">Log Out</a>`;
+  document.getElementById("logoutLink").onclick = () => {
+    localStorage.clear();
+    location.reload();
+  };
+
+  /* ----------  fetch list ---------- */
+  const { data: items, error } = await supabase
+    .from("saved_orders")
+    .select("*")
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error(error);
+    content.innerHTML = '<p class="center">Error loading items.</p>';
+    return;
+  }
+
+  if (!items || items.length === 0) {
+    content.innerHTML = `
+      <p class="center">
+        No saved items yet.<br /><small>Add items in the Orders menu.</small>
+      </p>`;
+    return;
+  }
+
+  content.innerHTML = '<div id="itemsList"></div>';
+  const list = document.getElementById("itemsList");
+
+  list.innerHTML = items.map(item => `
+    <div class="item-row" data-id="${item.id}">
+      <div>
+        <a href="index.html?item=${item.item}${item.price ? "&track="+item.price : ""}">
+          ${item.item}${item.price ? " @ "+Number(item.price).toLocaleString()+" coins" : ""}
+        </a>
+      </div>
+      <div>
+        <button class="edit-btn">Edit</button>
+        <button class="remove-btn">✕</button>
+      </div>
+    </div>`).join("");
+
+  /* ----------  remove ---------- */
+  list.querySelectorAll(".remove-btn").forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.closest(".item-row").dataset.id;
+      await supabase.from("saved_orders").delete().eq("id", id);
+      location.reload();
     };
+  });
 
-    /* ----------  fetch & render list ---------- */
-    const { data: items, error } = await supabase
-      .from("saved_orders")
-      .select("*")
-      .eq("user_id", userId);
+  /* ----------  edit ---------- */
+  list.querySelectorAll(".edit-btn").forEach(btn => {
+    btn.onclick = async () => {
+      const row      = btn.closest(".item-row");
+      const id       = row.dataset.id;
+      const original = items.find(i => i.id == id);
 
-    if(error){
-      console.error(error);
-      content.innerHTML = '<p class="center">Error loading items.</p>';
-      return;
-    }
+      const newItem  = prompt("Item ID:", original.item)?.trim();
+      const newPrice = prompt("Track price (blank = none):", original.price || "")?.trim();
+      if (!newItem) { alert("Item ID can’t be empty."); return; }
 
-    if(!items || items.length===0){
-      content.innerHTML = `
-        <p class="center">No saved items yet.<br>
-           <small>Add items in the Orders menu.</small></p>`;
-      return;
-    }
+      const { error } = await supabase
+        .from("saved_orders")
+        .update({ item: newItem, price: newPrice || null })
+        .eq("id", id);
 
-    content.innerHTML = `<div id="itemsList"></div>`;
-    const list = document.getElementById("itemsList");
-    list.innerHTML = items.map(item=>`
-      <div class="item-row" data-id="${item.id}">
-        <div>
-          <a href="index.html?item=${item.item}${item.price ? '&track='+item.price : ''}">
-            ${item.item}${item.price ? ` @ ${Number(item.price).toLocaleString()} coins` : ''}
-          </a>
-        </div>
-        <div>
-          <button class="edit-btn">Edit</button>
-          <button class="remove-btn">✕</button>
-        </div>
-      </div>`).join("");
-
-    /* ----------  remove ---------- */
-    list.querySelectorAll(".remove-btn").forEach(btn=>{
-      btn.onclick = async()=>{
-        const id = btn.closest(".item-row").dataset.id;
-        await supabase.from("saved_orders").delete().eq("id", id);
+      if (error) {
+        console.error(error);
+        alert("Error updating item.");
+      } else {
         location.reload();
-      };
-    });
-
-    /* ----------  edit ---------- */
-    list.querySelectorAll(".edit-btn").forEach(btn=>{
-      btn.onclick = async()=>{
-        const row  = btn.closest(".item-row");
-        const id   = row.dataset.id;
-        const oldItem  = items.find(i=>i.id==id);
-        const newItem  = prompt("Item ID:", oldItem.item)   ?.trim();
-        const newPrice = prompt("Track Price (blank = none):", oldItem.price||"")?.trim();
-
-        if(!newItem) return alert("Item ID cannot be empty.");
-        const { error } = await supabase
-          .from("saved_orders")
-          .update({ item:newItem, price:newPrice||null })
-          .eq("id", id);
-        if(error){
-          console.error(error); alert("Error updating item.");
-        }else{
-          location.reload();
-        }
-      };
-    });
-  </script>
+      }
+    };
+  });
+</script>
 
   <script defer src="https://vercel.com/analytics/script.js"></script>
   <noscript><img src="https://vercel.com/api/analytics/collect" alt=""/></noscript>
