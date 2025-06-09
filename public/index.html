@@ -42,13 +42,16 @@
       border-bottom: 2px solid #00bfff;
     }
     input {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      margin: 10px 0 10px;
-      border-radius: 6px;
-      border: none;
-    }
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  margin: 10px 0 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
     .tables {
       display: flex;
       gap: 20px;
@@ -59,28 +62,48 @@
       min-width: 400px;
     }
     table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 30px;
-      background-color: rgba(255, 255, 255, 0.05);
-    }
-    th, td {
-      padding: 10px;
-      text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    th {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-    .highlight-yellow {
-      background-color: rgba(255, 255, 0, 0.2);
-    }
-    .highlight-red {
-      background-color: rgba(255, 0, 0, 0.4);
-    }
-    .highlight-blue {
-      background-color: rgba(0, 191, 255, 0.3);
-    }
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+th {
+  background-color: rgba(0, 191, 255, 0.3);
+  padding: 12px;
+  font-weight: bold;
+}
+
+td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 14px;
+}
+
+tr:nth-child(even) td {
+  background-color: rgba(255,255,255,0.03);
+}
+
+.highlight-yellow {
+  background-color: rgba(255, 255, 0, 0.15) !important;
+}
+
+.highlight-red {
+  background-color: rgba(255, 80, 80, 0.25) !important;
+}
+
+.highlight-blue {
+  background-color: rgba(0, 191, 255, 0.25) !important;
+}
+
+tfoot td {
+  font-weight: bold;
+  background-color: rgba(255,255,255,0.07);
+}
+
     .order-info {
       margin: 20px auto;
       max-width: 600px;
