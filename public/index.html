@@ -151,7 +151,7 @@
   <div class="container">
     <div class="tabs">
       <a class="tab active-tab" href="index.html">Orders</a>
-      <a class="tab" href="saved-orders.html">Saved Orders</a>
+      <a class="tab" href="saved-orders.html">Saved Items</a>
     </div>
 
     <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
@@ -169,6 +169,10 @@
     <input id="itemInput" placeholder="Enter Item ID" />
     <div id="itemDropdown" class="dropdown"></div>
     <div id="chartLink" style="margin-top: 8px; font-size: 15px;"></div>
+    <div id="saveStatus" style="margin-top: 8px; font-size: 14px; color: #00bfff; cursor: pointer; text-decoration: underline;">
+  Save item
+</div>
+
 
     <h3>Track Order By Price:</h3>
     <input id="trackInput" placeholder="Enter price to track" />
@@ -427,6 +431,37 @@ volumeBox.innerHTML = `
       setInterval(() => {
         if (currentItemId) loadData(currentItemId);
       }, 3000);
+      const saveStatus = document.getElementById("saveStatus");
+saveStatus.onclick = async () => {
+  if (!userId || !username) {
+    alert("Please log in to save items.");
+    return;
+  }
+
+  const item = itemInput.value.trim();
+  if (!item) return alert("No item to save.");
+
+  const { data: existing, error: checkError } = await supabase
+    .from("saved_orders")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("item", item);
+
+  if (existing?.length > 0) {
+    saveStatus.textContent = "Item already saved";
+    return;
+  }
+
+  const { error: insertError } = await supabase.from("saved_orders").insert([{ user_id: userId, item, price: 0 }]);
+
+  if (insertError) {
+    alert("Error saving item.");
+  } else {
+    saveStatus.textContent = "Item saved!";
+    setTimeout(() => saveStatus.textContent = "Save item", 3000);
+  }
+};
+
     </script>    
   </div>
   <script defer src="https://vercel.com/analytics/script.js"></script>

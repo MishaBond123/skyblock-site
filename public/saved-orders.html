@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Saved Orders</title>
+  <title>Saved Items</title>
   <link rel="icon" type="image/jpeg" href="site-icon.png" />
   <style>
     body {
@@ -84,7 +84,7 @@
   <div class="container">
     <div class="tabs">
       <a class="tab" href="index.html">Orders</a>
-      <a class="tab active-tab" href="saved-orders.html">Saved Orders</a>
+      <a class="tab active-tab" href="saved-orders.html">Saved Items</a>
     </div>
 
     <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
@@ -108,51 +108,49 @@
     const content = document.getElementById("content");
 
     if (!userId || !username) {
-      content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your saved orders.</p>`;
-    } else {
-      authStatus.innerHTML = `
-        Logged in as <strong>${username}</strong>
-        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
-      `;
-      document.getElementById("logoutLink").onclick = () => {
-        sessionStorage.clear();
-        location.reload();
-      };
+  content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your saved items.</p>`;
+} else {
+  authStatus.innerHTML = `
+    Logged in as <strong>${username}</strong>
+    <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+  `;
+  document.getElementById("logoutLink").onclick = () => {
+    sessionStorage.clear();
+    location.reload();
+  };
 
-      const { data: orders, error } = await supabase
-        .from("saved_orders")
-        .select("*")
-        .eq("user_id", userId);
+  const { data: items, error } = await supabase
+    .from("saved_orders")
+    .select("*")
+    .eq("user_id", userId);
 
-      content.innerHTML = `
-        <div class="center">
-          <input id="itemInput" placeholder="Item Type" />
-          <input id="priceInput" placeholder="Order Price" />
-          <button id="addBtn">+ Add Order</button>
-        </div>
-        <div id="ordersList" style="margin-top: 30px;"></div>
-      `;
+  content.innerHTML = `
+    <div class="center" style="margin-bottom: 20px;">
+      Save items in the Order tab.
+    </div>
+    <div id="itemsList" style="margin-top: 20px;"></div>
+  `;
 
-      const list = document.getElementById("ordersList");
-      if (!orders || orders.length === 0) {
-        list.innerHTML = '<p class="center">No saved orders yet.</p>';
-      } else {
-        list.innerHTML = orders.map(order => `
-          <div class="order-row">
-            <a href="index.html?item=${order.item}&track=${order.price}">
-              ${order.item} @ ${parseFloat(order.price).toLocaleString()} coins
-            </a>
-            <button class="remove-btn" data-id="${order.id}">–</button>
-          </div>
-        `).join("");
-      }
+  const list = document.getElementById("itemsList");
+  if (!items || items.length === 0) {
+    list.innerHTML = '<p class="center">No saved items yet.</p>';
+  } else {
+    list.innerHTML = items.map(item => `
+      <div class="order-row">
+        <a href="index.html?item=${item.item}">${item.item}</a>
+        <button class="remove-btn" data-id="${item.id}">–</button>
+      </div>
+    `).join("");
+  }
 
-      document.querySelectorAll(".remove-btn").forEach(btn => {
-        btn.onclick = async () => {
-          await supabase.from("saved_orders").delete().eq("id", btn.dataset.id);
-          location.reload();
-        };
-      });
+  document.querySelectorAll(".remove-btn").forEach(btn => {
+    btn.onclick = async () => {
+      await supabase.from("saved_orders").delete().eq("id", btn.dataset.id);
+      location.reload();
+    };
+  });
+}
+
 
       document.getElementById("addBtn").onclick = async () => {
   const item = document.getElementById("itemInput").value.trim();
@@ -175,7 +173,7 @@
   }
 };
 
-    }
+    
   </script>
   <script defer src="https://vercel.com/analytics/script.js"></script>
   <noscript><img src="https://vercel.com/api/analytics/collect" alt="" /></noscript>
