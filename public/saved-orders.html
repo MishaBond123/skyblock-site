@@ -3,54 +3,95 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Saved Items</title>
+  <title>Saved Orders</title>
   <link rel="icon" type="image/jpeg" href="site-icon.png" />
   <style>
-    body{
-      margin:0;font-family:'Segoe UI',sans-serif;
-      background:url('bgimage.jpeg') center/cover fixed;
-      color:#fff;
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url('bgimage.jpeg');
+      background-size: cover;
+      background-attachment: fixed;
+      color: #fff;
     }
-    .container{
-      max-width:1200px;margin:40px auto;background:rgba(0,0,0,.75);
-      padding:30px;border-radius:16px;position:relative;
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      background-color: rgba(0, 0, 0, 0.75);
+      padding: 30px;
+      border-radius: 16px;
+      position: relative;
     }
-    .tabs{display:flex;gap:10px;position:absolute;top:-40px;left:20px;}
-    .tab{
-      padding:8px 16px;background:rgba(0,0,0,.6);
-      color:#fff;text-decoration:none;border-radius:8px 8px 0 0;
+    .tabs {
+      display: flex;
+      gap: 10px;
+      position: absolute;
+      top: -40px;
+      left: 20px;
     }
-    .active-tab{background:rgba(255,255,255,.1);border-bottom:2px solid #00bfff;}
-    /* list rows */
-    .item-row{
-      display:flex;justify-content:space-between;align-items:center;
-      background:rgba(255,255,255,.05);margin:8px 0;padding:12px 16px;
-      border-radius:8px;
+    .tab {
+      padding: 8px 16px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px 8px 0 0;
     }
-    .item-row a{color:#00bfff;text-decoration:underline;}
-    button{
-      padding:6px 10px;border:none;border-radius:6px;font-size:14px;
-      cursor:pointer;
+    .active-tab {
+      background-color: rgba(255,255,255,0.1);
+      border-bottom: 2px solid #00bfff;
     }
-    .edit-btn{background:#ffa800;color:#000;margin-right:6px;}
-    .remove-btn{background:crimson;color:#fff;}
-    .center{text-align:center;margin-top:30px;}
+    input {
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      width: 200px;
+    }
+    button {
+      padding: 10px 14px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      background-color: #00bfff;
+      color: #fff;
+    }
+    .order-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: rgba(255, 255, 255, 0.05);
+      margin: 8px 0;
+      padding: 10px 16px;
+      border-radius: 8px;
+    }
+    .order-row a {
+      color: #00bfff;
+      text-decoration: underline;
+    }
+    .remove-btn {
+      background-color: crimson;
+      margin-left: 12px;
+    }
+    .center {
+      text-align: center;
+      margin-top: 30px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- tabs -->
     <div class="tabs">
       <a class="tab" href="index.html">Orders</a>
-      <a class="tab active-tab" href="saved-items.html">Saved&nbsp;Items</a>
+      <a class="tab active-tab" href="saved-orders.html">Saved Orders</a>
     </div>
 
-    <!-- auth banner -->
-    <div id="authStatus" style="position:absolute;top:10px;right:20px;font-size:14px;">
-      <a href="auth.html" style="color:#00bfff;text-decoration:underline;">Log In&nbsp;/&nbsp;Sign Up</a>
+    <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
+      <a href="auth.html" style="color: #00bfff; text-decoration: underline;">Log In / Sign Up</a>
     </div>
 
-    <h1>Saved Items</h1>
+    <h1>Saved Orders</h1>
     <div id="content"></div>
   </div>
 
@@ -58,101 +99,86 @@
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
     const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
-    const SUPABASE_ANON_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const userId   = sessionStorage.getItem("user_id");
+    const userId = sessionStorage.getItem("user_id");
     const username = sessionStorage.getItem("username");
     const authStatus = document.getElementById("authStatus");
     const content = document.getElementById("content");
 
-    /* ----------  logged-out view ---------- */
-    if(!userId || !username){
-      content.innerHTML = `
-        <p class="center">
-          Please <a href="auth.html" style="color:#00bfff;">log in / sign up</a>
-          to view your saved items.
-        </p>`;
-      return;
-    }
-
-    /* ----------  auth banner ---------- */
-    authStatus.innerHTML = `
-      Logged in as <strong>${username}</strong>
-      <a href="#" id="logoutLink"
-         style="color:#00bfff;margin-left:10px;text-decoration:underline;">Log Out</a>`;
-    document.getElementById("logoutLink").onclick = () => {
-      sessionStorage.clear(); location.reload();
-    };
-
-    /* ----------  fetch & render list ---------- */
-    const { data: items, error } = await supabase
-      .from("saved_orders")
-      .select("*")
-      .eq("user_id", userId);
-
-    if(error){
-      console.error(error);
-      content.innerHTML = '<p class="center">Error loading items.</p>';
-      return;
-    }
-
-    if(!items || items.length===0){
-      content.innerHTML = `
-        <p class="center">No saved items yet.<br>
-           <small>Add items in the Orders menu.</small></p>`;
-      return;
-    }
-
-    content.innerHTML = `<div id="itemsList"></div>`;
-    const list = document.getElementById("itemsList");
-    list.innerHTML = items.map(item=>`
-      <div class="item-row" data-id="${item.id}">
-        <div>
-          <a href="index.html?item=${item.item}${item.price ? '&track='+item.price : ''}">
-            ${item.item}${item.price ? ` @ ${Number(item.price).toLocaleString()} coins` : ''}
-          </a>
-        </div>
-        <div>
-          <button class="edit-btn">Edit</button>
-          <button class="remove-btn">✕</button>
-        </div>
-      </div>`).join("");
-
-    /* ----------  remove ---------- */
-    list.querySelectorAll(".remove-btn").forEach(btn=>{
-      btn.onclick = async()=>{
-        const id = btn.closest(".item-row").dataset.id;
-        await supabase.from("saved_orders").delete().eq("id", id);
+    if (!userId || !username) {
+      content.innerHTML = `<p class="center">Please <a href="auth.html" style="color:#00bfff;">log in</a> to view your saved orders.</p>`;
+    } else {
+      authStatus.innerHTML = `
+        Logged in as <strong>${username}</strong>
+        <a href="#" id="logoutLink" style="color:#00bfff; margin-left:10px; text-decoration:underline;">Log Out</a>
+      `;
+      document.getElementById("logoutLink").onclick = () => {
+        sessionStorage.clear();
         location.reload();
       };
-    });
 
-    /* ----------  edit ---------- */
-    list.querySelectorAll(".edit-btn").forEach(btn=>{
-      btn.onclick = async()=>{
-        const row  = btn.closest(".item-row");
-        const id   = row.dataset.id;
-        const oldItem  = items.find(i=>i.id==id);
-        const newItem  = prompt("Item ID:", oldItem.item)   ?.trim();
-        const newPrice = prompt("Track Price (blank = none):", oldItem.price||"")?.trim();
+      const { data: orders, error } = await supabase
+        .from("saved_orders")
+        .select("*")
+        .eq("user_id", userId);
 
-        if(!newItem) return alert("Item ID cannot be empty.");
-        const { error } = await supabase
-          .from("saved_orders")
-          .update({ item:newItem, price:newPrice||null })
-          .eq("id", id);
-        if(error){
-          console.error(error); alert("Error updating item.");
-        }else{
+      content.innerHTML = `
+        <div class="center">
+          <input id="itemInput" placeholder="Item Type" />
+          <input id="priceInput" placeholder="Order Price" />
+          <button id="addBtn">+ Add Order</button>
+        </div>
+        <div id="ordersList" style="margin-top: 30px;"></div>
+      `;
+
+      const list = document.getElementById("ordersList");
+      if (!orders || orders.length === 0) {
+        list.innerHTML = '<p class="center">No saved orders yet.</p>';
+      } else {
+        list.innerHTML = orders.map(order => `
+          <div class="order-row">
+            <a href="index.html?item=${order.item}&track=${order.price}">
+              ${order.item} @ ${parseFloat(order.price).toLocaleString()} coins
+            </a>
+            <button class="remove-btn" data-id="${order.id}">–</button>
+          </div>
+        `).join("");
+      }
+
+      document.querySelectorAll(".remove-btn").forEach(btn => {
+        btn.onclick = async () => {
+          await supabase.from("saved_orders").delete().eq("id", btn.dataset.id);
           location.reload();
-        }
-      };
-    });
-  </script>
+        };
+      });
 
+      document.getElementById("addBtn").onclick = async () => {
+  const item = document.getElementById("itemInput").value.trim();
+  const price = document.getElementById("priceInput").value.trim();
+  if (!item || !price || isNaN(price)) return alert("Enter a valid item and price.");
+
+  const { data, error } = await supabase.from("saved_orders").insert([
+    {
+      user_id: userId,
+      item,
+      price
+    }
+  ]);
+
+  if (error) {
+    console.error("Supabase insert error:", error);
+    alert("Error saving order: " + error.message);
+  } else {
+    location.reload();
+  }
+};
+
+    }
+  </script>
   <script defer src="https://vercel.com/analytics/script.js"></script>
-  <noscript><img src="https://vercel.com/api/analytics/collect" alt=""/></noscript>
+  <noscript><img src="https://vercel.com/api/analytics/collect" alt="" /></noscript>
 </body>
 </html>
+
