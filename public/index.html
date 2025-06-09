@@ -26,7 +26,7 @@
       padding:8px 16px;background:rgba(0,0,0,.6);
       color:#fff;text-decoration:none;border-radius:8px 8px 0 0;
     }
-    .active-tab{background:rgba(255,255,255,.1);border-bottom:2px solid #00bfff55;}
+    .active-tab{background:rgba(255,255,255,.1);border-bottom:2px solid #00bfff;}
     /* ----------  inputs / buttons ---------- */
     input{
       width:100%;padding:10px;font-size:16px;margin:10px 0;
@@ -119,255 +119,234 @@
 
   <!-- ≡≡≡ scripts ≡≡≡ -->
   <script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-  const SUPABASE_URL      = "https://dhgfmbsyndfbsretlhvm.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    /* ----------  Supabase ---------- */
+    const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  /* ----------  auth banner ---------- */
-  const userId   = localStorage.getItem("user_id");
-  const username = localStorage.getItem("username");
-  const authStatus = document.getElementById("authStatus");
+    /* ----------  auth banner ---------- */
+    const userId   = sessionStorage.getItem("user_id");
+    const username = sessionStorage.getItem("username");
+    const authStatus = document.getElementById("authStatus");
+    if (userId && username){
+      authStatus.innerHTML = `
+        Logged in as <strong>${username}</strong>
+        <a href="#" id="logoutLink"
+           style="color:#00bfff;margin-left:10px;text-decoration:underline;">Log Out</a>`;
+      document.getElementById("logoutLink").onclick = () => {
+        sessionStorage.clear(); location.reload();
+      };
+    }
 
-  if (userId && username) {
-    authStatus.innerHTML = `
-      Logged in as <strong>${username}</strong>
-      <a href="#" id="logoutLink"
-         style="color:#00bfff;margin-left:10px;text-decoration:underline;">Log Out</a>`;
-    document.getElementById("logoutLink").onclick = () => {
-      localStorage.clear();
-      location.reload();
+    /* ----------  element refs ---------- */
+    const itemInput   = document.getElementById("itemInput");
+    const trackInput  = document.getElementById("trackInput");
+    const saveBtn     = document.getElementById("saveItemBtn");
+    const itemDropdown= document.getElementById("itemDropdown");
+    const chartLink   = document.getElementById("chartLink");
+    const volumeBox   = document.getElementById("volumeBox");
+    const buyBody     = document.querySelector("#buyTable tbody");
+    const sellBody    = document.querySelector("#sellTable tbody");
+    const buyFoot     = document.querySelector("#buyTable tfoot tr");
+    const sellFoot    = document.querySelector("#sellTable tfoot tr");
+    const orderInfo   = document.getElementById("orderInfo");
+
+    let latestBuySummary=[], latestSellSummary=[], currentItemId="";
+    let allItems = [];
+
+    /* ----------  helper: fetch all item IDs once ---------- */
+    async function fetchAllItems(){
+      const res = await fetch("https://api.hypixel.net/skyblock/bazaar");
+      const json = await res.json();
+      allItems = Object.keys(json.products).map(id=>{
+        const quick = json.products[id].quick_status;
+        const price = quick.sellPrice>1e6 ? (quick.sellPrice/1e6).toFixed(2)+'M'
+                     : quick.sellPrice>1e3 ? (quick.sellPrice/1e3).toFixed(1)+'k'
+                     : quick.sellPrice.toFixed(1);
+        return {
+          id,
+          name: id.replace(/_/g,' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()),
+          price
+        };
+      });
+    }
+
+    /* ----------  autocomplete dropdown ---------- */
+    itemInput.addEventListener("input",()=>{
+      const query = itemInput.value.trim().toLowerCase();
+      itemDropdown.innerHTML = "";
+      if(!query){ itemDropdown.style.display="none"; return; }
+
+      const filtered = allItems.filter(i=> i.name.toLowerCase().includes(query)
+                                       || i.id.toLowerCase().includes(query));
+      filtered.slice(0,50).forEach(item=>{
+        const div = document.createElement("div");
+        div.className="dropdown-item";
+        div.innerHTML = `<div class="dropdown-label">${item.name}</div>
+                         <div class="dropdown-price">${item.price} /bz</div>`;
+        div.onclick = ()=>{
+          itemInput.value = item.id;
+          itemDropdown.style.display="none";
+          currentItemId = item.id;
+          chartLink.innerHTML = `View the chart on skyblock.finance
+            <a href="https://skyblock.finance/items/${item.id}/chart"
+               target="_blank" style="color:#00bfff;text-decoration:underline;">Here</a>`;
+          loadData(item.id);
+
+          const url = new URL(window.location);
+          url.searchParams.set("item",item.id);
+          history.replaceState({}, "", url);
+        };
+        itemDropdown.appendChild(div);
+      });
+      itemDropdown.style.display="block";
+    });
+
+    /* ----------  Save-item handler ---------- */
+    saveBtn.onclick = async ()=>{
+      const item = itemInput.value.trim();
+      if(!item){
+        alert("Please enter an Item ID first."); return;
+      }
+      if(!userId){
+        alert("Please sign in to save items.");
+        window.location.href = "auth.html";
+        return;
+      }
+      /* optional price: we store the track field if present, else null */
+      const price = trackInput.value.trim();
+      const { error } = await supabase
+        .from("saved_orders")
+        .insert([{ user_id:userId, item, price }]);
+      if(error){
+        console.error(error);
+        alert("There was an error saving that item.");
+      }else{
+        alert("Item saved!  View it in the Saved Items tab.");
+      }
     };
-  }
 
-  /* ----------  element refs ---------- */
-  const itemInput    = document.getElementById("itemInput");
-  const trackInput   = document.getElementById("trackInput");
-  const saveBtn      = document.getElementById("saveItemBtn");
-  const itemDropdown = document.getElementById("itemDropdown");
-  const chartLink    = document.getElementById("chartLink");
-  const volumeBox    = document.getElementById("volumeBox");
-  const buyBody      = document.querySelector("#buyTable tbody");
-  const sellBody     = document.querySelector("#sellTable tbody");
-  const buyFoot      = document.querySelector("#buyTable tfoot tr");
-  const sellFoot     = document.querySelector("#sellTable tfoot tr");
-  const orderInfo    = document.getElementById("orderInfo");
-
-  let latestBuySummary  = [];
-  let latestSellSummary = [];
-  let currentItemId     = "";
-  let allItems          = [];
-
-  /* ----------  fetch all item IDs once ---------- */
-  async function fetchAllItems() {
-    const res  = await fetch("https://api.hypixel.net/skyblock/bazaar");
-    const json = await res.json();
-    allItems   = Object.keys(json.products).map(id => {
-      const quick  = json.products[id].quick_status;
-      const price  = quick.sellPrice > 1e6
-                       ? (quick.sellPrice / 1e6).toFixed(2) + "M"
-                       : quick.sellPrice > 1e3
-                       ? (quick.sellPrice / 1e3).toFixed(1) + "k"
-                       : quick.sellPrice.toFixed(1);
-      return {
-        id,
-        name: id.replace(/_/g," ").toLowerCase()
-                .replace(/\b\w/g,c=>c.toUpperCase()),
-        price
-      };
+    /* ----------  rest of original logic (unchanged except tiny clean-ups) ---------- */
+    trackInput.addEventListener("change",()=>{
+      const tracked=parseFloat(trackInput.value.replace(/,/g,''));
+      highlightTrackedOrder(tracked);
     });
-  }
 
-  /* ----------  autocomplete dropdown ---------- */
-  itemInput.addEventListener("input", () => {
-    const query = itemInput.value.trim().toLowerCase();
-    itemDropdown.innerHTML = "";
-    if (!query) { itemDropdown.style.display = "none"; return; }
+    async function loadData(itemId){
+      const res = await fetch("https://api.hypixel.net/skyblock/bazaar");
+      const json = await res.json();
+      const data = json.products[itemId];
+      if(!data) return;
 
-    const filtered = allItems.filter(i =>
-      i.name.toLowerCase().includes(query) || i.id.toLowerCase().includes(query));
+      /* averages */
+      const avgInstabuys = data.quick_status.buyMovingWeek  / 168;
+      const avgInstasells= data.quick_status.sellMovingWeek / 168;
 
-    filtered.slice(0,50).forEach(item => {
-      const div = document.createElement("div");
-      div.className = "dropdown-item";
-      div.innerHTML = `
-        <div class="dropdown-label">${item.name}</div>
-        <div class="dropdown-price">${item.price} /bz</div>`;
-      div.onclick = () => {
-        itemInput.value          = item.id;
-        itemDropdown.style.display = "none";
-        currentItemId            = item.id;
-        chartLink.innerHTML      =
-          `View the chart on skyblock.finance
-           <a href="https://skyblock.finance/items/${item.id}/chart"
-              target="_blank" style="color:#00bfff;text-decoration:underline;">Here</a>`;
-        loadData(item.id);
+      latestBuySummary  = data.sell_summary;
+      latestSellSummary = data.buy_summary;
 
-        /* update query-string for easy sharing */
-        const url = new URL(window.location);
-        url.searchParams.set("item", item.id);
-        history.replaceState({}, "", url);
-      };
-      itemDropdown.appendChild(div);
-    });
-    itemDropdown.style.display = "block";
-  });
+      renderTable(latestBuySummary, buyBody,  buyFoot,  avgInstasells);
+      renderTable(latestSellSummary, sellBody, sellFoot, avgInstabuys);
 
-  /* ----------  Save-item button ---------- */
-  saveBtn.onclick = async () => {
-    const item = itemInput.value.trim();
-    if (!item) { alert("Please enter an Item ID first."); return; }
+      highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g,'')));
 
-    if (!userId) {
-      alert("Please log in to save items.");
-      window.location.href = "auth.html";
-      return;
+      /* quick stats box */
+      const avgSellOrder = averageAmount(latestBuySummary);
+      const avgBuyOrder  = averageAmount(latestSellSummary);
+      const buyPrice = latestSellSummary[0]?.pricePerUnit || 1;
+      const sellPrice= latestBuySummary [0]?.pricePerUnit || 1;
+      const spread   = ((buyPrice - sellPrice) / sellPrice * 100).toFixed(2);
+
+      volumeBox.innerHTML = `
+        <div style="display:flex;justify-content:center;gap:100px;text-align:left;">
+          <div>
+            <div><strong>Avg instabuys:</strong> ${avgInstabuys.toFixed(1)}</div>
+            <div><strong>Avg sell-order volume:</strong> ${avgSellOrder.toFixed(1)}</div>
+          </div>
+          <div>
+            <div><strong>Avg instasells:</strong> ${avgInstasells.toFixed(1)}</div>
+            <div><strong>Avg buy-order volume:</strong> ${avgBuyOrder.toFixed(1)}</div>
+          </div>
+        </div>
+        <div class="volume-spread">
+          <strong>Market spread:</strong> ${isFinite(spread)?spread+'%':'N/A'}
+        </div>`;
     }
 
-    const price = trackInput.value.trim();
-    const { error } = await supabase
-      .from("saved_orders")
-      .insert([{ user_id: userId, item, price }]);
-
-    if (error) {
-      console.error(error);
-      alert("Error saving that item.");
-    } else {
-      alert("Item saved!  Check the Saved Items tab.");
+    function averageAmount(summary){
+      return summary.length
+        ? summary.reduce((sum,row)=>sum+row.amount,0)/summary.length : 0;
     }
-  };
 
-  /* ----------  price tracker field ---------- */
-  trackInput.addEventListener("change", () => {
-    const tracked = parseFloat(trackInput.value.replace(/,/g,""));
-    highlightTrackedOrder(tracked);
-  });
+    function renderTable(summary, tbody, tfootRow, hourlyVol){
+      tbody.innerHTML="";
+      let totalAmount=0,totalCoins=0;
+      summary.forEach(row=>{
+        const total=row.amount*row.pricePerUnit;
+        totalAmount+=row.amount; totalCoins+=total;
+        const tr=document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.orders}</td>
+          <td>${row.amount}</td>
+          <td>${row.pricePerUnit.toLocaleString()} coins</td>
+          <td>${total.toLocaleString()} coins</td>`;
+        if(row.amount>hourlyVol*5)      tr.classList.add("highlight-red");
+        else if(row.amount>hourlyVol)   tr.classList.add("highlight-yellow");
+        tbody.appendChild(tr);
+      });
+      tfootRow.innerHTML = `<td>Total:</td><td>${totalAmount}</td><td></td>
+                            <td>${totalCoins.toLocaleString()} coins</td>`;
+    }
 
-  /* ----------  fetch & render bazaar data ---------- */
-  async function loadData(itemId) {
-    const res  = await fetch("https://api.hypixel.net/skyblock/bazaar");
-    const json = await res.json();
-    const data = json.products[itemId];
-    if (!data) return;
-
-    /* quick maths */
-    const avgInstabuys  = data.quick_status.buyMovingWeek  / 168;
-    const avgInstasells = data.quick_status.sellMovingWeek / 168;
-
-    latestBuySummary  = data.sell_summary;  // sell orders
-    latestSellSummary = data.buy_summary;   // buy orders
-
-    renderTable(latestBuySummary,  buyBody,  buyFoot,  avgInstasells);
-    renderTable(latestSellSummary, sellBody, sellFoot, avgInstabuys);
-
-    highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g,"")));
-
-    /* mini dashboard */
-    const avgSellOrder = averageAmount(latestBuySummary);
-    const avgBuyOrder  = averageAmount(latestSellSummary);
-    const buyPrice     = latestSellSummary[0]?.pricePerUnit || 1;
-    const sellPrice    = latestBuySummary [0]?.pricePerUnit || 1;
-    const spread       = ((buyPrice - sellPrice) / sellPrice * 100).toFixed(2);
-
-    volumeBox.innerHTML = `
-      <div style="display:flex;justify-content:center;gap:100px;text-align:left;">
-        <div>
-          <div><strong>Avg instabuys:</strong> ${avgInstabuys.toFixed(1)}</div>
-          <div><strong>Avg sell-order volume:</strong> ${avgSellOrder.toFixed(1)}</div>
-        </div>
-        <div>
-          <div><strong>Avg instasells:</strong> ${avgInstasells.toFixed(1)}</div>
-          <div><strong>Avg buy-order volume:</strong> ${avgBuyOrder.toFixed(1)}</div>
-        </div>
-      </div>
-      <div class="volume-spread">
-        <strong>Market spread:</strong> ${isFinite(spread) ? spread + "%" : "N/A"}
-      </div>`;
-  }
-
-  function averageAmount(summary) {
-    return summary.length
-      ? summary.reduce((sum,row) => sum + row.amount, 0) / summary.length
-      : 0;
-  }
-
-  function renderTable(summary, tbody, tfootRow, hourlyVol) {
-    tbody.innerHTML = "";
-    let totalAmount = 0, totalCoins = 0;
-
-    summary.forEach(row => {
-      const total = row.amount * row.pricePerUnit;
-      totalAmount += row.amount;
-      totalCoins  += total;
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${row.orders}</td>
-        <td>${row.amount}</td>
-        <td>${row.pricePerUnit.toLocaleString()} coins</td>
-        <td>${total.toLocaleString()} coins</td>`;
-
-      if (row.amount > hourlyVol * 5)      tr.classList.add("highlight-red");
-      else if (row.amount > hourlyVol)     tr.classList.add("highlight-yellow");
-      tbody.appendChild(tr);
-    });
-
-    tfootRow.innerHTML = `
-      <td>Total:</td><td>${totalAmount}</td><td></td>
-      <td>${totalCoins.toLocaleString()} coins</td>`;
-  }
-
-  function highlightTrackedOrder(price) {
-    orderInfo.innerHTML = "";
-    if (!price || isNaN(price)) return;
-
-    [...buyBody.children, ...sellBody.children]
-      .forEach(row => row.classList.remove("highlight-blue"));
-
-    for (const [summary, body] of [[latestBuySummary, buyBody],
-                                   [latestSellSummary, sellBody]]) {
-      let coinsBetween = 0, itemsBetween = 0, priority = 1;
-      for (const row of summary) {
-        const unit = parseFloat(row.pricePerUnit.toFixed(1));
-        if (Math.abs(unit - price) < 0.1) {
-          const tr = body.children[summary.indexOf(row)];
-          if (tr) tr.classList.add("highlight-blue");
-          orderInfo.innerHTML = `
-            <div class="order-info">
-              <strong>Tracked Order Info</strong><br>
-              Priority position: ${priority}<br>
-              Items between: ${itemsBetween}<br>
-              Coin gap: ${Math.round(coinsBetween).toLocaleString()} coins<br>
-              Items left in order: ${row.amount}
-            </div>`;
-          return;
+    function highlightTrackedOrder(price){
+      orderInfo.innerHTML="";
+      if(!price||isNaN(price)) return;
+      [...buyBody.children,...sellBody.children]
+        .forEach(row=>row.classList.remove("highlight-blue"));
+      for(const [summary,body] of [[latestBuySummary,buyBody],[latestSellSummary,sellBody]]){
+        let coinsBetween=0,itemsBetween=0,priority=1;
+        for(const row of summary){
+          const unit=parseFloat(row.pricePerUnit.toFixed(1));
+          if(Math.abs(unit-price)<0.1){
+            const tr = body.children[summary.indexOf(row)];
+            if(tr) tr.classList.add("highlight-blue");
+            orderInfo.innerHTML = `
+              <div class="order-info">
+                <strong>Tracked Order Info</strong><br>
+                Priority position: ${priority}<br>
+                Items between: ${itemsBetween}<br>
+                Coin gap: ${Math.round(coinsBetween).toLocaleString()} coins<br>
+                Items left in order: ${row.amount}
+              </div>`;
+            return;
+          }
+          itemsBetween += row.amount;
+          coinsBetween += row.amount*row.pricePerUnit;
+          priority++;
         }
-        itemsBetween += row.amount;
-        coinsBetween += row.amount * row.pricePerUnit;
-        priority++;
       }
     }
-  }
 
-  /* ----------  boot-strap ---------- */
-  const urlParams = new URLSearchParams(window.location.search);
-  const preloadedItem  = urlParams.get("item");
-  const preloadedTrack = urlParams.get("track");
-  if (preloadedItem) {
-    itemInput.value  = preloadedItem;
-    currentItemId    = preloadedItem;
-    chartLink.innerHTML =
-      `View the chart on skyblock.finance
-       <a href="https://skyblock.finance/items/${preloadedItem}/chart"
-          target="_blank" style="color:#00bfff;text-decoration:underline;">Here</a>`;
-    loadData(preloadedItem);
-  }
-  if (preloadedTrack) trackInput.value = preloadedTrack;
+    /* ----------  boot-strap ---------- */
+    const urlParams = new URLSearchParams(window.location.search);
+    const preloadedItem  = urlParams.get("item");
+    const preloadedTrack = urlParams.get("track");
+    if(preloadedItem){
+      itemInput.value = preloadedItem;
+      currentItemId   = preloadedItem;
+      chartLink.innerHTML = `View the chart on skyblock.finance
+        <a href="https://skyblock.finance/items/${preloadedItem}/chart"
+           target="_blank" style="color:#00bfff;text-decoration:underline;">Here</a>`;
+      loadData(preloadedItem);
+    }
+    if(preloadedTrack){ trackInput.value = preloadedTrack; }
 
-  fetchAllItems();
-  setInterval(() => { if (currentItemId) loadData(currentItemId); }, 3000);
-</script>
+    fetchAllItems();
+    setInterval(()=>{ if(currentItemId) loadData(currentItemId); }, 3000);
+  </script>
 
   <script defer src="https://vercel.com/analytics/script.js"></script>
   <noscript><img src="https://vercel.com/api/analytics/collect" alt=""/></noscript>
