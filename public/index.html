@@ -432,6 +432,7 @@ volumeBox.innerHTML = `
         if (currentItemId) loadData(currentItemId);
       }, 3000);
       const saveStatus = document.getElementById("saveStatus");
+
 saveStatus.onclick = async () => {
   if (!userId || !username) {
     alert("Please log in to save items.");
@@ -439,26 +440,38 @@ saveStatus.onclick = async () => {
   }
 
   const item = itemInput.value.trim();
-  if (!item) return alert("No item to save.");
+  if (!item) {
+    alert("No item to save.");
+    return;
+  }
 
   const { data: existing, error: checkError } = await supabase
     .from("saved_orders")
-    .select("*")
+    .select("id")
     .eq("user_id", userId)
     .eq("item", item);
 
-  if (existing?.length > 0) {
+  if (checkError) {
+    console.error("Check error:", checkError);
+    alert("Error checking saved items.");
+    return;
+  }
+
+  if (existing.length > 0) {
     saveStatus.textContent = "Item already saved";
     return;
   }
 
-  const { error: insertError } = await supabase.from("saved_orders").insert([{ user_id: userId, item, price: 0 }]);
+  const { error: insertError } = await supabase.from("saved_orders").insert([
+    { user_id: userId, item }
+  ]);
 
   if (insertError) {
-    alert("Error saving item.");
+    console.error("Insert error:", insertError);
+    alert("Error saving item: " + insertError.message);
   } else {
     saveStatus.textContent = "Item saved!";
-    setTimeout(() => saveStatus.textContent = "Save item", 3000);
+    setTimeout(() => (saveStatus.textContent = "Save item"), 3000);
   }
 };
 

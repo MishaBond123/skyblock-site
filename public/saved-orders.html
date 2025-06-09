@@ -149,31 +149,7 @@
       location.reload();
     };
   });
-}
-
-
-      document.getElementById("addBtn").onclick = async () => {
-  const item = document.getElementById("itemInput").value.trim();
-  const price = document.getElementById("priceInput").value.trim();
-  if (!item || !price || isNaN(price)) return alert("Enter a valid item and price.");
-
-  const { data, error } = await supabase.from("saved_orders").insert([
-    {
-      user_id: userId,
-      item,
-      price
-    }
-  ]);
-
-  if (error) {
-    console.error("Supabase insert error:", error);
-    alert("Error saving order: " + error.message);
-  } else {
-    location.reload();
-  }
-};
-
-    
+}   
   </script>
   <script defer src="https://vercel.com/analytics/script.js"></script>
   <noscript><img src="https://vercel.com/api/analytics/collect" alt="" /></noscript>
