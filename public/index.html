@@ -440,38 +440,40 @@ saveStatus.onclick = async () => {
   }
 
   const item = itemInput.value.trim();
-  if (!item) {
-    alert("No item to save.");
-    return;
-  }
+  if (!item) return alert("No item to save.");
 
-  const { data: existing, error: checkError } = await supabase
-    .from("saved_orders")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("item", item);
+  try {
+    const { data: existing, error: checkError } = await supabase
+      .from("saved_orders")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("item", item);
 
-  if (checkError) {
-    console.error("Check error:", checkError);
-    alert("Error checking saved items.");
-    return;
-  }
+    if (checkError) {
+      console.error("Supabase select error:", checkError.message);
+      alert("Error checking saved items: " + checkError.message);
+      return;
+    }
 
-  if (existing.length > 0) {
-    saveStatus.textContent = "Item already saved";
-    return;
-  }
+    if (existing?.length > 0) {
+      saveStatus.textContent = "Item already saved";
+      return;
+    }
 
-  const { error: insertError } = await supabase.from("saved_orders").insert([
-    { user_id: userId, item }
-  ]);
+    const { error: insertError } = await supabase.from("saved_orders").insert([
+      { user_id: userId, item }
+    ]);
 
-  if (insertError) {
-    console.error("Insert error:", insertError);
-    alert("Error saving item: " + insertError.message);
-  } else {
-    saveStatus.textContent = "Item saved!";
-    setTimeout(() => (saveStatus.textContent = "Save item"), 3000);
+    if (insertError) {
+      console.error("Insert error:", insertError.message);
+      alert("Error saving item: " + insertError.message);
+    } else {
+      saveStatus.textContent = "Item saved!";
+      setTimeout(() => (saveStatus.textContent = "Save item"), 3000);
+    }
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    alert("Something went wrong while saving.");
   }
 };
 
