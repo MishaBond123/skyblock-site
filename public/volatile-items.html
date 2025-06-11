@@ -143,6 +143,7 @@
 
       const oldest = dataRows[0];
       const latestTimestamp = new Date(latest[0].trim());
+      const latest = dataRows[dataRows.length - 1];
       if (!isNaN(latestTimestamp)) {
         const timeAgo = getTimeAgo(latestTimestamp);
         document.getElementById("dataAge").textContent = `${timeAgo} ago (${(dataRows.length / 48).toFixed(1)} days logged)`;
