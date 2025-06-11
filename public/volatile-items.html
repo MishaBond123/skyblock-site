@@ -129,8 +129,8 @@
       <thead>
         <tr>
           <th>Item ID</th>
-          <th>Current Buy Price</th>
-          <th>Historical Buy Price</th>
+          <th>Historical Price</th>
+          <th>Current Price</th>
           <th>Change (%)</th>
         </tr>
       </thead>
@@ -238,8 +238,8 @@
         : filtered.map(item => `
           <tr>
             <td><a class="item-link" href="index.html?item=${item.item_id}">${item.item_id}</a></td>
-            <td>${item.current_price.toLocaleString(undefined, { maximumFractionDigits: 1 })} coins</td>
             <td>${item.past_price.toLocaleString(undefined, { maximumFractionDigits: 1 })} coins</td>
+            <td>${item.current_price.toLocaleString(undefined, { maximumFractionDigits: 1 })} coins</td>
             <td style="color: ${item.change_percent > 0 ? '#00ff99' : '#ff6666'}">
               ${item.change_percent.toFixed(1)}%
             </td>
