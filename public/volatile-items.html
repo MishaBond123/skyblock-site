@@ -40,7 +40,7 @@
       background-color: rgba(255,255,255,0.1);
       border-bottom: 2px solid #00bfff;
     }
-    select, input {
+    select, input, label {
       padding: 10px;
       font-size: 16px;
       margin: 10px 10px 10px 0;
@@ -48,6 +48,10 @@
       border: none;
       background-color: rgba(255,255,255,0.1);
       color: #fff;
+    }
+    input[type="checkbox"] {
+      width: auto;
+      margin-right: 5px;
     }
     button {
       padding: 10px 16px;
@@ -90,7 +94,8 @@
 
     <h1>Most Volatile Bazaar Items</h1>
     <p style="margin-top: -10px; color: #ccc; font-size: 16px; max-width: 800px">
-      This section displays the 25 items with the highest price change based on the difference between the current sell order price and the historical buy instantly price. Last updated: <span id="dataAge"></span>
+      This section displays the 25 items with the highest price change based on the difference between the
+      current sell order price and the historical buy instantly price. Last updated: <span id="dataAge"></span>
     </p>
 
     <div>
@@ -100,6 +105,8 @@
         <option value="down">Price Decreasing</option>
       </select>
       <input type="number" id="minPriceInput" placeholder="Minimum current price (coins)" />
+      <label><input type="checkbox" id="excludeEnchantments" checked> Exclude ENCHANTMENT_*</label>
+      <label><input type="checkbox" id="excludeUltimate" checked> Exclude ULTIMATE_*</label>
       <button onclick="loadVolatileItems()">Apply Filters</button>
     </div>
 
@@ -132,6 +139,8 @@
     async function loadVolatileItems() {
       const direction = document.getElementById("directionSelect").value;
       const minPrice = parseFloat(document.getElementById("minPriceInput").value) || 0;
+      const excludeEnchantments = document.getElementById("excludeEnchantments").checked;
+      const excludeUltimate = document.getElementById("excludeUltimate").checked;
 
       const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1qqH_uVwkFRtkE60-uk1-ZXnY7dUvaDwg9nBDudFcSsUuLFaF1n53Hry8D95M1daSWlE5asYB-8bL/pub?output=csv';
       const res = await fetch(csvUrl);
@@ -163,10 +172,16 @@
       const apiKey = 'YOUR_HYPIXEL_API_KEY';
       const apiRes = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
       const json = await apiRes.json();
-      const products = json.products || {};
+      if (!json.success) {
+        alert("Failed to load Hypixel Bazaar data.");
+        return;
+      }
 
+      const products = json.products || {};
       const items = [];
       for (const itemId in historicalMap) {
+        if (excludeEnchantments && itemId.startsWith("ENCHANTMENT_")) continue;
+        if (excludeUltimate && itemId.startsWith("ULTIMATE_")) continue;
         const past = historicalMap[itemId];
         const apiItem = products[itemId];
         if (!apiItem) continue;
