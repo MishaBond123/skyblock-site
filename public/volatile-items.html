@@ -40,18 +40,25 @@
       background-color: rgba(255,255,255,0.1);
       border-bottom: 2px solid #00bfff;
     }
-    select, input, label {
+    .filters {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    select, input[type="number"] {
       padding: 10px;
       font-size: 16px;
-      margin: 10px 10px 10px 0;
       border-radius: 6px;
       border: none;
       background-color: rgba(255,255,255,0.1);
       color: #fff;
+      width: fit-content;
     }
-    input[type="checkbox"] {
-      width: auto;
-      margin-right: 5px;
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     button {
       padding: 10px 16px;
@@ -61,6 +68,7 @@
       color: white;
       border: none;
       cursor: pointer;
+      width: fit-content;
     }
     button:hover {
       background-color: #005f99;
@@ -68,7 +76,6 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
       background-color: rgba(255,255,255,0.05);
     }
     th, td {
@@ -81,6 +88,13 @@
     }
     tr:hover {
       background-color: rgba(255,255,255,0.1);
+    }
+    a.item-link {
+      color: #00bfff;
+      text-decoration: none;
+    }
+    a.item-link:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -95,10 +109,11 @@
     <h1>Most Volatile Bazaar Items</h1>
     <p style="margin-top: -10px; color: #ccc; font-size: 16px; max-width: 800px">
       This section displays the 25 items with the highest price change based on the difference between the
-      current sell order price and the historical buy instantly price. Last updated: <span id="dataAge"></span>
+      current buy instantly price and the historical buy instantly price. <br>
+      Last updated: <span id="dataAge"></span> from <span id="dataOldest"></span> ago.
     </p>
 
-    <div>
+    <div class="filters">
       <select id="directionSelect">
         <option value="both">Price Movement: Both</option>
         <option value="up">Price Increasing</option>
@@ -107,15 +122,15 @@
       <input type="number" id="minPriceInput" placeholder="Minimum current price (coins)" />
       <label><input type="checkbox" id="excludeEnchantments" checked> Exclude ENCHANTMENT_*</label>
       <label><input type="checkbox" id="excludeUltimate" checked> Exclude ULTIMATE_*</label>
-      <button onclick="loadVolatileItems()">Apply Filters</button>
+      <button onclick="applyFiltersAndUpdateUrl()">Apply Filters</button>
     </div>
 
     <table id="itemsTable">
       <thead>
         <tr>
           <th>Item ID</th>
-          <th>Current Sell Order</th>
-          <th>Historical Buy Instantly</th>
+          <th>Current Buy Price</th>
+          <th>Historical Buy Price</th>
           <th>Change (%)</th>
         </tr>
       </thead>
@@ -136,11 +151,27 @@
       return `${days} day${days !== 1 ? 's' : ''}`;
     }
 
+    function applyFiltersAndUpdateUrl() {
+      const params = new URLSearchParams();
+      params.set('direction', document.getElementById("directionSelect").value);
+      params.set('minPrice', document.getElementById("minPriceInput").value);
+      if (document.getElementById("excludeEnchantments").checked) params.set('excludeEnchantments', '1');
+      if (document.getElementById("excludeUltimate").checked) params.set('excludeUltimate', '1');
+      history.replaceState(null, '', '?' + params.toString());
+      loadVolatileItems();
+    }
+
     async function loadVolatileItems() {
-      const direction = document.getElementById("directionSelect").value;
-      const minPrice = parseFloat(document.getElementById("minPriceInput").value) || 0;
-      const excludeEnchantments = document.getElementById("excludeEnchantments").checked;
-      const excludeUltimate = document.getElementById("excludeUltimate").checked;
+      const params = new URLSearchParams(location.search);
+      const direction = params.get('direction') || 'both';
+      const minPrice = parseFloat(params.get('minPrice')) || 0;
+      const excludeEnchantments = params.get('excludeEnchantments') === '1';
+      const excludeUltimate = params.get('excludeUltimate') === '1';
+
+      document.getElementById("directionSelect").value = direction;
+      document.getElementById("minPriceInput").value = minPrice;
+      document.getElementById("excludeEnchantments").checked = excludeEnchantments;
+      document.getElementById("excludeUltimate").checked = excludeUltimate;
 
       const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT1qqH_uVwkFRtkE60-uk1-ZXnY7dUvaDwg9nBDudFcSsUuLFaF1n53Hry8D95M1daSWlE5asYB-8bL/pub?output=csv';
       const res = await fetch(csvUrl);
@@ -153,9 +184,13 @@
       const oldest = dataRows[0];
       const latest = dataRows[dataRows.length - 1];
       const latestTimestamp = new Date(latest[0].trim());
+      const oldestTimestamp = new Date(oldest[0].trim());
+
       if (!isNaN(latestTimestamp)) {
-        const timeAgo = getTimeAgo(latestTimestamp);
-        document.getElementById("dataAge").textContent = `${timeAgo} ago (${(dataRows.length / 48).toFixed(1)} days logged)`;
+        document.getElementById("dataAge").textContent = getTimeAgo(latestTimestamp);
+      }
+      if (!isNaN(oldestTimestamp)) {
+        document.getElementById("dataOldest").textContent = getTimeAgo(oldestTimestamp);
       }
 
       const historicalMap = {};
@@ -202,7 +237,7 @@
         ? '<tr><td colspan="4">No items found matching the filter criteria.</td></tr>'
         : filtered.map(item => `
           <tr>
-            <td>${item.item_id}</td>
+            <td><a class="item-link" href="index.html?item=${item.item_id}">${item.item_id}</a></td>
             <td>${item.current_price.toLocaleString(undefined, { maximumFractionDigits: 1 })} coins</td>
             <td>${item.past_price.toLocaleString(undefined, { maximumFractionDigits: 1 })} coins</td>
             <td style="color: ${item.change_percent > 0 ? '#00ff99' : '#ff6666'}">
@@ -211,6 +246,8 @@
           </tr>
         `).join("");
     }
+
+    window.addEventListener('DOMContentLoaded', loadVolatileItems);
   </script>
 </body>
 </html>
