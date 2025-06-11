@@ -185,7 +185,7 @@
         const past = historicalMap[itemId];
         const apiItem = products[itemId];
         if (!apiItem) continue;
-        const current = apiItem.quick_status.sellPrice;
+        const current = apiItem.quick_status.buyPrice;
         if (!isFinite(current)) continue;
         const change = (past > 0) ? ((current - past) / past) * 100 : 0;
         items.push({ item_id: itemId, current_price: current, past_price: past, change_percent: change });
