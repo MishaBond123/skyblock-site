@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bazaar Orders — Minimal</title>
+  <title>Bazaar Orders — Ghost Levels</title>
   <link rel="icon" type="image/jpeg" href="site-icon.png"/>
 
   <style>
     :root {
-      --bg: #0b0f14;
       --card: rgba(0,0,0,0.65);
       --text: #f5f7fa;
       --muted: rgba(255,255,255,0.75);
@@ -47,7 +46,6 @@
       background: rgba(255,255,255,0.06); color: var(--text); font-size: 15px; outline: none;
     }
     input[type="checkbox"] { transform: translateY(1px); }
-
     .row { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
     .muted { color: var(--muted); font-size: 14px; }
 
@@ -61,9 +59,9 @@
     tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
 
     .highlight-yellow { background: var(--warn1) !important; }
-    .highlight-red { background: var(--warn2) !important; }
-    .highlight-blue { background: var(--hl) !important; }
-    .highlight-ghost { background: var(--ghost) !important; }
+    .highlight-red    { background: var(--warn2) !important; }
+    .highlight-blue   { background: var(--hl) !important; }
+    .highlight-ghost  { background: var(--ghost) !important; }
 
     .dropdown {
       background: var(--card); border: 1px solid var(--border);
@@ -92,19 +90,19 @@
 
     <div class="panel">
       <div class="row">
-        <div style="flex: 1 1 380px; min-width: 280px;">
+        <div style="flex:1 1 380px; min-width:280px;">
           <label>Item ID</label>
           <input id="itemInput" type="text" placeholder="Enter Item ID (e.g., BOOSTER_COOKIE)"/>
           <div id="itemDropdown" class="dropdown"></div>
           <div class="muted" id="chartLink" style="margin-top:6px;"></div>
         </div>
-        <div style="flex: 1 1 320px; min-width: 260px;">
+        <div style="flex:1 1 320px; min-width:260px;">
           <label>Track Order By Price</label>
           <input id="trackInput" type="text" placeholder="Enter price to track"/>
-          <label class="muted" style="margin-top:6px;"><input id="groupToggle" type="checkbox"/> Group prices within ±0.15%</label>
+          <label class="muted" style="margin-top:6px;"><input id="groupToggle" type="checkbox"/> Group live prices within ±0.15%</label>
         </div>
       </div>
-      <div class="muted" style="margin-top:8px;">Tip: DevTools → Application → Local Storage → keys starting with <code>remembered:</code></div>
+      <div class="muted" style="margin-top:8px;">Ghosts are exact price levels (0.1 precision), shown below live orders.</div>
     </div>
 
     <div id="orderInfo" class="panel" style="display:none;"></div>
@@ -131,12 +129,8 @@
 
   <script type="module">
     // ===== Config =====
-    const GROUP_PCT = 0.15; // ±0.15%
-
-    async function getApiKey() {
-      // Public endpoint works without a key; add yours if you want quota isolation.
-      return ""; // "YOUR_API_KEY_HERE"
-    }
+    const GROUP_PCT = 0.15; // ±0.15% for live API rows only
+    const POLL_MS = 3000;
 
     // ===== Elements =====
     const itemInput  = document.getElementById("itemInput");
@@ -159,16 +153,19 @@
     let allItems = [];
     let latestBuySummary = [];  // API sell_summary (sell offers)  -> Buy table
     let latestSellSummary = []; // API buy_summary  (buy bids)     -> Sell table
-    let lastHourlyBuyVolume  = 0; // for Buy (uses instasells)
-    let lastHourlySellVolume = 0; // for Sell (uses instabuys)
+    let lastHourlyBuyVolume  = 0; // for Buy (instasells)
+    let lastHourlySellVolume = 0; // for Sell (instabuys)
     let useGrouping = false;
 
-    // previous snapshot (API-only, sorted)
+    // previous API-only snapshots (sorted)
     let prevBuySortedDesc = []; // sell_summary sorted DESC
     let prevSellSortedAsc = []; // buy_summary  sorted ASC
 
     // ===== Helpers =====
-    function approxEqual(a,b,eps=1e-6){ return Math.abs(a-b) <= eps; }
+    // exact price level key at 0.1 precision (API shows 1 decimal)
+    function keyPrice(p){ return Math.round(p * 10) / 10; }
+    function sameLevel(a, b){ return keyPrice(a) === keyPrice(b); }
+
     function storageKey(itemId, side){ return `remembered:${itemId}:${side}`; }
     function readRemembered(itemId, side){
       try { return JSON.parse(localStorage.getItem(storageKey(itemId,side)) || "[]"); } catch { return []; }
@@ -176,14 +173,18 @@
     function writeRemembered(itemId, side, arr){
       try { localStorage.setItem(storageKey(itemId,side), JSON.stringify(arr)); } catch {}
     }
-    function addGhost(itemId, side, price, amount){
+    // ghosts are NOT grouped: store exact level (0.1), with amount and orders
+    function addGhost(itemId, side, price, amount, orders){
       const arr = readRemembered(itemId, side);
-      if (arr.find(x => approxEqual(x.price, price))) return;
-      arr.push({ price, amount, ts: Date.now() });
-      writeRemembered(itemId, side, arr);
+      const k = keyPrice(price);
+      if (!arr.some(x => sameLevel(x.price, k))) {
+        arr.push({ price: k, amount: amount ?? 0, orders: orders ?? 1, ts: Date.now() });
+        writeRemembered(itemId, side, arr);
+      }
     }
     function removeGhost(itemId, side, price){
-      writeRemembered(itemId, side, readRemembered(itemId, side).filter(r => !approxEqual(r.price, price)));
+      const k = keyPrice(price);
+      writeRemembered(itemId, side, readRemembered(itemId, side).filter(r => !sameLevel(r.price, k)));
     }
 
     function groupSummary(summary, pct = GROUP_PCT) {
@@ -202,7 +203,6 @@
           cur.amount += row.amount;
           cur._coins += row.amount * row.pricePerUnit;
           cur.pricePerUnit = cur._coins / cur.amount;
-          if (row.ghost || cur.ghost) cur.ghost = true;
         } else {
           pushCur();
           cur = base;
@@ -213,29 +213,26 @@
     }
 
     function buildDisplaysWithGhosts(apiSellSummary, apiBuySummary) {
-      // ghosts come from localStorage if NOT currently present
+      // 1) ghosts from localStorage if NOT currently present at that exact level
       const buyGhosts = readRemembered(currentItemId, "buy")
-        .filter(r => apiSellSummary.findIndex(x => approxEqual(x.pricePerUnit, r.price)) === -1)
-        .map(r => ({ orders: 1, amount: r.amount || 0, pricePerUnit: r.price, ghost: true }));
+        .filter(r => !apiSellSummary.some(x => sameLevel(x.pricePerUnit, r.price)))
+        .map(r => ({ orders: r.orders ?? 1, amount: r.amount ?? 0, pricePerUnit: keyPrice(r.price), ghost: true }));
+
       const sellGhosts = readRemembered(currentItemId, "sell")
-        .filter(r => apiBuySummary.findIndex(x => approxEqual(x.pricePerUnit, r.price)) === -1)
-        .map(r => ({ orders: 1, amount: r.amount || 0, pricePerUnit: r.price, ghost: true }));
+        .filter(r => !apiBuySummary.some(x => sameLevel(x.pricePerUnit, r.price)))
+        .map(r => ({ orders: r.orders ?? 1, amount: r.amount ?? 0, pricePerUnit: keyPrice(r.price), ghost: true }));
 
-      let buyCombined  = [...apiSellSummary, ...buyGhosts];
-      let sellCombined = [...apiBuySummary, ...sellGhosts];
+      // 2) Optionally group ONLY live API rows (do not touch ghosts)
+      const apiSellGrouped = useGrouping ? groupSummary(apiSellSummary) : [...apiSellSummary];
+      const apiBuyGrouped  = useGrouping ? groupSummary(apiBuySummary)  : [...apiBuySummary];
 
-      if (useGrouping) {
-        buyCombined  = groupSummary(buyCombined);
-        sellCombined = groupSummary(sellCombined);
-      }
-
-      // Final sort with ghosts last
-      buyCombined.sort((a,b)=>{
-        if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1;
+      // 3) Merge + final sort; ghosts always last
+      const buyCombined  = [...apiSellGrouped, ...buyGhosts].sort((a,b)=>{
+        if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1; // ghosts last
         return b.pricePerUnit - a.pricePerUnit; // DESC for Buy
       });
-      sellCombined.sort((a,b)=>{
-        if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1;
+      const sellCombined = [...apiBuyGrouped,  ...sellGhosts].sort((a,b)=>{
+        if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1; // ghosts last
         return a.pricePerUnit - b.pricePerUnit; // ASC for Sell
       });
 
@@ -297,7 +294,7 @@
         let coinsBetween=0, itemsBetween=0, priority=1;
         for (let i=0;i<summary.length;i++){
           const row = summary[i];
-          const unit = parseFloat(row.pricePerUnit.toFixed(1));
+          const unit = parseFloat(keyPrice(row.pricePerUnit).toFixed(1));
           if (Math.abs(unit - price) < 0.1) {
             const tr = body.children[i];
             if (tr) tr.classList.add("highlight-blue");
@@ -318,86 +315,71 @@
       }
     }
 
-    // ======= Simple Ghost Rule Implementation =======
-    function rememberVanishedOutsideTop13(currentBuyDesc, currentSellAsc) {
-      // From previous snapshot: if a price that was at index >=13 vanished from current API top-30 → save as ghost.
-      const curBuySet  = new Set(currentBuyDesc.map(r => r.pricePerUnit));
-      const curSellSet = new Set(currentSellAsc.map(r => r.pricePerUnit));
+    // ===== Ghost lifecycle =====
+    // When a previous post-13 level disappears from current top-30 => create ghost at that exact price
+    function rememberVanishedOutsideTop13(curBuyDesc, curSellAsc) {
+      const curBuyKeys  = new Set(curBuyDesc.map(r => keyPrice(r.pricePerUnit)));
+      const curSellKeys = new Set(curSellAsc.map(r => keyPrice(r.pricePerUnit)));
 
       // BUY side (sell_summary DESC)
       prevBuySortedDesc.forEach((r, idx) => {
-        if (idx >= 13 && !curBuySetHas(curBuySet, r.pricePerUnit)) {
-          addGhost(currentItemId, "buy", r.pricePerUnit, r.amount);
+        if (idx >= 13) {
+          const k = keyPrice(r.pricePerUnit);
+          if (!curBuyKeys.has(k)) addGhost(currentItemId, "buy", k, r.amount, r.orders);
         }
       });
 
       // SELL side (buy_summary ASC)
       prevSellSortedAsc.forEach((r, idx) => {
-        if (idx >= 13 && !curSellSetHas(curSellSet, r.pricePerUnit)) {
-          addGhost(currentItemId, "sell", r.pricePerUnit, r.amount);
+        if (idx >= 13) {
+          const k = keyPrice(r.pricePerUnit);
+          if (!curSellKeys.has(k)) addGhost(currentItemId, "sell", k, r.amount, r.orders);
         }
       });
-
-      function curBuySetHas(set, price){
-        for (const p of set) if (approxEqual(p, price)) return true;
-        return false;
-      }
-      function curSellSetHas(set, price){
-        for (const p of set) if (approxEqual(p, price)) return true;
-        return false;
-      }
     }
 
-    function cleanGhostsAgainstCurrent(currentBuyDesc, currentSellAsc) {
-      // Removal conditions:
-      // 1) re-enter top13
-      // 2) canceled: lies strictly between two current levels, with no exact match
-      // 3) filled: opposite best crosses
+    // Remove ghosts when exact level reappears, sits between two levels (canceled), or is filled (opposite best crosses)
+    function cleanGhostsAgainstCurrent(curBuyDesc, curSellAsc) {
+      const buyLevels  = curBuyDesc.map(r => keyPrice(r.pricePerUnit)); // DESC values
+      const sellLevels = curSellAsc.map(r => keyPrice(r.pricePerUnit)); // ASC values
 
-      const bestSell = currentBuyDesc[0]?.pricePerUnit; // best sell (lowest? we keep DESC but top is most expensive; for crossing we use min/max safely below)
-      const bestBuy  = currentSellAsc[0]?.pricePerUnit;
+      const bestSell = Math.min(...curBuyDesc.map(r => r.pricePerUnit || Infinity)); // cheapest ask
+      const bestBuy  = Math.max(...curSellAsc.map(r => r.pricePerUnit || -Infinity)); // highest bid
 
-      // Helper to check "between" on a ladder that’s sorted either DESC or ASC
-      function isBetween(price, levels) {
+      function isBetween(price, levels){
         if (levels.length < 2) return false;
+        const p = keyPrice(price);
         for (let i=0;i<levels.length-1;i++){
           const a = levels[i], b = levels[i+1];
           const lo = Math.min(a,b), hi = Math.max(a,b);
-          if (price > lo && price < hi) return true;
+          if (p > lo && p < hi) return true;
         }
         return false;
       }
-      function hasExact(levels, price){
-        return levels.some(x => approxEqual(x, price));
-      }
 
-      // BUY ghosts
+      // BUY ghosts (sell offers)
       {
         const arr = readRemembered(currentItemId, "buy");
-        const levels = currentBuyDesc.map(r => r.pricePerUnit);
-        const oppBest = bestBuy;
         const kept = [];
         for (const g of arr) {
-          const pos = currentBuyDesc.findIndex(x => approxEqual(x.pricePerUnit, g.price));
-          if (pos >= 0 && pos <= 12) continue; // re-entered top13
-          if (pos === -1 && isBetween(g.price, levels)) continue; // canceled
-          if (typeof oppBest === "number" && oppBest >= g.price) continue; // filled (buy bids crossed up)
+          const k = keyPrice(g.price);
+          if (buyLevels.includes(k)) continue;                 // exact price is back
+          if (isBetween(k, buyLevels)) continue;               // canceled
+          if (isFinite(bestBuy) && bestBuy >= k) continue;     // filled by rising bids
           kept.push(g);
         }
         writeRemembered(currentItemId, "buy", kept);
       }
 
-      // SELL ghosts
+      // SELL ghosts (buy bids)
       {
         const arr = readRemembered(currentItemId, "sell");
-        const levels = currentSellAsc.map(r => r.pricePerUnit);
-        const oppBest = bestSell;
         const kept = [];
         for (const g of arr) {
-          const pos = currentSellAsc.findIndex(x => approxEqual(x.pricePerUnit, g.price));
-          if (pos >= 0 && pos <= 12) continue; // re-entered top13
-          if (pos === -1 && isBetween(g.price, levels)) continue; // canceled
-          if (typeof oppBest === "number" && oppBest <= g.price) continue; // filled (sell offers crossed down)
+          const k = keyPrice(g.price);
+          if (sellLevels.includes(k)) continue;                // exact price is back
+          if (isBetween(k, sellLevels)) continue;              // canceled
+          if (isFinite(bestSell) && bestSell <= k) continue;   // filled by falling asks
           kept.push(g);
         }
         writeRemembered(currentItemId, "sell", kept);
@@ -405,68 +387,26 @@
     }
 
     // ===== Data flow =====
-    async function loadData(itemId){
+    async function getApiKey(){ return ""; } // public works without key
+
+    async function fetchAllItems(){
       const key = await getApiKey();
       const url = key ? `https://api.hypixel.net/skyblock/bazaar?key=${key}` : `https://api.hypixel.net/skyblock/bazaar`;
       const res = await fetch(url);
       const json = await res.json();
-      const data = json.products?.[itemId];
-      if (!data) return;
-
-      const avgInstabuys  = data.quick_status.buyMovingWeek  / 168;
-      const avgInstasells = data.quick_status.sellMovingWeek / 168;
-
-      latestBuySummary  = data.sell_summary ?? []; // sell offers
-      latestSellSummary = data.buy_summary  ?? []; // buy bids
-
-      lastHourlyBuyVolume  = avgInstasells;
-      lastHourlySellVolume = avgInstabuys;
-
-      // Update volume & spread UI
-      const avgSellOrder = averageAmount(latestBuySummary);
-      const avgBuyOrder  = averageAmount(latestSellSummary);
-      volumeBox.innerHTML = `
-        <div><strong>Avg instabuys/hour:</strong> ${avgInstabuys.toFixed(1)}</div>
-        <div><strong>Avg instasells/hour:</strong> ${avgInstasells.toFixed(1)}</div>
-        <div><strong>Avg sell-order amount:</strong> ${avgSellOrder.toFixed(1)}</div>
-        <div><strong>Avg buy-order amount:</strong> ${avgBuyOrder.toFixed(1)}</div>
-      `;
-      const bestSellFromApi = Math.min(...latestBuySummary.map(r=>r.pricePerUnit || Infinity));
-      const bestBuyFromApi  = Math.max(...latestSellSummary.map(r=>r.pricePerUnit || -Infinity));
-      const spreadPct = ((bestBuyFromApi - bestSellFromApi) / bestSellFromApi) * 100;
-      spreadBox.innerHTML = `<strong>Market spread:</strong> ${isFinite(spreadPct) ? spreadPct.toFixed(2)+'%' : 'N/A'}`;
-
-      // Sort pure API ladders as required for decisions
-      const curBuySortedDesc = [...latestBuySummary].sort((a,b)=> b.pricePerUnit - a.pricePerUnit);
-      const curSellSortedAsc = [...latestSellSummary].sort((a,b)=> a.pricePerUnit - b.pricePerUnit);
-
-      // 1) Remember vanished outside top-13 (simple rule you asked for)
-      if (prevBuySortedDesc.length || prevSellSortedAsc.length) {
-        rememberVanishedOutsideTop13(curBuySortedDesc, curSellSortedAsc);
-      }
-
-      // 2) Clean ghosts vs current ladders
-      cleanGhostsAgainstCurrent(curBuySortedDesc, curSellSortedAsc);
-
-      // 3) Render
-      renderCurrentTables();
-
-      // 4) Update previous snapshot for next tick
-      prevBuySortedDesc = curBuySortedDesc;
-      prevSellSortedAsc = curSellSortedAsc;
+      const products = json.products || {};
+      allItems = Object.keys(products).map(id => {
+        const q = products[id].quick_status;
+        const price = q.sellPrice > 1e6 ? (q.sellPrice/1e6).toFixed(2)+'M' :
+                      q.sellPrice > 1e3 ? (q.sellPrice/1e3).toFixed(1)+'k' :
+                      q.sellPrice.toFixed(1);
+        return { id, name: id.replace(/_/g,' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()), price };
+      });
     }
-
-    // Search UI
-    itemInput.addEventListener("input", () => {
-      const query = itemInput.value.trim().toLowerCase();
-      itemDropdown.innerHTML = "";
-      if (!query) return (itemDropdown.style.display = "none");
-      if (allItems.length === 0) { fetchAllItems().then(() => populateDropdown(query)); }
-      else { populateDropdown(query); }
-    });
 
     function populateDropdown(query){
       const filtered = allItems.filter(i => i.name.toLowerCase().includes(query) || i.id.toLowerCase().includes(query));
+      itemDropdown.innerHTML = "";
       for (const item of filtered.slice(0, 60)) {
         const div = document.createElement("div");
         div.className = "dropdown-item";
@@ -481,12 +421,19 @@
       itemDropdown.style.display = filtered.length ? "block" : "none";
     }
 
+    itemInput.addEventListener("input", () => {
+      const query = itemInput.value.trim().toLowerCase();
+      if (!query) { itemDropdown.style.display = "none"; return; }
+      if (allItems.length === 0) { fetchAllItems().then(() => populateDropdown(query)); }
+      else { populateDropdown(query); }
+    });
+
     function selectItem(id){
       currentItemId = id;
-      // reset previous snapshot so ghosts only start after first live tick
+      // reset previous snapshot so ghosts start after first live tick
       prevBuySortedDesc = [];
       prevSellSortedAsc = [];
-
+      // clear ghosts of other items from previous testing? (keep by design)
       chartLink.innerHTML = `Chart: <a href="https://skyblock.finance/items/${id}/chart" target="_blank" style="color:var(--accent);">skyblock.finance/items/${id}/chart</a>`;
       loadData(id);
 
@@ -506,19 +453,55 @@
       renderCurrentTables();
     });
 
-    async function fetchAllItems(){
+    async function loadData(itemId){
       const key = await getApiKey();
       const url = key ? `https://api.hypixel.net/skyblock/bazaar?key=${key}` : `https://api.hypixel.net/skyblock/bazaar`;
       const res = await fetch(url);
       const json = await res.json();
-      const products = json.products || {};
-      allItems = Object.keys(products).map(id => {
-        const q = products[id].quick_status;
-        const price = q.sellPrice > 1e6 ? (q.sellPrice/1e6).toFixed(2)+'M' :
-                      q.sellPrice > 1e3 ? (q.sellPrice/1e3).toFixed(1)+'k' :
-                      q.sellPrice.toFixed(1);
-        return { id, name: id.replace(/_/g,' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()), price };
-      });
+      const data = json.products?.[itemId];
+      if (!data) return;
+
+      const avgInstabuys  = data.quick_status.buyMovingWeek  / 168;
+      const avgInstasells = data.quick_status.sellMovingWeek / 168;
+
+      latestBuySummary  = data.sell_summary ?? []; // sell offers (-> Buy table)
+      latestSellSummary = data.buy_summary  ?? []; // buy bids   (-> Sell table)
+
+      lastHourlyBuyVolume  = avgInstasells;
+      lastHourlySellVolume = avgInstabuys;
+
+      // Volume & spread UI
+      const avgSellOrder = averageAmount(latestBuySummary);
+      const avgBuyOrder  = averageAmount(latestSellSummary);
+      volumeBox.innerHTML = `
+        <div><strong>Avg instabuys/hour:</strong> ${avgInstabuys.toFixed(1)}</div>
+        <div><strong>Avg instasells/hour:</strong> ${avgInstasells.toFixed(1)}</div>
+        <div><strong>Avg sell-order amount:</strong> ${avgSellOrder.toFixed(1)}</div>
+        <div><strong>Avg buy-order amount:</strong> ${avgBuyOrder.toFixed(1)}</div>
+      `;
+      const cheapestAsk = Math.min(...latestBuySummary.map(r=>r.pricePerUnit || Infinity));
+      const highestBid  = Math.max(...latestSellSummary.map(r=>r.pricePerUnit || -Infinity));
+      const spreadPct = ((highestBid - cheapestAsk) / cheapestAsk) * 100;
+      spreadBox.innerHTML = `<strong>Market spread:</strong> ${isFinite(spreadPct) ? spreadPct.toFixed(2)+'%' : 'N/A'}`;
+
+      // Sorted ladders for comparisons
+      const curBuySortedDesc = [...latestBuySummary].sort((a,b)=> b.pricePerUnit - a.pricePerUnit);
+      const curSellSortedAsc = [...latestSellSummary].sort((a,b)=> a.pricePerUnit - b.pricePerUnit);
+
+      // 1) From previous snapshot → if post-13 level vanished → add ghost
+      if (prevBuySortedDesc.length || prevSellSortedAsc.length) {
+        rememberVanishedOutsideTop13(curBuySortedDesc, curSellSortedAsc);
+      }
+
+      // 2) Clean ghosts vs current ladders
+      cleanGhostsAgainstCurrent(curBuySortedDesc, curSellSortedAsc);
+
+      // 3) Render
+      renderCurrentTables();
+
+      // 4) Update previous snapshots
+      prevBuySortedDesc = curBuySortedDesc;
+      prevSellSortedAsc = curSellSortedAsc;
     }
 
     // Preload from URL
@@ -529,7 +512,7 @@
     if (preTrack) trackInput.value = preTrack;
 
     // Polling
-    setInterval(() => { if (currentItemId) loadData(currentItemId); }, 3000);
+    setInterval(() => { if (currentItemId) loadData(currentItemId); }, POLL_MS);
 
     // Bootstrap list
     fetchAllItems();
