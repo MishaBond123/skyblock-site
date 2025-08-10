@@ -2,29 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Bazaar Orders</title>
-  <link rel="icon" type="image/jpeg" href="site-icon.png" />
+  <link rel="icon" type="image/jpeg" href="site-icon.png"/>
 
- <!-- Google Analytics -->
+  <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5K8BCCH6QS"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-5K8BCCH6QS'); 
+    gtag('config', 'G-5K8BCCH6QS');
   </script>
 
   <style>
     body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-image: url('bgimage.jpeg');
-  background-size: cover;
-  background-attachment: fixed;
-  color: #fff;
-}
-
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-image: url('bgimage.jpeg');
+      background-size: cover;
+      background-attachment: fixed;
+      color: #fff;
+    }
     .container {
       max-width: 1200px;
       margin: 40px auto;
@@ -52,68 +51,51 @@
       border-bottom: 2px solid #00bfff;
     }
     input {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  margin: 10px 0 20px;
-  border-radius: 8px;
-  border: none;
-  background-color: rgba(255,255,255,0.1);
-  color: #fff;
-}
-
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      margin: 10px 0 20px;
+      border-radius: 8px;
+      border: none;
+      background-color: rgba(255,255,255,0.1);
+      color: #fff;
+    }
     .tables {
       display: flex;
       gap: 20px;
       flex-wrap: wrap;
     }
-    .tables > div {
-      flex: 1;
-      min-width: 400px;
-    }
+    .tables > div { flex: 1; min-width: 400px; }
     table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 30px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-}
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    th {
+      background-color: rgba(0, 191, 255, 0.3);
+      padding: 12px;
+      font-weight: bold;
+    }
+    td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 14px;
+    }
+    tr:nth-child(even) td { background-color: rgba(255,255,255,0.03); }
+    .highlight-yellow { background-color: rgba(255, 255, 0, 0.15) !important; }
+    .highlight-red    { background-color: rgba(255, 80, 80, 0.25) !important; }
+    .highlight-blue   { background-color: rgba(0, 191, 255, 0.25) !important; }
+    /* ghost remembered rows */
+    .highlight-ghost  { background-color: rgba(186, 114, 255, 0.18) !important; }
 
-th {
-  background-color: rgba(0, 191, 255, 0.3);
-  padding: 12px;
-  font-weight: bold;
-}
-
-td {
-  padding: 10px;
-  text-align: center;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  font-size: 14px;
-}
-
-tr:nth-child(even) td {
-  background-color: rgba(255,255,255,0.03);
-}
-
-.highlight-yellow {
-  background-color: rgba(255, 255, 0, 0.15) !important;
-}
-
-.highlight-red {
-  background-color: rgba(255, 80, 80, 0.25) !important;
-}
-
-.highlight-blue {
-  background-color: rgba(0, 191, 255, 0.25) !important;
-}
-
-tfoot td {
-  font-weight: bold;
-  background-color: rgba(255,255,255,0.07);
-}
-
+    tfoot td {
+      font-weight: bold;
+      background-color: rgba(255,255,255,0.07);
+    }
     .order-info {
       margin: 20px auto;
       max-width: 600px;
@@ -123,31 +105,27 @@ tfoot td {
       border-radius: 10px;
     }
     .volume-box {
-  display: flex;
-  flex-direction: column;
-  font-size: 18px;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: rgba(255,255,255,0.05);
-  padding: 24px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-}
-
-.volume-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.volume-spread {
-  margin-top: 10px;
-  border-top: 1px solid rgba(255,255,255,0.3);
-  padding-top: 10px;
-  text-align: center;
-  font-weight: bold;
-}
-
-
+      display: flex;
+      flex-direction: column;
+      font-size: 18px;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: rgba(255,255,255,0.05);
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    .volume-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .volume-spread {
+      margin-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.3);
+      padding-top: 10px;
+      text-align: center;
+      font-weight: bold;
+    }
     .dropdown {
       background-color: rgba(0, 0, 0, 0.85);
       border-radius: 8px;
@@ -164,13 +142,8 @@ tfoot td {
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
     }
-    .dropdown-item:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-    .dropdown-label {
-      display: flex;
-      align-items: center;
-    }
+    .dropdown-item:hover { background-color: rgba(255, 255, 255, 0.1); }
+    .dropdown-label { display: flex; align-items: center; }
     .dropdown-price {
       background-color: goldenrod;
       padding: 4px 8px;
@@ -178,6 +151,11 @@ tfoot td {
       font-weight: bold;
       color: black;
     }
+    .controls-row {
+      display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+      margin: 10px 0 20px;
+    }
+    .controls-row label { cursor: pointer; user-select: none; }
   </style>
 </head>
 <body>
@@ -185,7 +163,7 @@ tfoot td {
     <div class="tabs">
       <a class="tab active-tab" href="index.html">Orders</a>
       <a class="tab" href="saved-orders.html">Saved Items</a>
-      <a class="tab" href="volatile-items.html".html">Volatile Items</a>
+      <a class="tab" href="volatile-items.html">Volatile Items</a>
     </div>
 
     <div id="authStatus" style="position: absolute; top: 10px; right: 20px; font-size: 14px;">
@@ -199,17 +177,22 @@ tfoot td {
       <div><strong>Instasells / hour:</strong><div id="instasells"></div></div>
     </div>
 
-    <h3>Item ID:</h3>
-    <input id="itemInput" placeholder="Enter Item ID" />
-    <div id="itemDropdown" class="dropdown"></div>
-    <div id="chartLink" style="margin-top: 8px; font-size: 15px;"></div>
-    <div id="saveStatus" style="margin-top: 8px; font-size: 14px; color: #00bfff; cursor: pointer; text-decoration: underline;">
-  Save item
-</div>
-
-
-    <h3>Track Order By Price:</h3>
-    <input id="trackInput" placeholder="Enter price to track" />
+    <div class="controls-row">
+      <div style="min-width: 280px; flex: 1;">
+        <h3>Item ID:</h3>
+        <input id="itemInput" placeholder="Enter Item ID"/>
+        <div id="itemDropdown" class="dropdown"></div>
+        <div id="chartLink" style="margin-top: 8px; font-size: 15px;"></div>
+        <div id="saveStatus" style="margin-top: 8px; font-size: 14px; color: #00bfff; cursor: pointer; text-decoration: underline;">
+          Save item
+        </div>
+      </div>
+      <div style="min-width: 260px;">
+        <h3>Track Order By Price:</h3>
+        <input id="trackInput" placeholder="Enter price to track"/>
+        <label><input type="checkbox" id="groupToggle" style="margin-right:8px;">Group prices within ±0.5%</label>
+      </div>
+    </div>
 
     <div id="orderInfo"></div>
 
@@ -238,14 +221,13 @@ tfoot td {
 
     <script type="module">
       import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-    
+
       const SUPABASE_URL = "https://dhgfmbsyndfbsretlhvm.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoZ2ZtYnN5bmRmYnNyZXRsaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzA2MDUsImV4cCI6MjA2MDMwNjYwNX0.Xy6a2BMXaEOBQV2vJrKWbivaP4tYE6nAQ8tSQG-wTZI";
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
+
       const userId = sessionStorage.getItem("user_id");
       const username = sessionStorage.getItem("username");
-    
       const authStatus = document.getElementById("authStatus");
       if (userId && username) {
         authStatus.innerHTML = `
@@ -257,26 +239,72 @@ tfoot td {
           location.reload();
         };
       }
-    
-      const itemInput = document.getElementById("itemInput");
+
+      // elements
+      const itemInput  = document.getElementById("itemInput");
       const trackInput = document.getElementById("trackInput");
-      const buyBody = document.querySelector("#buyTable tbody");
-      const sellBody = document.querySelector("#sellTable tbody");
-      const buyFoot = document.querySelector("#buyTable tfoot tr");
-      const sellFoot = document.querySelector("#sellTable tfoot tr");
-      const instabuys = document.getElementById("instabuys");
-      const instasells = document.getElementById("instasells");
-      const orderInfo = document.getElementById("orderInfo");
+      const buyBody    = document.querySelector("#buyTable tbody");
+      const sellBody   = document.querySelector("#sellTable tbody");
+      const buyFoot    = document.querySelector("#buyTable tfoot tr");
+      const sellFoot   = document.querySelector("#sellTable tfoot tr");
+      const orderInfo  = document.getElementById("orderInfo");
       const itemDropdown = document.getElementById("itemDropdown");
-      const chartLink = document.getElementById("chartLink");
-    
-      let latestBuySummary = [], latestSellSummary = [], currentItemId = "";
+      const chartLink  = document.getElementById("chartLink");
+      const groupToggle = document.getElementById("groupToggle");
+
+      let latestBuySummary = [];  // API sell_summary (what you can insta-buy from)
+      let latestSellSummary = []; // API buy_summary  (what you can insta-sell to)
+      let currentItemId = "";
       let allItems = [];
-    
+
+      // used for highlight thresholds
+      let lastHourlyBuyVolume  = 0; // for Buy table highlighting (instasells)
+      let lastHourlySellVolume = 0; // for Sell table highlighting (instabuys)
+
+      // grouping toggle
+      let useGrouping = false;
+      groupToggle?.addEventListener("change", () => {
+        useGrouping = groupToggle.checked;
+        renderCurrentTables();
+      });
+
+      function storageKey(itemId, side) {
+        // side: "buy" means buy table (API sell_summary), "sell" means sell table (API buy_summary)
+        return `remembered:${itemId}:${side}`;
+      }
+      function readRemembered(itemId, side) {
+        try {
+          const raw = localStorage.getItem(storageKey(itemId, side));
+          return raw ? JSON.parse(raw) : [];
+        } catch { return []; }
+      }
+      function writeRemembered(itemId, side, arr) {
+        try { localStorage.setItem(storageKey(itemId, side), JSON.stringify(arr)); } catch {}
+      }
+      function addOrUpdateRemembered(itemId, side, price, amount) {
+        const arr = readRemembered(itemId, side);
+        const idx = arr.findIndex(r => approxEqual(r.price, price));
+        if (idx >= 0) {
+          arr[idx].amount = amount; // refresh qty we last saw
+          arr[idx].ts = Date.now();
+        } else {
+          arr.push({ price, amount, ts: Date.now() });
+        }
+        writeRemembered(itemId, side, arr);
+      }
+      function removeRemembered(itemId, side, price) {
+        const arr = readRemembered(itemId, side).filter(r => !approxEqual(r.price, price));
+        writeRemembered(itemId, side, arr);
+      }
+
+      function approxEqual(a, b, eps = 1e-6) {
+        return Math.abs(a - b) <= eps;
+      }
+
       async function getApiKey() {
         return "YOUR_API_KEY_HERE";
       }
-    
+
       async function fetchAllItems() {
         const apiKey = await getApiKey();
         const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
@@ -284,7 +312,9 @@ tfoot td {
         const products = json.products;
         allItems = Object.keys(products).map(id => {
           const quick = products[id].quick_status;
-          const price = quick.sellPrice > 1e6 ? (quick.sellPrice / 1e6).toFixed(2) + 'M' : quick.sellPrice > 1e3 ? (quick.sellPrice / 1e3).toFixed(1) + 'k' : quick.sellPrice.toFixed(1);
+          const price = quick.sellPrice > 1e6 ? (quick.sellPrice / 1e6).toFixed(2) + 'M'
+                     : quick.sellPrice > 1e3 ? (quick.sellPrice / 1e3).toFixed(1) + 'k'
+                     : quick.sellPrice.toFixed(1);
           return {
             id,
             name: id.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase()),
@@ -292,7 +322,7 @@ tfoot td {
           };
         });
       }
-    
+
       itemInput.addEventListener("input", () => {
         const query = itemInput.value.trim().toLowerCase();
         itemDropdown.innerHTML = "";
@@ -313,7 +343,7 @@ tfoot td {
               View the chart on skyblock.finance <a href="https://skyblock.finance/items/${item.id}/chart" target="_blank" style="color: #00bfff; text-decoration: underline;">Here</a>
             `;
             loadData(item.id);
-    
+
             const url = new URL(window.location);
             url.searchParams.set("item", item.id);
             history.replaceState({}, "", url);
@@ -322,76 +352,179 @@ tfoot td {
         }
         itemDropdown.style.display = "block";
       });
-    
+
       trackInput.addEventListener("change", () => {
         const tracked = parseFloat(trackInput.value.replace(/,/g, ''));
         highlightTrackedOrder(tracked);
       });
-    
+
+      // ====== GROUPING ======
+      function groupSummary(summary, pct = 0.5) {
+        if (!Array.isArray(summary) || summary.length === 0) return [];
+        const tol = pct / 100;
+        // keep order by price desc
+        const sorted = [...summary].sort((a,b) => b.pricePerUnit - a.pricePerUnit);
+
+        const groups = [];
+        let current = null;
+
+        const pushCur = () => { if (current) { delete current._coins; groups.push(current); } };
+
+        for (const row of sorted) {
+          const base = { ...row, _coins: row.amount * row.pricePerUnit };
+          if (!current) { current = base; continue; }
+          const relDiff = Math.abs(row.pricePerUnit - current.pricePerUnit) / (current.pricePerUnit || 1);
+          if (relDiff <= tol) {
+            current.orders += row.orders;
+            current.amount += row.amount;
+            current._coins += row.amount * row.pricePerUnit;
+            current.pricePerUnit = current._coins / current.amount;
+            if (row.ghost || current.ghost) current.ghost = true; // propagate ghost flag
+          } else {
+            pushCur();
+            current = base;
+          }
+        }
+        pushCur();
+        return groups;
+      }
+
+      // ====== REMEMBERING LOGIC (>30 via local state; track orders after 13th) ======
+      function updateRememberedWithCurrent(apiSellSummary, apiBuySummary) {
+        // apiSellSummary -> Buy table (we "instabuy" from sells)  [side "buy"]
+        // apiBuySummary  -> Sell table (we "instasell" to buys)   [side "sell"]
+
+        const bestSell = apiSellSummary[0]?.pricePerUnit; // lowest ask? (API order is usually by price desc; we’ll rely on positions)
+        const bestBuy  = apiBuySummary[0]?.pricePerUnit;
+
+        // Remember entries after 13th (index >= 13) but within API top 30 for BOTH sides
+        apiSellSummary.slice(13).forEach(r => addOrUpdateRemembered(currentItemId, "buy",  r.pricePerUnit, r.amount));
+        apiBuySummary.slice(13).forEach(r  => addOrUpdateRemembered(currentItemId, "sell", r.pricePerUnit, r.amount));
+
+        // Clean remembered per side
+        for (const side of ["buy", "sell"]) {
+          const apiNow = (side === "buy") ? apiSellSummary : apiBuySummary;
+          const oppNow = (side === "buy") ? apiBuySummary  : apiSellSummary; // opposite book for “filled” test
+          const bestOpp = oppNow[0]?.pricePerUnit;
+
+          let arr = readRemembered(currentItemId, side);
+
+          arr = arr.filter(rec => {
+            const p = rec.price;
+
+            // RULE: if it re-enters top 13 -> stop remembering
+            const pos = apiNow.findIndex(x => approxEqual(x.pricePerUnit, p));
+            if (pos >= 0 && pos <= 12) return false;
+
+            // RULE: if order is *between* two API prices (no matching level) -> canceled/deleted
+            if (!apiNow.some(x => approxEqual(x.pricePerUnit, p))) {
+              // check if p lies strictly between two consecutive price levels
+              const levels = apiNow.map(x => x.pricePerUnit).sort((a,b)=>b-a);
+              for (let i=0;i<levels.length-1;i++) {
+                const hi = levels[i], lo = levels[i+1];
+                if (hi > p && p > lo) return false; // vanished between -> delete
+              }
+            }
+
+            // RULE: if crossed with opposite best -> filled
+            // If this side is "buy" (a sell offer in API sell_summary), it’s filled when bestBuy >= p
+            // If this side is "sell" (a buy offer in API buy_summary), it’s filled when bestSell <= p
+            if (side === "buy" && typeof bestBuy === "number" && bestBuy >= p) return false;
+            if (side === "sell" && typeof bestSell === "number" && bestSell <= p) return false;
+
+            return true; // keep
+          });
+
+          writeRemembered(currentItemId, side, arr);
+        }
+      }
+
+      function mergeRememberedIntoDisplay(apiSellSummary, apiBuySummary) {
+        // Build display arrays: include API top30 + remembered "ghosts" that are NOT in API top30 anymore
+        const buyGhosts = readRemembered(currentItemId, "buy")
+          .filter(r => apiSellSummary.findIndex(x => approxEqual(x.pricePerUnit, r.price)) === -1)
+          .map(r => ({
+            orders: 1,
+            amount: r.amount || 0,
+            pricePerUnit: r.price,
+            ghost: true
+          }));
+        const sellGhosts = readRemembered(currentItemId, "sell")
+          .filter(r => apiBuySummary.findIndex(x => approxEqual(x.pricePerUnit, r.price)) === -1)
+          .map(r => ({
+            orders: 1,
+            amount: r.amount || 0,
+            pricePerUnit: r.price,
+            ghost: true
+          }));
+
+        // Concatenate then sort by price desc to keep ladder sense
+        const buyDisplay  = [...apiSellSummary, ...buyGhosts].sort((a,b)=>b.pricePerUnit-a.pricePerUnit);
+        const sellDisplay = [...apiBuySummary, ...sellGhosts].sort((a,b)=>b.pricePerUnit-a.pricePerUnit);
+
+        return { buyDisplay, sellDisplay };
+      }
+
       async function loadData(itemId) {
-  const apiKey = await getApiKey();
-  const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
-  const json = await res.json();
-  const data = json.products[itemId];
-  if (!data) return;
+        const apiKey = await getApiKey();
+        const res = await fetch(`https://api.hypixel.net/skyblock/bazaar?key=${apiKey}`);
+        const json = await res.json();
+        const data = json.products[itemId];
+        if (!data) return;
 
-  const avgInstabuys = data.quick_status.buyMovingWeek / 168;
-const avgInstasells = data.quick_status.sellMovingWeek / 168;
+        const avgInstabuys  = data.quick_status.buyMovingWeek  / 168;
+        const avgInstasells = data.quick_status.sellMovingWeek / 168;
 
-latestBuySummary = data.sell_summary;
-latestSellSummary = data.buy_summary;
+        // API gives:
+        //   sell_summary = list of SELL orders (offers) -> our BUY table
+        //   buy_summary  = list of BUY  orders (bids)   -> our SELL table
+        latestBuySummary  = data.sell_summary ?? [];
+        latestSellSummary = data.buy_summary  ?? [];
 
-renderTable(latestBuySummary, buyBody, buyFoot, avgInstasells);
-renderTable(latestSellSummary, sellBody, sellFoot, avgInstabuys);
+        // save hourly volumes for highlight
+        lastHourlyBuyVolume  = avgInstasells;
+        lastHourlySellVolume = avgInstabuys;
 
-highlightTrackedOrder(parseFloat(trackInput.value.replace(/,/g, '')));
+        // maintain remembered set per rules (top13…top30, cancellations, fills, re-entry)
+        updateRememberedWithCurrent(latestBuySummary, latestSellSummary);
 
-const avgSellOrder = averageAmount(latestBuySummary);
-const avgBuyOrder = averageAmount(latestSellSummary);
+        // UI: header box (averages + spread)
+        const avgSellOrder = averageAmount(latestBuySummary);
+        const avgBuyOrder  = averageAmount(latestSellSummary);
 
-const sellPrice = latestBuySummary[0]?.pricePerUnit || 1;
-const buyPrice = latestSellSummary[0]?.pricePerUnit || 1;
-const spread = ((buyPrice - sellPrice) / sellPrice * 100).toFixed(2);
+        const sellPrice = latestBuySummary[0]?.pricePerUnit || 1;
+        const buyPrice  = latestSellSummary[0]?.pricePerUnit || 1;
+        const spread = ((buyPrice - sellPrice) / sellPrice * 100).toFixed(2);
 
-const volumeBox = document.querySelector(".volume-box");
+        const volumeBox = document.querySelector(".volume-box");
+        volumeBox.innerHTML = `
+          <div style="display:flex; justify-content:center; gap:100px; text-align:left; font-size:18px;">
+            <div>
+              <div><strong>Avg instabuys:</strong> ${avgInstabuys.toFixed(1)}</div>
+              <div><strong>Avg sell order volume:</strong> ${avgSellOrder.toFixed(1)}</div>
+            </div>
+            <div>
+              <div><strong>Avg instasells:</strong> ${avgInstasells.toFixed(1)}</div>
+              <div><strong>Avg buy order volume:</strong> ${avgBuyOrder.toFixed(1)}</div>
+            </div>
+          </div>
+          <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.2); padding-top:10px; text-align:center;">
+            <strong>Market spread:</strong> ${isFinite(spread) ? spread + "%" : "N/A"}
+          </div>
+        `;
 
-volumeBox.innerHTML = `
-  <div style="
-    display: flex;
-    justify-content: center;
-    gap: 100px;
-    text-align: left;
-    font-size: 18px;
-    font-family: 'Segoe UI', sans-serif;
-  ">
-    <div>
-      <div><strong>Avg instabuys:</strong> ${avgInstabuys.toFixed(1)}</div>
-      <div><strong>Avg sell order volume:</strong> ${avgSellOrder.toFixed(1)}</div>
-    </div>
-    <div>
-      <div><strong>Avg instasells:</strong> ${avgInstasells.toFixed(1)}</div>
-      <div><strong>Avg buy order volume:</strong> ${avgBuyOrder.toFixed(1)}</div>
-    </div>
-  </div>
-`;
+        renderCurrentTables();
+      }
 
-  // Add economic info (spread)
-  const spreadBox = document.createElement("div");
-  spreadBox.style.cssText = "margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; text-align: center;";
-  spreadBox.innerHTML = `
-    <strong>Market spread:</strong> ${isFinite(spread) ? spread + "%" : "N/A"}
-  `;
-  document.querySelector(".volume-box").appendChild(spreadBox);
-}
-    
       function averageAmount(summary) {
         if (!summary.length) return 0;
         return summary.reduce((sum, row) => sum + row.amount, 0) / summary.length;
       }
-    
+
       function renderTable(summary, tbody, tfootRow, hourlyVolume) {
         tbody.innerHTML = "";
         let totalAmount = 0, totalCoins = 0;
+
         for (const row of summary) {
           const total = row.amount * row.pricePerUnit;
           totalAmount += row.amount;
@@ -403,8 +536,15 @@ volumeBox.innerHTML = `
             <td>${row.pricePerUnit.toLocaleString()} coins</td>
             <td>${total.toLocaleString()} coins</td>
           `;
-          if (row.amount > hourlyVolume * 5) tr.classList.add("highlight-red");
-          else if (row.amount > hourlyVolume) tr.classList.add("highlight-yellow");
+
+          // highlights based on relative volume (only for non-ghost rows)
+          if (!row.ghost) {
+            if (row.amount > hourlyVolume * 5) tr.classList.add("highlight-red");
+            else if (row.amount > hourlyVolume) tr.classList.add("highlight-yellow");
+          } else {
+            tr.classList.add("highlight-ghost"); // light purple for remembered/out-of-API rows
+          }
+
           tbody.appendChild(tr);
         }
         tfootRow.innerHTML = `
@@ -414,19 +554,37 @@ volumeBox.innerHTML = `
           <td>${totalCoins.toLocaleString()} coins</td>
         `;
       }
-    
-      function highlightTrackedOrder(price) {
+
+      function renderCurrentTables() {
+        // Build displays that include “ghosts”
+        const { buyDisplay, sellDisplay } = mergeRememberedIntoDisplay(latestBuySummary, latestSellSummary);
+
+        const buyShown  = useGrouping ? groupSummary(buyDisplay)  : buyDisplay;
+        const sellShown = useGrouping ? groupSummary(sellDisplay) : sellDisplay;
+
+        renderTable(buyShown,  buyBody,  buyFoot,  lastHourlyBuyVolume);
+        renderTable(sellShown, sellBody, sellFoot, lastHourlySellVolume);
+
+        const tracked = parseFloat(trackInput.value.replace(/,/g, ''));
+        highlightTrackedOrder(tracked, buyShown, sellShown);
+      }
+
+      function highlightTrackedOrder(price, buyShownOverride=null, sellShownOverride=null) {
         orderInfo.innerHTML = "";
         if (!price || isNaN(price)) return;
-        const allRows = [...buyBody.children, ...sellBody.children];
-        allRows.forEach(row => row.classList.remove("highlight-blue"));
-        for (const [summary, body] of [[latestBuySummary, buyBody], [latestSellSummary, sellBody]]) {
+
+        [...buyBody.children, ...sellBody.children].forEach(row => row.classList.remove("highlight-blue"));
+
+        const buyShown  = buyShownOverride  ?? (useGrouping ? groupSummary(mergeRememberedIntoDisplay(latestBuySummary, latestSellSummary).buyDisplay)  : mergeRememberedIntoDisplay(latestBuySummary, latestSellSummary).buyDisplay);
+        const sellShown = sellShownOverride ?? (useGrouping ? groupSummary(mergeRememberedIntoDisplay(latestBuySummary, latestSellSummary).sellDisplay) : mergeRememberedIntoDisplay(latestBuySummary, latestSellSummary).sellDisplay);
+
+        for (const [summary, body] of [[buyShown, buyBody], [sellShown, sellBody]]) {
           let coinsBetween = 0, itemsBetween = 0, priority = 1;
-          for (const row of summary) {
+          for (let i = 0; i < summary.length; i++) {
+            const row = summary[i];
             const unit = parseFloat(row.pricePerUnit.toFixed(1));
             if (Math.abs(unit - price) < 0.1) {
-              const index = summary.indexOf(row);
-              const tr = body.children[index];
+              const tr = body.children[i];
               if (tr) tr.classList.add("highlight-blue");
               orderInfo.innerHTML = `
                 <div class="order-info">
@@ -445,7 +603,8 @@ volumeBox.innerHTML = `
           }
         }
       }
-    
+
+      // Preload via URL
       const urlParams = new URLSearchParams(window.location.search);
       const preloadedItem = urlParams.get('item');
       const preloadedTrack = urlParams.get('track');
@@ -460,60 +619,55 @@ volumeBox.innerHTML = `
       if (preloadedTrack) {
         trackInput.value = preloadedTrack;
       }
-    
+
+      // initial bootstrap & polling
       fetchAllItems();
       setInterval(() => {
         if (currentItemId) loadData(currentItemId);
-      }, 3000);
+      }, 3000); // you mentioned API updates every ~30s; we still poll UI every 3s for responsiveness
+
+      // Save item (unchanged)
       const saveStatus = document.getElementById("saveStatus");
+      saveStatus.onclick = async () => {
+        if (!userId || !username) {
+          alert("Please log in to save items.");
+          return;
+        }
+        const item = itemInput.value.trim();
+        if (!item) return alert("No item to save.");
+        try {
+          const { data: existing, error: checkError } = await supabase
+            .from("saved_orders")
+            .select("id")
+            .eq("user_id", userId)
+            .eq("item", item);
 
-saveStatus.onclick = async () => {
-  if (!userId || !username) {
-    alert("Please log in to save items.");
-    return;
-  }
-
-  const item = itemInput.value.trim();
-  if (!item) return alert("No item to save.");
-
-  try {
-    const { data: existing, error: checkError } = await supabase
-      .from("saved_orders")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("item", item);
-
-    if (checkError) {
-      console.error("Supabase select error:", checkError.message);
-      alert("Error checking saved items: " + checkError.message);
-      return;
-    }
-
-    if (existing?.length > 0) {
-      saveStatus.textContent = "Item already saved";
-      return;
-    }
-
-    const { error: insertError } = await supabase.from("saved_orders").insert([
-      { user_id: userId, item }
-    ]);
-
-    if (insertError) {
-      console.error("Insert error:", insertError.message);
-      alert("Error saving item: " + insertError.message);
-    } else {
-      saveStatus.textContent = "Item saved!";
-      setTimeout(() => (saveStatus.textContent = "Save item"), 3000);
-    }
-  } catch (err) {
-    console.error("Unexpected error:", err);
-    alert("Something went wrong while saving.");
-  }
-};
-
-    </script>    
+          if (checkError) {
+            console.error("Supabase select error:", checkError.message);
+            alert("Error checking saved items: " + checkError.message);
+            return;
+          }
+          if (existing?.length > 0) {
+            saveStatus.textContent = "Item already saved";
+            return;
+          }
+          const { error: insertError } = await supabase.from("saved_orders").insert([{ user_id: userId, item }]);
+          if (insertError) {
+            console.error("Insert error:", insertError.message);
+            alert("Error saving item: " + insertError.message);
+          } else {
+            saveStatus.textContent = "Item saved!";
+            setTimeout(() => (saveStatus.textContent = "Save item"), 3000);
+          }
+        } catch (err) {
+          console.error("Unexpected error:", err);
+          alert("Something went wrong while saving.");
+        }
+      };
+    </script>
   </div>
+
   <script defer src="https://vercel.com/analytics/script.js"></script>
-  <noscript><img src="https://vercel.com/api/analytics/collect" alt="" /></noscript>
+  <noscript><img src="https://vercel.com/api/analytics/collect" alt=""/></noscript>
 </body>
 </html>
