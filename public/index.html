@@ -128,444 +128,303 @@
   </div>
 
   <script type="module">
-    // ===== DEBUG UTIL =====
-    function dbg(...args) {
-      const ts = new Date().toISOString();
-      console.log(`[${ts}] [GHOST DEBUG]`, ...args);
-    }
+const GROUP_PCT = 0.15;
+const POLL_MS = 3000;
 
-    // ===== Config =====
-    const GROUP_PCT = 0.15; // ±0.15% for live API rows only
-    const POLL_MS = 3000;
+const itemInput  = document.getElementById("itemInput");
+const itemDropdown = document.getElementById("itemDropdown");
+const chartLink  = document.getElementById("chartLink");
+const trackInput = document.getElementById("trackInput");
+const groupToggle = document.getElementById("groupToggle");
 
-    // ===== Elements =====
-    const itemInput  = document.getElementById("itemInput");
-    const itemDropdown = document.getElementById("itemDropdown");
-    const chartLink  = document.getElementById("chartLink");
-    const trackInput = document.getElementById("trackInput");
-    const groupToggle = document.getElementById("groupToggle");
+const buyBody  = document.querySelector("#buyTable tbody");
+const sellBody = document.querySelector("#sellTable tbody");
+const buyFoot  = document.querySelector("#buyTable tfoot tr");
+const sellFoot = document.querySelector("#sellTable tfoot tr");
 
-    const buyBody  = document.querySelector("#buyTable tbody");
-    const sellBody = document.querySelector("#sellTable tbody");
-    const buyFoot  = document.querySelector("#buyTable tfoot tr");
-    const sellFoot = document.querySelector("#sellTable tfoot tr");
+const orderInfo = document.getElementById("orderInfo");
+const volumeBox = document.getElementById("volumeBox");
+const spreadBox = document.getElementById("spreadBox");
 
-    const orderInfo = document.getElementById("orderInfo");
-    const volumeBox = document.getElementById("volumeBox");
-    const spreadBox = document.getElementById("spreadBox");
+let currentItemId = "";
+let allItems = [];
+let latestBuySummary = [];
+let latestSellSummary = [];
+let lastHourlyBuyVolume  = 0;
+let lastHourlySellVolume = 0;
+let useGrouping = false;
 
-    // ===== State =====
-    let currentItemId = "";
-    let allItems = [];
-    let latestBuySummary = [];  // API sell_summary (sell offers)  -> Buy table
-    let latestSellSummary = []; // API buy_summary  (buy bids)     -> Sell table
-    let lastHourlyBuyVolume  = 0; // for Buy (instasells)
-    let lastHourlySellVolume = 0; // for Sell (instabuys)
-    let useGrouping = false;
+let prevBuySortedDesc = [];
+let prevSellSortedAsc = [];
 
-    // previous API-only snapshots (sorted)
-    let prevBuySortedDesc = []; // sell_summary sorted DESC
-    let prevSellSortedAsc = []; // buy_summary  sorted ASC
-
-    // ===== Helpers =====
-    // exact price level key at 0.1 precision (API shows 1 decimal)
-    function keyPrice(p){ return Math.round(p * 10) / 10; }
-    function sameLevel(a, b){ return keyPrice(a) === keyPrice(b); }
-
-    function storageKey(itemId, side){ return `remembered:${itemId}:${side}`; }
-    function readRemembered(itemId, side){
-      try {
-        const raw = localStorage.getItem(storageKey(itemId,side)) || "[]";
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (e) {
-        dbg("READ ERROR", side, e?.message);
-        return [];
-      }
-    }
-    function writeRemembered(itemId, side, arr){
-      try {
-        localStorage.setItem(storageKey(itemId,side), JSON.stringify(arr));
-        dbg("STORAGE WRITE", side, storageKey(itemId, side), arr);
-      } catch (e) {
-        dbg("WRITE ERROR", side, e?.message);
-      }
-    }
-    // ghosts are NOT grouped: store exact level (0.1), with amount and orders
-    function addGhost(itemId, side, price, amount, orders){
-      const arr = readRemembered(itemId, side);
-      const k = keyPrice(price);
-      const exists = arr.some(x => sameLevel(x.price, k));
-      dbg("ADD GHOST attempt", { side, price:k, exists, amount, orders });
-      if (!exists) {
-        const entry = { price: k, amount: amount ?? 0, orders: orders ?? 1, ts: Date.now() };
-        arr.push(entry);
-        writeRemembered(itemId, side, arr);
-        dbg("ADD GHOST saved", { side, entry });
-      }
-    }
-    function removeGhost(itemId, side, price, reason){
-      const k = keyPrice(price);
-      const before = readRemembered(itemId, side);
-      const after = before.filter(r => !sameLevel(r.price, k));
-      if (after.length !== before.length) {
-        writeRemembered(itemId, side, after);
-        dbg("REMOVE GHOST", { side, price:k, reason, remaining: after.length });
-      }
-    }
-
-    function groupSummary(summary, pct = GROUP_PCT) {
-      if (!Array.isArray(summary) || summary.length === 0) return [];
-      const tol = pct / 100;
-      const arr = [...summary]; // preserve incoming order
-      const out = [];
-      let cur = null;
-      const pushCur = () => { if (cur){ delete cur._coins; out.push(cur); } };
-      for (const row of arr) {
-        const base = { ...row, _coins: row.amount * row.pricePerUnit };
-        if (!cur) { cur = base; continue; }
-        const rel = Math.abs(row.pricePerUnit - cur.pricePerUnit) / (cur.pricePerUnit || 1);
-        if (rel <= tol) {
-          cur.orders += row.orders;
-          cur.amount += row.amount;
-          cur._coins += row.amount * row.pricePerUnit;
-          cur.pricePerUnit = cur._coins / cur.amount;
-        } else {
-          pushCur();
-          cur = base;
-        }
-      }
+const EPS = 1e-9;
+function dbg(...args){console.log(`[${new Date().toISOString()}] [GHOST DEBUG]`,...args);}
+function keyPrice(p){ return Math.round(p * 10) / 10; }
+function sameLevel(a, b){ return keyPrice(a) === keyPrice(b); }
+function storageKey(itemId, side){ return `remembered:${itemId}:${side}`; }
+function readRemembered(itemId, side){
+  try { return JSON.parse(localStorage.getItem(storageKey(itemId,side)) || "[]"); } catch { return []; }
+}
+function writeRemembered(itemId, side, arr){
+  try { localStorage.setItem(storageKey(itemId,side), JSON.stringify(arr)); } catch {}
+  dbg(`STORAGE WRITE ${side}`, storageKey(itemId,side), arr);
+}
+function addGhost(itemId, side, price, amount, orders){
+  const arr = readRemembered(itemId, side);
+  const k = keyPrice(price);
+  if (!arr.some(x => sameLevel(x.price, k))) {
+    dbg("ADD GHOST", {side,price:k,amount,orders});
+    arr.push({ price: k, amount: amount ?? 0, orders: orders ?? 1, ts: Date.now() });
+    writeRemembered(itemId, side, arr);
+  }
+}
+function crossed(side, price, bestBid, bestAsk){
+  return side==="buy" ? price >= bestAsk - EPS : price <= bestBid + EPS;
+}
+function groupSummary(summary, pct = GROUP_PCT) {
+  if (!Array.isArray(summary) || summary.length === 0) return [];
+  const tol = pct / 100;
+  const arr = [...summary];
+  const out = [];
+  let cur = null;
+  const pushCur = () => { if (cur){ delete cur._coins; out.push(cur); } };
+  for (const row of arr) {
+    const base = { ...row, _coins: row.amount * row.pricePerUnit };
+    if (!cur) { cur = base; continue; }
+    const rel = Math.abs(row.pricePerUnit - cur.pricePerUnit) / (cur.pricePerUnit || 1);
+    if (rel <= tol) {
+      cur.orders += row.orders;
+      cur.amount += row.amount;
+      cur._coins += row.amount * row.pricePerUnit;
+      cur.pricePerUnit = cur._coins / cur.amount;
+    } else {
       pushCur();
-      return out;
+      cur = base;
     }
-
-    function buildDisplaysWithGhosts(apiSellSummary, apiBuySummary) {
-      // 1) ghosts from localStorage if NOT currently present at that exact level
-      const buyGhosts = readRemembered(currentItemId, "buy")
-        .filter(r => !apiSellSummary.some(x => sameLevel(x.pricePerUnit, r.price)))
-        .map(r => ({ orders: r.orders ?? 1, amount: r.amount ?? 0, pricePerUnit: keyPrice(r.price), ghost: true }));
-
-      const sellGhosts = readRemembered(currentItemId, "sell")
-        .filter(r => !apiBuySummary.some(x => sameLevel(x.pricePerUnit, r.price)))
-        .map(r => ({ orders: r.orders ?? 1, amount: r.amount ?? 0, pricePerUnit: keyPrice(r.price), ghost: true }));
-
-      // 2) Optionally group ONLY live API rows (do not touch ghosts)
-      const apiSellGrouped = useGrouping ? groupSummary(apiSellSummary) : [...apiSellSummary];
-      const apiBuyGrouped  = useGrouping ? groupSummary(apiBuySummary)  : [...apiBuySummary];
-
-      // 3) Merge + final sort; ghosts always last
-      const buyCombined  = [...apiSellGrouped, ...buyGhosts].sort((a,b)=>{
-        if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1; // ghosts last
-        return b.pricePerUnit - a.pricePerUnit; // DESC for Buy
-      });
-      const sellCombined = [...apiBuyGrouped,  ...sellGhosts].sort((a,b)=>{
-        if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1; // ghosts last
-        return a.pricePerUnit - b.pricePerUnit; // ASC for Sell
-      });
-
-      return { buyDisplay: buyCombined, sellDisplay: sellCombined };
+  }
+  pushCur();
+  return out;
+}
+function buildDisplaysWithGhosts(apiSellSummary, apiBuySummary) {
+  const buyGhosts = readRemembered(currentItemId, "buy")
+    .filter(r => !apiSellSummary.some(x => sameLevel(x.pricePerUnit, r.price)))
+    .map(r => ({ orders: r.orders ?? 1, amount: r.amount ?? 0, pricePerUnit: keyPrice(r.price), ghost: true }));
+  const sellGhosts = readRemembered(currentItemId, "sell")
+    .filter(r => !apiBuySummary.some(x => sameLevel(x.pricePerUnit, r.price)))
+    .map(r => ({ orders: r.orders ?? 1, amount: r.amount ?? 0, pricePerUnit: keyPrice(r.price), ghost: true }));
+  const apiSellGrouped = useGrouping ? groupSummary(apiSellSummary) : [...apiSellSummary];
+  const apiBuyGrouped  = useGrouping ? groupSummary(apiBuySummary)  : [...apiBuySummary];
+  const buyCombined  = [...apiSellGrouped, ...buyGhosts].sort((a,b)=>{
+    if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1;
+    return b.pricePerUnit - a.pricePerUnit;
+  });
+  const sellCombined = [...apiBuyGrouped,  ...sellGhosts].sort((a,b)=>{
+    if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1;
+    return a.pricePerUnit - b.pricePerUnit;
+  });
+  return { buyDisplay: buyCombined, sellDisplay: sellCombined };
+}
+function renderTable(summary, tbody, tfootRow, hourlyVolume){
+  tbody.innerHTML = "";
+  let totalAmount=0, totalCoins=0;
+  for (const row of summary) {
+    const total = row.amount * row.pricePerUnit;
+    totalAmount += row.amount; totalCoins += total;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.orders}</td>
+      <td>${row.amount}</td>
+      <td>${row.pricePerUnit.toLocaleString()} coins</td>
+      <td>${total.toLocaleString()} coins</td>
+    `;
+    if (row.ghost) tr.classList.add("highlight-ghost");
+    else {
+      if (row.amount > hourlyVolume * 5) tr.classList.add("highlight-red");
+      else if (row.amount > hourlyVolume) tr.classList.add("highlight-yellow");
     }
-
-    function averageAmount(summary){
-      if (!summary.length) return 0;
-      return summary.reduce((s,r)=>s+r.amount,0) / summary.length;
-    }
-
-    function renderTable(summary, tbody, tfootRow, hourlyVolume){
-      tbody.innerHTML = "";
-      let totalAmount=0, totalCoins=0;
-      for (const row of summary) {
-        const total = row.amount * row.pricePerUnit;
-        totalAmount += row.amount; totalCoins += total;
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${row.orders}</td>
-          <td>${row.amount}</td>
-          <td>${row.pricePerUnit.toLocaleString()} coins</td>
-          <td>${total.toLocaleString()} coins</td>
+    tbody.appendChild(tr);
+  }
+  tfootRow.innerHTML = `
+    <td>Total:</td>
+    <td>${totalAmount}</td>
+    <td></td>
+    <td>${totalCoins.toLocaleString()} coins</td>
+  `;
+}
+function renderCurrentTables() {
+  const { buyDisplay, sellDisplay } = buildDisplaysWithGhosts(latestBuySummary, latestSellSummary);
+  renderTable(buyDisplay,  buyBody,  buyFoot,  lastHourlyBuyVolume);
+  renderTable(sellDisplay, sellBody, sellFoot, lastHourlySellVolume);
+  const tracked = parseFloat((trackInput.value || "").replace(/,/g, ''));
+  highlightTrackedOrder(tracked, buyDisplay, sellDisplay);
+}
+function highlightTrackedOrder(price, buyShown, sellShown){
+  orderInfo.style.display = "none";
+  orderInfo.innerHTML = "";
+  if (!price || isNaN(price)) return;
+  [...buyBody.children, ...sellBody.children].forEach(r => r.classList.remove("highlight-blue"));
+  for (const [summary, body] of [[buyShown, buyBody], [sellShown, sellBody]]) {
+    let coinsBetween=0, itemsBetween=0, priority=1;
+    for (let i=0;i<summary.length;i++){
+      const row = summary[i];
+      const unit = parseFloat(keyPrice(row.pricePerUnit).toFixed(1));
+      if (Math.abs(unit - price) < 0.1) {
+        const tr = body.children[i];
+        if (tr) tr.classList.add("highlight-blue");
+        orderInfo.style.display = "block";
+        orderInfo.innerHTML = `
+          <strong>Tracked Order Info</strong><br/>
+          Priority position: ${priority}<br/>
+          Items between: ${itemsBetween}<br/>
+          Coin gap: ${Math.round(coinsBetween).toLocaleString()} coins<br/>
+          Items left in order: ${row.amount}
         `;
-        if (row.ghost) tr.classList.add("highlight-ghost");
-        else {
-          if (row.amount > hourlyVolume * 5) tr.classList.add("highlight-red");
-          else if (row.amount > hourlyVolume) tr.classList.add("highlight-yellow");
-        }
-        tbody.appendChild(tr);
+        return;
       }
-      tfootRow.innerHTML = `
-        <td>Total:</td>
-        <td>${totalAmount}</td>
-        <td></td>
-        <td>${totalCoins.toLocaleString()} coins</td>
-      `;
+      itemsBetween += row.amount;
+      coinsBetween += row.amount * row.pricePerUnit;
+      priority++;
     }
-
-    function renderCurrentTables() {
-      const { buyDisplay, sellDisplay } = buildDisplaysWithGhosts(latestBuySummary, latestSellSummary);
-      renderTable(buyDisplay,  buyBody,  buyFoot,  lastHourlyBuyVolume);
-      renderTable(sellDisplay, sellBody, sellFoot, lastHourlySellVolume);
-
-      // Tracking highlight
-      const tracked = parseFloat((trackInput.value || "").replace(/,/g, ''));
-      highlightTrackedOrder(tracked, buyDisplay, sellDisplay);
+  }
+}
+function rememberVanishedOutsideTop13(curBuyDesc, curSellAsc) {
+  const curBuyKeys  = new Set(curBuyDesc.map(r => keyPrice(r.pricePerUnit)));
+  const curSellKeys = new Set(curSellAsc.map(r => keyPrice(r.pricePerUnit)));
+  prevBuySortedDesc.forEach((r, idx) => {
+    if (idx >= 13) {
+      const k = keyPrice(r.pricePerUnit);
+      if (!curBuyKeys.has(k)) { dbg("VANISHED BUY",r); addGhost(currentItemId, "buy", k, r.amount, r.orders); }
     }
-
-    function highlightTrackedOrder(price, buyShown, sellShown){
-      orderInfo.style.display = "none";
-      orderInfo.innerHTML = "";
-      if (!price || isNaN(price)) return;
-
-      // Clear previous
-      [...buyBody.children, ...sellBody.children].forEach(r => r.classList.remove("highlight-blue"));
-
-      for (const [summary, body] of [[buyShown, buyBody], [sellShown, sellBody]]) {
-        let coinsBetween=0, itemsBetween=0, priority=1;
-        for (let i=0;i<summary.length;i++){
-          const row = summary[i];
-          const unit = parseFloat(keyPrice(row.pricePerUnit).toFixed(1));
-          if (Math.abs(unit - price) < 0.1) {
-            const tr = body.children[i];
-            if (tr) tr.classList.add("highlight-blue");
-            orderInfo.style.display = "block";
-            orderInfo.innerHTML = `
-              <strong>Tracked Order Info</strong><br/>
-              Priority position: ${priority}<br/>
-              Items between: ${itemsBetween}<br/>
-              Coin gap: ${Math.round(coinsBetween).toLocaleString()} coins<br/>
-              Items left in order: ${row.amount}
-            `;
-            return;
-          }
-          itemsBetween += row.amount;
-          coinsBetween += row.amount * row.pricePerUnit;
-          priority++;
-        }
-      }
+  });
+  prevSellSortedAsc.forEach((r, idx) => {
+    if (idx >= 13) {
+      const k = keyPrice(r.pricePerUnit);
+      if (!curSellKeys.has(k)) { dbg("VANISHED SELL",r); addGhost(currentItemId, "sell", k, r.amount, r.orders); }
     }
-
-    // ===== Ghost lifecycle =====
-    // When a previous post-13 level disappears from current top-30 => create ghost at that exact price
-    function rememberVanishedOutsideTop13(curBuyDesc, curSellAsc) {
-      dbg("CHECK VANISHED for", currentItemId);
-      dbg("prevBuySortedDesc:", prevBuySortedDesc.map(r => r.pricePerUnit));
-      dbg("curBuyDesc:", curBuyDesc.map(r => r.pricePerUnit));
-      dbg("prevSellSortedAsc:", prevSellSortedAsc.map(r => r.pricePerUnit));
-      dbg("curSellAsc:", curSellAsc.map(r => r.pricePerUnit));
-
-      const curBuyKeys  = new Set(curBuyDesc.map(r => keyPrice(r.pricePerUnit)));
-      const curSellKeys = new Set(curSellAsc.map(r => keyPrice(r.pricePerUnit)));
-
-      // BUY side (sell_summary DESC)
-      prevBuySortedDesc.forEach((r, idx) => {
-        if (idx >= 13) {
-          const k = keyPrice(r.pricePerUnit);
-          if (!curBuyKeys.has(k)) {
-            dbg("VANISHED BUY", { idx, price: k, amount: r.amount, orders: r.orders });
-            addGhost(currentItemId, "buy", k, r.amount, r.orders);
-          }
-        }
-      });
-
-      // SELL side (buy_summary ASC)
-      prevSellSortedAsc.forEach((r, idx) => {
-        if (idx >= 13) {
-          const k = keyPrice(r.pricePerUnit);
-          if (!curSellKeys.has(k)) {
-            dbg("VANISHED SELL", { idx, price: k, amount: r.amount, orders: r.orders });
-            addGhost(currentItemId, "sell", k, r.amount, r.orders);
-          }
-        }
-      });
-    }
-
-    // Remove ghosts when exact level reappears, sits between two levels (canceled), or is filled (opposite best crosses)
-    function cleanGhostsAgainstCurrent(curBuyDesc, curSellAsc) {
-      const buyLevels  = curBuyDesc.map(r => keyPrice(r.pricePerUnit)); // DESC values
-      const sellLevels = curSellAsc.map(r => keyPrice(r.pricePerUnit)); // ASC values
-
-      const bestSell = Math.min(...curBuyDesc.map(r => r.pricePerUnit || Infinity)); // cheapest ask
-      const bestBuy  = Math.max(...curSellAsc.map(r => r.pricePerUnit || -Infinity)); // highest bid
-
-      function isBetween(price, levels){
-        if (levels.length < 2) return false;
-        const p = keyPrice(price);
-        for (let i=0;i<levels.length-1;i++){
-          const a = levels[i], b = levels[i+1];
-          const lo = Math.min(a,b), hi = Math.max(a,b);
-          if (p > lo && p < hi) return true;
-        }
-        return false;
-      }
-
-      // BUY ghosts (sell offers)
-      {
-        const arr = readRemembered(currentItemId, "buy");
-        const kept = [];
-        for (const g of arr) {
-          const k = keyPrice(g.price);
-          if (buyLevels.includes(k)) { dbg("REMOVE buy", { price:k, reason:"reappeared" }); continue; }
-          if (isBetween(k, buyLevels)) { dbg("REMOVE buy", { price:k, reason:"between levels (canceled)" }); continue; }
-          if (isFinite(bestBuy) && bestBuy >= k) { dbg("REMOVE buy", { price:k, reason:"filled (best bid crossed)" }); continue; }
-          kept.push(g);
-        }
-        writeRemembered(currentItemId, "buy", kept);
-      }
-
-      // SELL ghosts (buy bids)
-      {
-        const arr = readRemembered(currentItemId, "sell");
-        const kept = [];
-        for (const g of arr) {
-          const k = keyPrice(g.price);
-          if (sellLevels.includes(k)) { dbg("REMOVE sell", { price:k, reason:"reappeared" }); continue; }
-          if (isBetween(k, sellLevels)) { dbg("REMOVE sell", { price:k, reason:"between levels (canceled)" }); continue; }
-          if (isFinite(bestSell) && bestSell <= k) { dbg("REMOVE sell", { price:k, reason:"filled (best ask crossed)" }); continue; }
-          kept.push(g);
-        }
-        writeRemembered(currentItemId, "sell", kept);
-      }
-    }
-
-    // ===== Data flow =====
-    async function getApiKey(){ return ""; } // public works without key
-
-    async function fetchAllItems(){
-      const key = await getApiKey();
-      const url = key ? `https://api.hypixel.net/skyblock/bazaar?key=${key}` : `https://api.hypixel.net/skyblock/bazaar`;
-      const res = await fetch(url);
-      const json = await res.json();
-      const products = json.products || {};
-      allItems = Object.keys(products).map(id => {
-        const q = products[id].quick_status;
-        const price = q.sellPrice > 1e6 ? (q.sellPrice/1e6).toFixed(2)+'M' :
-                      q.sellPrice > 1e3 ? (q.sellPrice/1e3).toFixed(1)+'k' :
-                      q.sellPrice.toFixed(1);
-        return { id, name: id.replace(/_/g,' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()), price };
-      });
-    }
-
-    function populateDropdown(query){
-      const filtered = allItems.filter(i => i.name.toLowerCase().includes(query) || i.id.toLowerCase().includes(query));
-      itemDropdown.innerHTML = "";
-      for (const item of filtered.slice(0, 60)) {
-        const div = document.createElement("div");
-        div.className = "dropdown-item";
-        div.innerHTML = `<div>${item.name}</div><div class="pill">${item.price} /bz</div>`;
-        div.onclick = () => {
-          itemInput.value = item.id;
-          itemDropdown.style.display = "none";
-          selectItem(item.id);
-        };
-        itemDropdown.appendChild(div);
-      }
-      itemDropdown.style.display = filtered.length ? "block" : "none";
-    }
-
-    itemInput.addEventListener("input", () => {
-      const query = itemInput.value.trim().toLowerCase();
-      if (!query) { itemDropdown.style.display = "none"; return; }
-      if (allItems.length === 0) { fetchAllItems().then(() => populateDropdown(query)); }
-      else { populateDropdown(query); }
-    });
-
-    function selectItem(id){
-      currentItemId = id;
-      // reset previous snapshot so ghosts start after first live tick
-      prevBuySortedDesc = [];
-      prevSellSortedAsc = [];
-      dbg("SELECT ITEM", id, "reset prev snapshots");
-
-      chartLink.innerHTML = `Chart: <a href="https://skyblock.finance/items/${id}/chart" target="_blank" style="color:var(--accent);">skyblock.finance/items/${id}/chart</a>`;
-      loadData(id);
-
-      const url = new URL(window.location);
-      url.searchParams.set("item", id);
-      history.replaceState({}, "", url);
-    }
-
-    trackInput.addEventListener("change", () => {
-      const tracked = parseFloat((trackInput.value||"").replace(/,/g,''));
-      const { buyDisplay, sellDisplay } = buildDisplaysWithGhosts(latestBuySummary, latestSellSummary);
-      highlightTrackedOrder(tracked, buyDisplay, sellDisplay);
-    });
-
-    groupToggle.addEventListener("change", () => {
-      useGrouping = groupToggle.checked;
-      dbg("GROUP TOGGLE", useGrouping);
-      renderCurrentTables();
-    });
-
-    async function loadData(itemId){
-      const key = await getApiKey();
-      const url = key ? `https://api.hypixel.net/skyblock/bazaar?key=${key}` : `https://api.hypixel.net/skyblock/bazaar`;
-      const res = await fetch(url);
-      const json = await res.json();
-      const data = json.products?.[itemId];
-      if (!data) { dbg("NO DATA for item", itemId); return; }
-
-      const avgInstabuys  = data.quick_status.buyMovingWeek  / 168;
-      const avgInstasells = data.quick_status.sellMovingWeek / 168;
-
-      latestBuySummary  = data.sell_summary ?? []; // sell offers (-> Buy table)
-      latestSellSummary = data.buy_summary  ?? []; // buy bids   (-> Sell table)
-
-      lastHourlyBuyVolume  = avgInstasells;
-      lastHourlySellVolume = avgInstabuys;
-
-      // Volume & spread UI
-      const avgSellOrder = averageAmount(latestBuySummary);
-      const avgBuyOrder  = averageAmount(latestSellSummary);
-      volumeBox.innerHTML = `
-        <div><strong>Avg instabuys/hour:</strong> ${avgInstabuys.toFixed(1)}</div>
-        <div><strong>Avg instasells/hour:</strong> ${avgInstasells.toFixed(1)}</div>
-        <div><strong>Avg sell-order amount:</strong> ${avgSellOrder.toFixed(1)}</div>
-        <div><strong>Avg buy-order amount:</strong> ${avgBuyOrder.toFixed(1)}</div>
-      `;
-      const cheapestAsk = Math.min(...latestBuySummary.map(r=>r.pricePerUnit || Infinity));
-      const highestBid  = Math.max(...latestSellSummary.map(r=>r.pricePerUnit || -Infinity));
-      const spreadPct = ((highestBid - cheapestAsk) / cheapestAsk) * 100;
-      spreadBox.innerHTML = `<strong>Market spread:</strong> ${isFinite(spreadPct) ? spreadPct.toFixed(2)+'%' : 'N/A'}`;
-
-      // Sorted ladders for comparisons
-      const curBuySortedDesc = [...latestBuySummary].sort((a,b)=> b.pricePerUnit - a.pricePerUnit);
-      const curSellSortedAsc = [...latestSellSummary].sort((a,b)=> a.pricePerUnit - b.pricePerUnit);
-
-      dbg("TICK", { item: itemId });
-      dbg("curBuySortedDesc (prices):", curBuySortedDesc.map(r=>r.pricePerUnit));
-      dbg("curSellSortedAsc (prices):", curSellSortedAsc.map(r=>r.pricePerUnit));
-      dbg("prevBuySortedDesc (prices):", prevBuySortedDesc.map(r=>r.pricePerUnit));
-      dbg("prevSellSortedAsc (prices):", prevSellSortedAsc.map(r=>r.pricePerUnit));
-
-      // 1) From previous snapshot → if post-13 level vanished → add ghost
-      if (prevBuySortedDesc.length || prevSellSortedAsc.length) {
-        rememberVanishedOutsideTop13(curBuySortedDesc, curSellSortedAsc);
-      } else {
-        dbg("FIRST SNAPSHOT — no vanish compare this tick");
-      }
-
-      // 2) Clean ghosts vs current ladders (with reason logs)
-      cleanGhostsAgainstCurrent(curBuySortedDesc, curSellSortedAsc);
-
-      // 3) Render
-      renderCurrentTables();
-
-      // 4) Update previous snapshots
-      prevBuySortedDesc = curBuySortedDesc;
-      prevSellSortedAsc = curSellSortedAsc;
-      dbg("SNAPSHOTS UPDATED");
-    }
-
-    // Preload from URL
-    const urlParams = new URLSearchParams(location.search);
-    const preItem = urlParams.get("item");
-    const preTrack = urlParams.get("track");
-    if (preItem) { itemInput.value = preItem; selectItem(preItem); }
-    if (preTrack) trackInput.value = preTrack;
-
-    // Polling
-    setInterval(() => { if (currentItemId) loadData(currentItemId); }, POLL_MS);
-
-    // Bootstrap list
-    fetchAllItems();
-  </script>
+  });
+}
+function cleanGhostsAgainstCurrent(curBuyDesc, curSellAsc) {
+  const buyLevels  = curBuyDesc.map(r => keyPrice(r.pricePerUnit));
+  const sellLevels = curSellAsc.map(r => keyPrice(r.pricePerUnit));
+  const bestSell = Math.min(...curBuyDesc.map(r => r.pricePerUnit || Infinity));
+  const bestBuy  = Math.max(...curSellAsc.map(r => r.pricePerUnit || -Infinity));
+  let keptBuy = [];
+  for (const g of readRemembered(currentItemId, "buy")) {
+    const k = keyPrice(g.price);
+    if (buyLevels.includes(k)) continue;
+    if (crossed("buy", k, bestBuy, bestSell)) { dbg("REMOVE buy",g); continue; }
+    keptBuy.push(g);
+  }
+  writeRemembered(currentItemId, "buy", keptBuy);
+  let keptSell = [];
+  for (const g of readRemembered(currentItemId, "sell")) {
+    const k = keyPrice(g.price);
+    if (sellLevels.includes(k)) continue;
+    if (crossed("sell", k, bestBuy, bestSell)) { dbg("REMOVE sell",g); continue; }
+    keptSell.push(g);
+  }
+  writeRemembered(currentItemId, "sell", keptSell);
+}
+async function getApiKey(){ return ""; }
+async function fetchAllItems(){
+  const key = await getApiKey();
+  const url = key ? `https://api.hypixel.net/skyblock/bazaar?key=${key}` : `https://api.hypixel.net/skyblock/bazaar`;
+  const res = await fetch(url);
+  const json = await res.json();
+  const products = json.products || {};
+  allItems = Object.keys(products).map(id => {
+    const q = products[id].quick_status;
+    const price = q.sellPrice > 1e6 ? (q.sellPrice/1e6).toFixed(2)+'M' :
+                  q.sellPrice > 1e3 ? (q.sellPrice/1e3).toFixed(1)+'k' :
+                  q.sellPrice.toFixed(1);
+    return { id, name: id.replace(/_/g,' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()), price };
+  });
+}
+function populateDropdown(query){
+  const filtered = allItems.filter(i => i.name.toLowerCase().includes(query) || i.id.toLowerCase().includes(query));
+  itemDropdown.innerHTML = "";
+  for (const item of filtered.slice(0, 60)) {
+    const div = document.createElement("div");
+    div.className = "dropdown-item";
+    div.innerHTML = `<div>${item.name}</div><div class="pill">${item.price} /bz</div>`;
+    div.onclick = () => {
+      itemInput.value = item.id;
+      itemDropdown.style.display = "none";
+      selectItem(item.id);
+    };
+    itemDropdown.appendChild(div);
+  }
+  itemDropdown.style.display = filtered.length ? "block" : "none";
+}
+itemInput.addEventListener("input", () => {
+  const query = itemInput.value.trim().toLowerCase();
+  if (!query) { itemDropdown.style.display = "none"; return; }
+  if (allItems.length === 0) { fetchAllItems().then(() => populateDropdown(query)); }
+  else { populateDropdown(query); }
+});
+function selectItem(id){
+  currentItemId = id;
+  prevBuySortedDesc = [];
+  prevSellSortedAsc = [];
+  chartLink.innerHTML = `Chart: <a href="https://skyblock.finance/items/${id}/chart" target="_blank" style="color:var(--accent);">skyblock.finance/items/${id}/chart</a>`;
+  loadData(id);
+  const url = new URL(window.location);
+  url.searchParams.set("item", id);
+  history.replaceState({}, "", url);
+}
+trackInput.addEventListener("change", () => {
+  const tracked = parseFloat((trackInput.value||"").replace(/,/g,''));
+  const { buyDisplay, sellDisplay } = buildDisplaysWithGhosts(latestBuySummary, latestSellSummary);
+  highlightTrackedOrder(tracked, buyDisplay, sellDisplay);
+});
+groupToggle.addEventListener("change", () => {
+  useGrouping = groupToggle.checked;
+  renderCurrentTables();
+});
+async function loadData(itemId){
+  const key = await getApiKey();
+  const url = key ? `https://api.hypixel.net/skyblock/bazaar?key=${key}` : `https://api.hypixel.net/skyblock/bazaar`;
+  const res = await fetch(url);
+  const json = await res.json();
+  const data = json.products?.[itemId];
+  if (!data) return;
+  const avgInstabuys  = data.quick_status.buyMovingWeek  / 168;
+  const avgInstasells = data.quick_status.sellMovingWeek / 168;
+  latestBuySummary  = data.sell_summary ?? [];
+  latestSellSummary = data.buy_summary  ?? [];
+  lastHourlyBuyVolume  = avgInstasells;
+  lastHourlySellVolume = avgInstabuys;
+  const avgSellOrder = averageAmount(latestBuySummary);
+  const avgBuyOrder  = averageAmount(latestSellSummary);
+  volumeBox.innerHTML = `
+    <div><strong>Avg instabuys/hour:</strong> ${avgInstabuys.toFixed(1)}</div>
+    <div><strong>Avg instasells/hour:</strong> ${avgInstasells.toFixed(1)}</div>
+    <div><strong>Avg sell-order amount:</strong> ${avgSellOrder.toFixed(1)}</div>
+    <div><strong>Avg buy-order amount:</strong> ${avgBuyOrder.toFixed(1)}</div>
+  `;
+  const cheapestAsk = Math.min(...latestBuySummary.map(r=>r.pricePerUnit || Infinity));
+  const highestBid  = Math.max(...latestSellSummary.map(r=>r.pricePerUnit || -Infinity));
+  const spreadPct = ((highestBid - cheapestAsk) / cheapestAsk) * 100;
+  spreadBox.innerHTML = `<strong>Market spread:</strong> ${isFinite(spreadPct) ? spreadPct.toFixed(2)+'%' : 'N/A'}`;
+  const curBuySortedDesc = [...latestBuySummary].sort((a,b)=> b.pricePerUnit - a.pricePerUnit);
+  const curSellSortedAsc = [...latestSellSummary].sort((a,b)=> a.pricePerUnit - b.pricePerUnit);
+  if (prevBuySortedDesc.length || prevSellSortedAsc.length) rememberVanishedOutsideTop13(curBuySortedDesc, curSellSortedAsc);
+  cleanGhostsAgainstCurrent(curBuySortedDesc, curSellSortedAsc);
+  renderCurrentTables();
+  prevBuySortedDesc = curBuySortedDesc;
+  prevSellSortedAsc = curSellSortedAsc;
+}
+function averageAmount(summary){
+  if (!summary.length) return 0;
+  return summary.reduce((s,r)=>s+r.amount,0) / summary.length;
+}
+const urlParams = new URLSearchParams(location.search);
+const preItem = urlParams.get("item");
+const preTrack = urlParams.get("track");
+if (preItem) { itemInput.value = preItem; selectItem(preItem); }
+if (preTrack) trackInput.value = preTrack;
+setInterval(() => { if (currentItemId) loadData(currentItemId); }, POLL_MS);
+fetchAllItems();
+</script>
 </body>
 </html>
