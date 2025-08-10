@@ -4,51 +4,57 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Bazaar Orders — Minimal</title>
+  <link rel="icon" type="image/jpeg" href="site-icon.png"/>
+
   <style>
     :root {
       --bg: #0b0f14;
-      --card: rgba(255,255,255,0.06);
+      --card: rgba(0,0,0,0.65);
       --text: #f5f7fa;
-      --muted: rgba(255,255,255,0.7);
+      --muted: rgba(255,255,255,0.75);
       --accent: #00bfff;
       --ghost: rgba(186,114,255,0.18);
       --warn1: rgba(255,255,0,0.15);
       --warn2: rgba(255,80,80,0.25);
       --hl: rgba(0,191,255,0.25);
+      --border: rgba(255,255,255,0.12);
+      --head: rgba(0,191,255,0.28);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0; color: var(--text);
-      background: radial-gradient(1200px 800px at 20% -10%, #112233 0%, #0b0f14 50%, #0b0f14 100%), #0b0f14;
+      background-image: url('bgimage.jpeg');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
       font-family: system-ui, Segoe UI, Roboto, sans-serif;
     }
     .container { max-width: 1200px; margin: 36px auto; padding: 0 16px; }
     h1 { margin: 0 0 20px; font-weight: 700; letter-spacing: .2px; }
 
     .panel {
-      background: var(--card); border: 1px solid rgba(255,255,255,0.08);
+      background: var(--card); border: 1px solid var(--border);
       border-radius: 14px; padding: 16px; margin-bottom: 16px;
+      backdrop-filter: saturate(120%) blur(2px);
     }
 
-    .grid-2 {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 920px) { .grid-2 { grid-template-columns: 1fr; } }
 
-    label { user-select: none; cursor: pointer; }
+    label { user-select: none; cursor: pointer; display: block; margin-bottom: 6px; }
     input[type="text"]{
-      width: 100%; padding: 12px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06); color: var(--text); font-size: 15px;
-      outline: none;
+      width: 100%; padding: 12px 12px; border-radius: 10px; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06); color: var(--text); font-size: 15px; outline: none;
     }
     input[type="checkbox"] { transform: translateY(1px); }
 
-    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .row { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
     .muted { color: var(--muted); font-size: 14px; }
 
     table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 12px; }
     thead th {
-      background: rgba(0,191,255,0.28); padding: 10px; text-align: center; font-weight: 700;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: var(--head); padding: 10px; text-align: center; font-weight: 700;
+      border-bottom: 1px solid var(--border);
     }
     tbody td { padding: 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px; }
     tfoot td { padding: 10px; font-weight: 700; background: rgba(255,255,255,0.07); }
@@ -60,7 +66,7 @@
     .highlight-ghost { background: var(--ghost) !important; }
 
     .dropdown {
-      background: var(--card); border: 1px solid rgba(255,255,255,0.12);
+      background: var(--card); border: 1px solid var(--border);
       border-radius: 10px; padding: 6px; max-height: 320px; overflow-y: auto; display: none; margin-top: 6px;
     }
     .dropdown-item {
@@ -73,8 +79,6 @@
     .volume { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
     .volume strong { font-weight: 700; }
     .spread { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.15); }
-
-    @media (max-width: 920px) { .grid-2 { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -82,29 +86,25 @@
     <h1>Bazaar Orders</h1>
 
     <div class="panel">
-      <div class="volume" id="volumeBox">
-        <!-- Filled dynamically -->
-      </div>
+      <div class="volume" id="volumeBox"></div>
       <div class="spread" id="spreadBox"></div>
     </div>
 
     <div class="panel">
       <div class="row">
-        <div style="flex: 1 1 320px; min-width: 280px;">
+        <div style="flex: 1 1 380px; min-width: 280px;">
           <label>Item ID</label>
           <input id="itemInput" type="text" placeholder="Enter Item ID (e.g., BOOSTER_COOKIE)"/>
           <div id="itemDropdown" class="dropdown"></div>
           <div class="muted" id="chartLink" style="margin-top:6px;"></div>
         </div>
-        <div style="flex: 1 1 260px; min-width: 260px;">
+        <div style="flex: 1 1 320px; min-width: 260px;">
           <label>Track Order By Price</label>
           <input id="trackInput" type="text" placeholder="Enter price to track"/>
-          <label class="muted" style="display:block; margin-top:6px;">
-            <input id="groupToggle" type="checkbox"/> Group prices within ±0.15%
-          </label>
+          <label class="muted" style="margin-top:6px;"><input id="groupToggle" type="checkbox"/> Group prices within ±0.15%</label>
         </div>
       </div>
-      <div class="muted" style="margin-top:8px;">Tip: DevTools → Application → Local Storage to inspect remembered orders.</div>
+      <div class="muted" style="margin-top:8px;">Tip: DevTools → Application → Local Storage → keys starting with <code>remembered:</code></div>
     </div>
 
     <div id="orderInfo" class="panel" style="display:none;"></div>
@@ -130,15 +130,15 @@
   </div>
 
   <script type="module">
-    // ---------- Config ----------
-    const GROUP_PCT = 0.15; // ±0.15% grouping tolerance
+    // ===== Config =====
+    const GROUP_PCT = 0.15; // ±0.15%
 
     async function getApiKey() {
-      // If you have a key, return it here. The endpoint works without a key for public reads too.
+      // Public endpoint works without a key; add yours if you want quota isolation.
       return ""; // "YOUR_API_KEY_HERE"
     }
 
-    // ---------- Elements ----------
+    // ===== Elements =====
     const itemInput  = document.getElementById("itemInput");
     const itemDropdown = document.getElementById("itemDropdown");
     const chartLink  = document.getElementById("chartLink");
@@ -154,7 +154,7 @@
     const volumeBox = document.getElementById("volumeBox");
     const spreadBox = document.getElementById("spreadBox");
 
-    // ---------- State ----------
+    // ===== State =====
     let currentItemId = "";
     let allItems = [];
     let latestBuySummary = [];  // API sell_summary (sell offers)  -> Buy table
@@ -163,7 +163,11 @@
     let lastHourlySellVolume = 0; // for Sell (uses instabuys)
     let useGrouping = false;
 
-    // ---------- Helpers ----------
+    // previous snapshot (API-only, sorted)
+    let prevBuySortedDesc = []; // sell_summary sorted DESC
+    let prevSellSortedAsc = []; // buy_summary  sorted ASC
+
+    // ===== Helpers =====
     function approxEqual(a,b,eps=1e-6){ return Math.abs(a-b) <= eps; }
     function storageKey(itemId, side){ return `remembered:${itemId}:${side}`; }
     function readRemembered(itemId, side){
@@ -172,14 +176,13 @@
     function writeRemembered(itemId, side, arr){
       try { localStorage.setItem(storageKey(itemId,side), JSON.stringify(arr)); } catch {}
     }
-    function addOrUpdateRemembered(itemId, side, price, amount){
+    function addGhost(itemId, side, price, amount){
       const arr = readRemembered(itemId, side);
-      const i = arr.findIndex(r => approxEqual(r.price, price));
-      if (i>=0){ arr[i].amount = amount; arr[i].ts = Date.now(); }
-      else { arr.push({ price, amount, ts: Date.now() }); }
+      if (arr.find(x => approxEqual(x.price, price))) return;
+      arr.push({ price, amount, ts: Date.now() });
       writeRemembered(itemId, side, arr);
     }
-    function removeRemembered(itemId, side, price){
+    function removeGhost(itemId, side, price){
       writeRemembered(itemId, side, readRemembered(itemId, side).filter(r => !approxEqual(r.price, price)));
     }
 
@@ -209,7 +212,8 @@
       return out;
     }
 
-    function mergeRememberedIntoDisplay(apiSellSummary, apiBuySummary) {
+    function buildDisplaysWithGhosts(apiSellSummary, apiBuySummary) {
+      // ghosts come from localStorage if NOT currently present
       const buyGhosts = readRemembered(currentItemId, "buy")
         .filter(r => apiSellSummary.findIndex(x => approxEqual(x.pricePerUnit, r.price)) === -1)
         .map(r => ({ orders: 1, amount: r.amount || 0, pricePerUnit: r.price, ghost: true }));
@@ -217,23 +221,21 @@
         .filter(r => apiBuySummary.findIndex(x => approxEqual(x.pricePerUnit, r.price)) === -1)
         .map(r => ({ orders: 1, amount: r.amount || 0, pricePerUnit: r.price, ghost: true }));
 
-      // Combine
       let buyCombined  = [...apiSellSummary, ...buyGhosts];
       let sellCombined = [...apiBuySummary, ...sellGhosts];
 
-      // Apply grouping (optional) BEFORE final sorting; ghost flag is preserved/propagated
       if (useGrouping) {
         buyCombined  = groupSummary(buyCombined);
         sellCombined = groupSummary(sellCombined);
       }
 
-      // Final sort: ghosts last
+      // Final sort with ghosts last
       buyCombined.sort((a,b)=>{
-        if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1; // ghosts last
+        if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1;
         return b.pricePerUnit - a.pricePerUnit; // DESC for Buy
       });
       sellCombined.sort((a,b)=>{
-        if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1; // ghosts last
+        if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1;
         return a.pricePerUnit - b.pricePerUnit; // ASC for Sell
       });
 
@@ -274,17 +276,7 @@
     }
 
     function renderCurrentTables() {
-      // Start from raw API arrays
-      let apiSell = [...latestBuySummary];   // sell_summary -> Buy table
-      let apiBuy  = [...latestSellSummary];  // buy_summary  -> Sell table
-
-      // For remembering decisions (top 13), we sort API-only ladders in the correct directions
-      const buySortedDesc = [...apiSell].sort((a,b)=> b.pricePerUnit - a.pricePerUnit);
-      const sellSortedAsc = [...apiBuy].sort((a,b)=> a.pricePerUnit - b.pricePerUnit);
-
-      // Build displays with ghosts + grouping + final sort
-      const { buyDisplay, sellDisplay } = mergeRememberedIntoDisplay(apiSell, apiBuy);
-
+      const { buyDisplay, sellDisplay } = buildDisplaysWithGhosts(latestBuySummary, latestSellSummary);
       renderTable(buyDisplay,  buyBody,  buyFoot,  lastHourlyBuyVolume);
       renderTable(sellDisplay, sellBody, sellFoot, lastHourlySellVolume);
 
@@ -326,58 +318,93 @@
       }
     }
 
-    function updateRememberedWithCurrent(apiSellSummary, apiBuySummary) {
-      // Build API-only ladders in the desired directions
-      const buySortedDesc = [...apiSellSummary].sort((a,b)=> b.pricePerUnit - a.pricePerUnit); // Buy table
-      const sellSortedAsc = [...apiBuySummary].sort((a,b)=> a.pricePerUnit - b.pricePerUnit);  // Sell table
+    // ======= Simple Ghost Rule Implementation =======
+    function rememberVanishedOutsideTop13(currentBuyDesc, currentSellAsc) {
+      // From previous snapshot: if a price that was at index >=13 vanished from current API top-30 → save as ghost.
+      const curBuySet  = new Set(currentBuyDesc.map(r => r.pricePerUnit));
+      const curSellSet = new Set(currentSellAsc.map(r => r.pricePerUnit));
 
-      const bestSell = buySortedDesc[0]?.pricePerUnit;
-      const bestBuy  = sellSortedAsc[0]?.pricePerUnit;
-
-      // Remember positions >=13 within API top-30
-      buySortedDesc.slice(13, 30).forEach(r => addOrUpdateRemembered(currentItemId, "buy",  r.pricePerUnit, r.amount));
-      sellSortedAsc.slice(13, 30).forEach(r => addOrUpdateRemembered(currentItemId, "sell", r.pricePerUnit, r.amount));
-
-      // Clean remembered per rules
-      for (const side of ["buy","sell"]) {
-        const apiNow = (side==="buy") ? buySortedDesc : sellSortedAsc;
-        const oppNow = (side==="buy") ? sellSortedAsc : buySortedDesc;
-
-        const arr = readRemembered(currentItemId, side);
-        const kept = [];
-
-        for (const rec of arr) {
-          const p = rec.price;
-
-          // Re-entered top 13?
-          const pos = apiNow.findIndex(x => approxEqual(x.pricePerUnit, p));
-          if (pos >= 0 && pos <= 12) continue; // drop
-
-          // Canceled: no exact match AND strictly between two levels
-          if (pos === -1) {
-            const levels = apiNow.map(x => x.pricePerUnit);
-            for (let i=0;i<levels.length-1;i++){
-              const a = levels[i], b = levels[i+1];
-              const lo = Math.min(a,b), hi = Math.max(a,b);
-              if (p > lo && p < hi) { // vanished between -> cancel
-                rec._drop_reason = "canceled";
-                p; // noop
-                continue; // drop
-              }
-            }
-          }
-
-          // Filled: opposite best crossed
-          if (side==="buy" && typeof bestBuy === "number" && bestBuy >= p) continue;   // buy bids moved up past our sell offer price
-          if (side==="sell"&& typeof bestSell=== "number" && bestSell<= p) continue;   // sell offers moved down past our buy bid price
-
-          kept.push(rec);
+      // BUY side (sell_summary DESC)
+      prevBuySortedDesc.forEach((r, idx) => {
+        if (idx >= 13 && !curBuySetHas(curBuySet, r.pricePerUnit)) {
+          addGhost(currentItemId, "buy", r.pricePerUnit, r.amount);
         }
+      });
 
-        writeRemembered(currentItemId, side, kept);
+      // SELL side (buy_summary ASC)
+      prevSellSortedAsc.forEach((r, idx) => {
+        if (idx >= 13 && !curSellSetHas(curSellSet, r.pricePerUnit)) {
+          addGhost(currentItemId, "sell", r.pricePerUnit, r.amount);
+        }
+      });
+
+      function curBuySetHas(set, price){
+        for (const p of set) if (approxEqual(p, price)) return true;
+        return false;
+      }
+      function curSellSetHas(set, price){
+        for (const p of set) if (approxEqual(p, price)) return true;
+        return false;
       }
     }
 
+    function cleanGhostsAgainstCurrent(currentBuyDesc, currentSellAsc) {
+      // Removal conditions:
+      // 1) re-enter top13
+      // 2) canceled: lies strictly between two current levels, with no exact match
+      // 3) filled: opposite best crosses
+
+      const bestSell = currentBuyDesc[0]?.pricePerUnit; // best sell (lowest? we keep DESC but top is most expensive; for crossing we use min/max safely below)
+      const bestBuy  = currentSellAsc[0]?.pricePerUnit;
+
+      // Helper to check "between" on a ladder that’s sorted either DESC or ASC
+      function isBetween(price, levels) {
+        if (levels.length < 2) return false;
+        for (let i=0;i<levels.length-1;i++){
+          const a = levels[i], b = levels[i+1];
+          const lo = Math.min(a,b), hi = Math.max(a,b);
+          if (price > lo && price < hi) return true;
+        }
+        return false;
+      }
+      function hasExact(levels, price){
+        return levels.some(x => approxEqual(x, price));
+      }
+
+      // BUY ghosts
+      {
+        const arr = readRemembered(currentItemId, "buy");
+        const levels = currentBuyDesc.map(r => r.pricePerUnit);
+        const oppBest = bestBuy;
+        const kept = [];
+        for (const g of arr) {
+          const pos = currentBuyDesc.findIndex(x => approxEqual(x.pricePerUnit, g.price));
+          if (pos >= 0 && pos <= 12) continue; // re-entered top13
+          if (pos === -1 && isBetween(g.price, levels)) continue; // canceled
+          if (typeof oppBest === "number" && oppBest >= g.price) continue; // filled (buy bids crossed up)
+          kept.push(g);
+        }
+        writeRemembered(currentItemId, "buy", kept);
+      }
+
+      // SELL ghosts
+      {
+        const arr = readRemembered(currentItemId, "sell");
+        const levels = currentSellAsc.map(r => r.pricePerUnit);
+        const oppBest = bestSell;
+        const kept = [];
+        for (const g of arr) {
+          const pos = currentSellAsc.findIndex(x => approxEqual(x.pricePerUnit, g.price));
+          if (pos >= 0 && pos <= 12) continue; // re-entered top13
+          if (pos === -1 && isBetween(g.price, levels)) continue; // canceled
+          if (typeof oppBest === "number" && oppBest <= g.price) continue; // filled (sell offers crossed down)
+          kept.push(g);
+        }
+        writeRemembered(currentItemId, "sell", kept);
+      }
+    }
+
+    // ===== Data flow =====
     async function loadData(itemId){
       const key = await getApiKey();
       const url = key ? `https://api.hypixel.net/skyblock/bazaar?key=${key}` : `https://api.hypixel.net/skyblock/bazaar`;
@@ -395,7 +422,7 @@
       lastHourlyBuyVolume  = avgInstasells;
       lastHourlySellVolume = avgInstabuys;
 
-      // Volume / spread box
+      // Update volume & spread UI
       const avgSellOrder = averageAmount(latestBuySummary);
       const avgBuyOrder  = averageAmount(latestSellSummary);
       volumeBox.innerHTML = `
@@ -404,25 +431,36 @@
         <div><strong>Avg sell-order amount:</strong> ${avgSellOrder.toFixed(1)}</div>
         <div><strong>Avg buy-order amount:</strong> ${avgBuyOrder.toFixed(1)}</div>
       `;
-      const sellPrice = latestBuySummary[0]?.pricePerUnit || 1;
-      const buyPrice  = latestSellSummary[0]?.pricePerUnit || 1;
-      const spreadPct = ((buyPrice - sellPrice) / sellPrice) * 100;
+      const bestSellFromApi = Math.min(...latestBuySummary.map(r=>r.pricePerUnit || Infinity));
+      const bestBuyFromApi  = Math.max(...latestSellSummary.map(r=>r.pricePerUnit || -Infinity));
+      const spreadPct = ((bestBuyFromApi - bestSellFromApi) / bestSellFromApi) * 100;
       spreadBox.innerHTML = `<strong>Market spread:</strong> ${isFinite(spreadPct) ? spreadPct.toFixed(2)+'%' : 'N/A'}`;
 
-      // Update remembered sets using current API ladders
-      updateRememberedWithCurrent(latestBuySummary, latestSellSummary);
+      // Sort pure API ladders as required for decisions
+      const curBuySortedDesc = [...latestBuySummary].sort((a,b)=> b.pricePerUnit - a.pricePerUnit);
+      const curSellSortedAsc = [...latestSellSummary].sort((a,b)=> a.pricePerUnit - b.pricePerUnit);
 
-      // Render
+      // 1) Remember vanished outside top-13 (simple rule you asked for)
+      if (prevBuySortedDesc.length || prevSellSortedAsc.length) {
+        rememberVanishedOutsideTop13(curBuySortedDesc, curSellSortedAsc);
+      }
+
+      // 2) Clean ghosts vs current ladders
+      cleanGhostsAgainstCurrent(curBuySortedDesc, curSellSortedAsc);
+
+      // 3) Render
       renderCurrentTables();
+
+      // 4) Update previous snapshot for next tick
+      prevBuySortedDesc = curBuySortedDesc;
+      prevSellSortedAsc = curSellSortedAsc;
     }
 
-    // ---------- Search / UI ----------
+    // Search UI
     itemInput.addEventListener("input", () => {
       const query = itemInput.value.trim().toLowerCase();
       itemDropdown.innerHTML = "";
       if (!query) return (itemDropdown.style.display = "none");
-
-      // Lazy search: if we haven't fetched all items yet, do so quickly from current API snapshot
       if (allItems.length === 0) { fetchAllItems().then(() => populateDropdown(query)); }
       else { populateDropdown(query); }
     });
@@ -445,6 +483,10 @@
 
     function selectItem(id){
       currentItemId = id;
+      // reset previous snapshot so ghosts only start after first live tick
+      prevBuySortedDesc = [];
+      prevSellSortedAsc = [];
+
       chartLink.innerHTML = `Chart: <a href="https://skyblock.finance/items/${id}/chart" target="_blank" style="color:var(--accent);">skyblock.finance/items/${id}/chart</a>`;
       loadData(id);
 
@@ -455,8 +497,7 @@
 
     trackInput.addEventListener("change", () => {
       const tracked = parseFloat((trackInput.value||"").replace(/,/g,''));
-      // Re-highlight against the current DOM
-      const { buyDisplay, sellDisplay } = mergeRememberedIntoDisplay(latestBuySummary, latestSellSummary);
+      const { buyDisplay, sellDisplay } = buildDisplaysWithGhosts(latestBuySummary, latestSellSummary);
       highlightTrackedOrder(tracked, buyDisplay, sellDisplay);
     });
 
@@ -480,20 +521,17 @@
       });
     }
 
-    // Preload from URL if present
+    // Preload from URL
     const urlParams = new URLSearchParams(location.search);
     const preItem = urlParams.get("item");
     const preTrack = urlParams.get("track");
-    if (preItem) {
-      itemInput.value = preItem;
-      selectItem(preItem);
-    }
+    if (preItem) { itemInput.value = preItem; selectItem(preItem); }
     if (preTrack) trackInput.value = preTrack;
 
     // Polling
     setInterval(() => { if (currentItemId) loadData(currentItemId); }, 3000);
 
-    // bootstrap quick index list in the background
+    // Bootstrap list
     fetchAllItems();
   </script>
 </body>
