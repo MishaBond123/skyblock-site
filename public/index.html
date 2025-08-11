@@ -1,53 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bazaar Orders (WATO)</title>
-  <link rel="icon" href="site-icon.png"/>
-  <style>
-    :root{
-      --card: rgba(0,0,0,.68);
-      --head: rgba(0,191,255,.28);
-      --text: #f5f7fa;
-      --muted: rgba(255,255,255,.75);
-      --border: rgba(255,255,255,.12);
-      --row: rgba(255,255,255,.03);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;color:var(--text);font-family:system-ui,Segoe UI,Roboto,sans-serif;
-      background-image:url('bgimage.jpeg');background-size:cover;background-attachment:fixed;background-position:center;
-    }
-    .container{max-width:1200px;margin:28px auto;padding:0 16px}
-    h1{margin:0 0 16px}
-    .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:16px;backdrop-filter:saturate(120%) blur(2px)}
-    label{display:block;margin:0 0 6px}
-    input[type="text"]{
-      width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);
-      background:rgba(255,255,255,.06);color:var(--text);outline:none;font-size:15px;
-    }
-    .muted{color:var(--muted);font-size:14px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    @media (max-width:960px){.grid{grid-template-columns:1fr}}
-
-    table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
-    thead th{background:var(--head);padding:10px;text-align:center;border-bottom:1px solid var(--border)}
-    tbody td{padding:10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06);background:var(--row)}
-    tfoot td{padding:10px;font-weight:700;background:rgba(255,255,255,.06)}
-    tr:nth-child(even) td{background:rgba(255,255,255,.045)}
-
-    .dropdown{
-      position:relative
-    }
-    .dropdown-menu{
-      position:absolute;left:0;right:0;z-index:10;margin-top:6px;max-height:300px;overflow:auto;
-      background:var(--card);border:1px solid var(--border);border-radius:10px;display:none
-    }
-    .dropdown-item{padding:8px 10px;cursor:pointer}
-    .dropdown-item:hover{background:rgba(255,255,255,.06)}
-    .row{display:flex;gap:12px;align-items:center;margin-top:8px}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bazaar Orders (WATO)</title>
+<link rel="icon" href="site-icon.png"/>
+<style>
+  :root{--card:rgba(0,0,0,.68);--head:rgba(0,191,255,.28);--text:#f5f7fa;--muted:rgba(255,255,255,.75);--border:rgba(255,255,255,.12)}
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--text);font-family:system-ui,Segoe UI,Roboto,sans-serif;background:url('bgimage.jpeg') center/cover fixed no-repeat}
+  .container{max-width:1200px;margin:28px auto;padding:0 16px}
+  h1{margin:0 0 16px}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:16px;backdrop-filter:saturate(120%) blur(2px)}
+  label{display:block;margin:0 0 6px}
+  input[type="text"]{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--text);outline:none;font-size:15px}
+  .muted{color:var(--muted);font-size:14px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:960px){.grid{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden}
+  thead th{background:var(--head);padding:10px;text-align:center;border-bottom:1px solid var(--border)}
+  tbody td{padding:10px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03)}
+  tr:nth-child(even) td{background:rgba(255,255,255,.045)}
+  tfoot td{padding:10px;font-weight:700;background:rgba(255,255,255,.06)}
+  .dropdown{position:relative}
+  .dropdown-menu{position:absolute;left:0;right:0;z-index:10;margin-top:6px;max-height:300px;overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:10px;display:none}
+  .dropdown-item{padding:8px 10px;cursor:pointer}
+  .dropdown-item:hover{background:rgba(255,255,255,.06)}
+  .row{display:flex;gap:12px;align-items:center;margin-top:8px}
+</style>
 </head>
 <body>
   <div class="container">
@@ -56,7 +36,7 @@
     <div class="panel">
       <div class="dropdown">
         <label for="itemInput">Item ID</label>
-        <input id="itemInput" type="text" autocomplete="off" placeholder="Start typing… (e.g., BOOSTER_COOKIE)"/>
+        <input id="itemInput" type="text" autocomplete="off" placeholder="Type e.g. BOOSTER_COOKIE, then Enter"/>
         <div id="dd" class="dropdown-menu"></div>
       </div>
       <label class="row muted" style="user-select:none;">
@@ -87,209 +67,205 @@
     </div>
   </div>
 
-  <script>
-    const API_BASE = 'https://wato-api.vercel.app';
-    const REFRESH_MS = 30_000;
-    const GROUP_PCT = 0.1; // ±0.1%
+<script>
+  const API_BASE = 'https://wato-api.vercel.app';
+  const REFRESH_MS = 30000;
+  const GROUP_PCT = 0.1; // ±0.1%
 
-    let supported = [];            // list of item ids from /usage
-    let currentItem = '';
-    let timer = null;
-    let useGrouping = true;
+  // Local, guaranteed list; extend as you add items to WATO.
+  let SUPPORTED = [
+    'BOOSTER_COOKIE',
+    'RECOMBOBULATOR_3000',
+    'ENCHANTED_DIAMOND_BLOCK',
+    'KISMET_FEATHER',
+    'SUMMONING_EYE',
+    'ESSENCE_CRIMSON',
+    'SKELETON_KEY',
+    'TITANIC_EXP_BOTTLE'
+  ];
 
-    const el = (sel) => document.querySelector(sel);
-    const ddMenu = el('#dd');
-    const itemInput = el('#itemInput');
-    const statusEl = el('#status');
-    const groupToggle = el('#groupToggle');
+  let currentItem = '';
+  let timer = null;
+  let useGrouping = true;
 
-    function asCoins(n){ return Number(n || 0).toLocaleString(undefined, {maximumFractionDigits:3}); }
+  const el = sel => document.querySelector(sel);
+  const itemInput = el('#itemInput');
+  const ddMenu    = el('#dd');
+  const statusEl  = el('#status');
+  const groupToggle = el('#groupToggle');
 
-    // ----- GROUPING -----
-    function groupSummary(rows) {
-      if (!rows || !rows.length) return [];
-      const tol = GROUP_PCT / 100;
-      // Ensure sorted first, then group stable
-      const sorted = rows.slice().sort((a,b) => a.pricePerUnit - b.pricePerUnit);
-      const out = [];
-      let cur = null; // {pricePerUnit, amount, orders, _coins}
-      for (const r of sorted) {
-        const base = {
-          amount: Number(r.amount) || 0,
-          pricePerUnit: Number(r.pricePerUnit) || 0,
-          orders: Number(r.orders) || Number(r.orders_count) || 0,
-          _coins: (Number(r.amount) || 0) * (Number(r.pricePerUnit) || 0)
-        };
-        if (!cur) { cur = {...base}; continue; }
-        const rel = Math.abs(base.pricePerUnit - cur.pricePerUnit) / (cur.pricePerUnit || 1);
-        if (rel <= tol) {
-          cur.orders += base.orders;
-          cur.amount += base.amount;
-          cur._coins += base._coins;
-          cur.pricePerUnit = cur._coins / (cur.amount || 1);
-        } else {
-          cur.amount = Math.round(cur.amount);        // round amount at group boundary
-          out.push(({_coins, ...rest} = cur, rest));
-          cur = {...base};
+  const asCoins = n => Number(n||0).toLocaleString(undefined,{maximumFractionDigits:3});
+
+  // Optional: merge remote /usage if present
+  (async function maybeMergeUsage(){
+    try{
+      const r = await fetch(`${API_BASE}/usage`, {cache:'no-store'});
+      if (r.ok){
+        const j = await r.json();
+        const remote = Array.isArray(j.items) ? j.items
+                     : Array.isArray(j.usage) ? j.usage
+                     : [];
+        if (remote.length){
+          const set = new Set([...SUPPORTED, ...remote.map(x=>String(x).toUpperCase())]);
+          SUPPORTED = Array.from(set).sort();
         }
       }
-      if (cur){ cur.amount = Math.round(cur.amount); out.push(({_coins, ...rest} = cur, rest)); }
-      return out;
-    }
+    }catch(_){}
+  })();
 
-    // ----- TABLE RENDER -----
-    function renderTable(rows, tbody, tfootRow) {
-      tbody.innerHTML = '';
-      if (!rows.length) {
-        const tr = document.createElement('tr');
-        const td = document.createElement('td');
-        td.colSpan = 4; td.className = 'muted'; td.textContent = 'No data';
-        tr.appendChild(td); tbody.appendChild(tr);
-        tfootRow.innerHTML = '<td>Total:</td><td></td><td></td><td></td>';
-        return;
-      }
-      let totalAmt = 0, totalCoins = 0;
-      for (const r of rows) {
-        const amount = Math.round(Number(r.amount) || 0);
-        const price  = Number(r.pricePerUnit) || 0;
-        const orders = Number(r.orders ?? r.orders_count ?? 0);
-        const coins  = amount * price;
-        totalAmt += amount; totalCoins += coins;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${orders}</td>
-          <td>${amount.toLocaleString()}</td>
-          <td>${asCoins(price)}</td>
-          <td>${asCoins(coins)}</td>
-        `;
-        tbody.appendChild(tr);
-      }
-      tfootRow.innerHTML = `
-        <td>Total:</td>
-        <td>${totalAmt.toLocaleString()}</td>
-        <td></td>
-        <td>${asCoins(totalCoins)}</td>
-      `;
-    }
-
-    function renderTables(buyOrders, sellOrders) {
-      let buyData  = useGrouping ? groupSummary(buyOrders)  : buyOrders.slice();
-      let sellData = useGrouping ? groupSummary(sellOrders) : sellOrders.slice();
-
-      // ALWAYS sort after grouping/ungrouping:
-      buyData.sort((a,b)  => (b.pricePerUnit - a.pricePerUnit)); // expensive → cheapest
-      sellData.sort((a,b) => (a.pricePerUnit - b.pricePerUnit)); // cheapest → expensive
-
-      renderTable(buyData,  el('#buyTable tbody'),  el('#buyTable tfoot tr'));
-      renderTable(sellData, el('#sellTable tbody'), el('#sellTable tfoot tr'));
-    }
-
-    // ----- FETCH -----
-    async function fetchSupported() {
-      try {
-        const res = await fetch(`${API_BASE}/usage`, {cache:'no-store'});
-        if (!res.ok) throw new Error('usage fetch failed');
-        const data = await res.json();
-        supported = Array.isArray(data?.items) ? data.items : (data?.usage || []);
-      } catch (e) {
-        console.warn(e);
-        supported = []; // fall back empty
-      }
-    }
-
-    async function fetchOrders(itemId) {
-      const res = await fetch(`${API_BASE}/${encodeURIComponent(itemId)}`, {cache:'no-store'});
-      if (!res.ok) throw new Error(`API ${res.status}`);
-      return await res.json(); // { buy_summary:[], sell_summary:[] }
-    }
-
-    async function load(itemId) {
-      if (!itemId) return;
-      statusEl.textContent = 'Loading…';
-      try {
-        const data = await fetchOrders(itemId);
-        const buys  = Array.isArray(data.buy_summary)  ? data.buy_summary  : [];
-        const sells = Array.isArray(data.sell_summary) ? data.sell_summary : [];
-        renderTables(buys, sells);
-        statusEl.textContent = `Updated ${new Date().toLocaleTimeString()}`;
-      } catch (e) {
-        console.error(e);
-        statusEl.textContent = 'Error loading data';
-        renderTables([], []);
-      }
-    }
-
-    function startPolling() {
-      if (timer) clearInterval(timer);
-      timer = setInterval(() => load(currentItem), REFRESH_MS);
-    }
-
-    // ----- DROPDOWN -----
-    function openDropdown(items){
-      ddMenu.innerHTML = '';
-      items.slice(0,80).forEach(id => {
-        const div = document.createElement('div');
-        div.className = 'dropdown-item';
-        div.textContent = id;
-        div.onclick = () => {
-          itemInput.value = id;
-          ddMenu.style.display = 'none';
-          if (currentItem !== id) {
-            currentItem = id;
-            history.replaceState({}, '', `?item=${encodeURIComponent(id)}`);
-            load(currentItem);
-            startPolling();
-          }
-        };
-        ddMenu.appendChild(div);
-      });
-      ddMenu.style.display = items.length ? 'block' : 'none';
-    }
-
-    function filterSupported(q){
-      q = q.trim().toLowerCase();
-      if (!q) { ddMenu.style.display = 'none'; return; }
-      const list = supported.filter(id => id.toLowerCase().includes(q));
-      openDropdown(list);
-    }
-
-    // ----- EVENTS -----
-    let debounce;
-    itemInput.addEventListener('input', () => {
-      clearTimeout(debounce);
-      const q = itemInput.value;
-      debounce = setTimeout(() => filterSupported(q), 120);
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!ddMenu.contains(e.target) && e.target !== itemInput) {
-        ddMenu.style.display = 'none';
-      }
-    });
-
-    groupToggle.addEventListener('change', () => {
-      useGrouping = groupToggle.checked;
-      // Re-render immediately with last data by refetching once:
-      load(currentItem);
-    });
-
-    // ----- INIT -----
-    (async function init(){
-      await fetchSupported();
-      const url = new URL(location.href);
-      const pre = url.searchParams.get('item') || '';
-      if (pre && supported.includes(pre)) {
-        itemInput.value = pre;
-        currentItem = pre;
-        load(currentItem);
-        startPolling();
+  function groupSummary(rows){
+    if (!rows || !rows.length) return [];
+    const tol = GROUP_PCT/100;
+    const sorted = rows.slice().sort((a,b)=> a.pricePerUnit - b.pricePerUnit);
+    const out = [];
+    let cur = null;
+    for(const r of sorted){
+      const amt = Number(r.amount)||0;
+      const price = Number(r.pricePerUnit)||0;
+      const ord = Number(r.orders ?? r.orders_count ?? 0);
+      const chunk = {amount:amt, pricePerUnit:price, orders:ord, _coins: amt*price};
+      if(!cur){ cur = {...chunk}; continue; }
+      const rel = Math.abs(chunk.pricePerUnit - cur.pricePerUnit) / (cur.pricePerUnit || 1);
+      if (rel <= tol){
+        cur.orders += chunk.orders;
+        cur.amount += chunk.amount;
+        cur._coins += chunk._coins;
+        cur.pricePerUnit = cur._coins / (cur.amount || 1);
       } else {
-        // focus box, show supported suggestions
-        itemInput.focus();
-        openDropdown(supported.slice(0,80));
+        cur.amount = Math.round(cur.amount);
+        out.push(({_coins, ...rest}=cur, rest));
+        cur = {...chunk};
       }
-    })();
-  </script>
+    }
+    if (cur){ cur.amount = Math.round(cur.amount); out.push(({_coins, ...rest}=cur, rest)); }
+    return out;
+  }
+
+  function renderTable(rows, tbody, tfootRow){
+    tbody.innerHTML = '';
+    if (!rows.length){
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 4; td.className='muted'; td.textContent='No data';
+      tr.appendChild(td); tbody.appendChild(tr);
+      tfootRow.innerHTML = '<td>Total:</td><td></td><td></td><td></td>';
+      return;
+    }
+    let totalAmt=0, totalCoins=0;
+    for(const r of rows){
+      const amount = Math.round(Number(r.amount)||0);
+      const price  = Number(r.pricePerUnit)||0;
+      const orders = Number(r.orders ?? r.orders_count ?? 0);
+      const coins  = amount*price;
+      totalAmt += amount; totalCoins += coins;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${orders}</td>
+        <td>${amount.toLocaleString()}</td>
+        <td>${asCoins(price)}</td>
+        <td>${asCoins(coins)}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+    tfootRow.innerHTML = `<td>Total:</td><td>${totalAmt.toLocaleString()}</td><td></td><td>${asCoins(totalCoins)}</td>`;
+  }
+
+  function renderTables(buyOrders, sellOrders){
+    let buyData  = useGrouping ? groupSummary(buyOrders)  : buyOrders.slice();
+    let sellData = useGrouping ? groupSummary(sellOrders) : sellOrders.slice();
+
+    // ALWAYS sort post-grouping:
+    buyData.sort((a,b)=> b.pricePerUnit - a.pricePerUnit); // high → low
+    sellData.sort((a,b)=> a.pricePerUnit - b.pricePerUnit); // low → high
+
+    renderTable(buyData,  el('#buyTable tbody'),  el('#buyTable tfoot tr'));
+    renderTable(sellData, el('#sellTable tbody'), el('#sellTable tfoot tr'));
+  }
+
+  async function load(itemId){
+    if (!itemId) return;
+    statusEl.textContent = 'Loading…';
+    try{
+      const res = await fetch(`${API_BASE}/${encodeURIComponent(itemId)}`, {cache:'no-store'});
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json(); // { buy_summary:[], sell_summary:[] }
+      const buys  = Array.isArray(data.buy_summary)  ? data.buy_summary  : [];
+      const sells = Array.isArray(data.sell_summary) ? data.sell_summary : [];
+      renderTables(buys, sells);
+      statusEl.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+    }catch(e){
+      console.error(e);
+      statusEl.textContent = 'Error loading data';
+      renderTables([],[]);
+    }
+  }
+
+  function startPolling(){
+    if (timer) clearInterval(timer);
+    timer = setInterval(()=> load(currentItem), REFRESH_MS);
+  }
+
+  // ----- dropdown helpers -----
+  function openDropdown(list){
+    ddMenu.innerHTML = '';
+    list.slice(0,100).forEach(id=>{
+      const div = document.createElement('div');
+      div.className='dropdown-item';
+      div.textContent = id;
+      div.onclick = ()=> selectItem(id);
+      ddMenu.appendChild(div);
+    });
+    ddMenu.style.display = list.length ? 'block' : 'none';
+  }
+  function filterList(q){
+    q = (q||'').toUpperCase();
+    if (!q){ ddMenu.style.display='none'; return; }
+    openDropdown(SUPPORTED.filter(id => id.includes(q)));
+  }
+  function selectItem(id){
+    currentItem = id.toUpperCase();
+    itemInput.value = currentItem;
+    ddMenu.style.display = 'none';
+    history.replaceState({}, '', `?item=${encodeURIComponent(currentItem)}`);
+    load(currentItem);
+    startPolling();
+  }
+
+  // events
+  let deb;
+  itemInput.addEventListener('input', ()=>{
+    clearTimeout(deb);
+    deb = setTimeout(()=> filterList(itemInput.value), 120);
+  });
+  itemInput.addEventListener('focus', ()=>{
+    openDropdown(SUPPORTED.slice(0,100));
+  });
+  itemInput.addEventListener('keydown', (e)=>{
+    if (e.key === 'Enter'){
+      const v = itemInput.value.trim().toUpperCase();
+      if (SUPPORTED.includes(v)) selectItem(v);
+      else {
+        // pick first suggestion if any
+        const first = SUPPORTED.find(id => id.includes(v));
+        if (first) selectItem(first);
+      }
+    }
+  });
+  document.addEventListener('click', (e)=>{
+    if (!ddMenu.contains(e.target) && e.target !== itemInput) ddMenu.style.display='none';
+  });
+  groupToggle.addEventListener('change', ()=>{
+    useGrouping = groupToggle.checked;
+    load(currentItem);
+  });
+
+  // init: preselect ?item=
+  (function init(){
+    const u = new URL(location.href);
+    const pre = (u.searchParams.get('item')||'').toUpperCase();
+    if (pre && SUPPORTED.includes(pre)) selectItem(pre);
+    else itemInput.focus();
+  })();
+</script>
 </body>
 </html>
