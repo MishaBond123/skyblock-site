@@ -1,117 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Bazaar Orders (WATO API)</title>
-<style>
-  body { font-family: sans-serif; background: #111; color: #fff; margin: 0; padding: 20px; }
-  .panel { background: rgba(0,0,0,0.7); border-radius: 10px; padding: 16px; margin-bottom: 20px; }
-  input[type="text"] { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #555; background: #222; color: #fff; }
-  .dropdown { background: #222; border: 1px solid #555; border-radius: 6px; margin-top: 5px; display: none; }
-  .dropdown-item { padding: 8px; cursor: pointer; }
-  .dropdown-item:hover { background: #333; }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  th, td { padding: 8px; border-bottom: 1px solid #333; text-align: center; }
-  th { background: #333; }
-  .highlight-ghost { background: rgba(186,114,255,0.18); }
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bazaar Orders — WATO API</title>
+  <link rel="icon" type="image/png" href="site-icon.png"/>
+
+  <style>
+    :root {
+      --card: rgba(0,0,0,0.65);
+      --text: #f5f7fa;
+      --border: rgba(255,255,255,0.12);
+      --head: rgba(0,191,255,0.28);
+      --ghost: rgba(186,114,255,0.18);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background-image: url('bgimage.jpeg');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      font-family: system-ui, Segoe UI, Roboto, sans-serif;
+    }
+    .container { max-width: 900px; margin: 36px auto; padding: 0 16px; }
+    .panel {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px; margin-bottom: 16px;
+      backdrop-filter: saturate(120%) blur(2px);
+    }
+    label { display: block; margin-bottom: 6px; font-weight: bold; }
+    input[type="text"] {
+      width: 100%; padding: 12px; border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-size: 15px;
+    }
+    .dropdown {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 6px; max-height: 320px;
+      overflow-y: auto; display: none; margin-top: 6px;
+    }
+    .dropdown-item {
+      padding: 8px 10px; border-radius: 8px; cursor: pointer;
+    }
+    .dropdown-item:hover { background: rgba(255,255,255,0.06); }
+    table {
+      width: 100%; border-collapse: collapse;
+      border-radius: 12px; overflow: hidden;
+    }
+    thead th {
+      background: var(--head); padding: 10px; text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody td {
+      padding: 10px; text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 14px;
+    }
+    tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+    .highlight-ghost { background: var(--ghost) !important; }
+  </style>
 </head>
 <body>
-<div class="panel">
-  <label>Item ID</label>
-  <input id="itemInput" type="text" placeholder="Enter Item ID"/>
-  <div id="itemDropdown" class="dropdown"></div>
-</div>
+  <div class="container">
+    <div class="panel">
+      <label>Item ID</label>
+      <input id="itemInput" type="text" placeholder="Enter Item ID"/>
+      <div id="itemDropdown" class="dropdown"></div>
+    </div>
 
-<div class="panel">
-  <h2>Buy Orders</h2>
-  <table id="buyTable">
-    <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th></tr></thead>
-    <tbody></tbody>
-  </table>
-</div>
+    <div class="panel">
+      <h2>Buy Orders</h2>
+      <table id="buyTable">
+        <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-<div class="panel">
-  <h2>Sell Orders</h2>
-  <table id="sellTable">
-    <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th></tr></thead>
-    <tbody></tbody>
-  </table>
-</div>
+    <div class="panel">
+      <h2>Sell Orders</h2>
+      <table id="sellTable">
+        <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 
-<script>
-const supportedItems = [
-  "BOOSTER_COOKIE",
-  "RECOMBOBULATOR_3000",
-  "ENCHANTED_DIAMOND_BLOCK",
-  "KISMET_FEATHER",
-  "SUMMONING_EYE",
-  "ESSENCE_CRIMSON",
-  "SKELETON_KEY",
-  "TITANIC_EXP_BOTTLE"
-];
+  <script>
+  const supportedItems = [
+    "BOOSTER_COOKIE",
+    "RECOMBOBULATOR_3000",
+    "ENCHANTED_DIAMOND_BLOCK",
+    "KISMET_FEATHER",
+    "SUMMONING_EYE",
+    "ESSENCE_CRIMSON",
+    "SKELETON_KEY",
+    "TITANIC_EXP_BOTTLE"
+  ];
 
-const itemInput = document.getElementById("itemInput");
-const itemDropdown = document.getElementById("itemDropdown");
-const buyBody = document.querySelector("#buyTable tbody");
-const sellBody = document.querySelector("#sellTable tbody");
+  const itemInput = document.getElementById("itemInput");
+  const itemDropdown = document.getElementById("itemDropdown");
+  const buyBody = document.querySelector("#buyTable tbody");
+  const sellBody = document.querySelector("#sellTable tbody");
 
-function populateDropdown(query) {
-  const filtered = supportedItems.filter(id => id.toLowerCase().includes(query.toLowerCase()));
-  itemDropdown.innerHTML = "";
-  for (const id of filtered) {
-    const div = document.createElement("div");
-    div.className = "dropdown-item";
-    div.textContent = id;
-    div.onclick = () => {
-      itemInput.value = id;
-      itemDropdown.style.display = "none";
-      loadOrders(id);
-    };
-    itemDropdown.appendChild(div);
+  function populateDropdown(query) {
+    const filtered = supportedItems.filter(id => id.toLowerCase().includes(query.toLowerCase()));
+    itemDropdown.innerHTML = "";
+    for (const id of filtered) {
+      const div = document.createElement("div");
+      div.className = "dropdown-item";
+      div.textContent = id;
+      div.onclick = () => {
+        itemInput.value = id;
+        itemDropdown.style.display = "none";
+        loadOrders(id);
+      };
+      itemDropdown.appendChild(div);
+    }
+    itemDropdown.style.display = filtered.length ? "block" : "none";
   }
-  itemDropdown.style.display = filtered.length ? "block" : "none";
-}
 
-itemInput.addEventListener("input", () => {
-  const query = itemInput.value.trim();
-  if (!query) { itemDropdown.style.display = "none"; return; }
-  populateDropdown(query);
-});
+  itemInput.addEventListener("input", () => {
+    const query = itemInput.value.trim();
+    if (!query) { itemDropdown.style.display = "none"; return; }
+    populateDropdown(query);
+  });
 
-async function loadOrders(itemId) {
-  try {
-    const res = await fetch(`https://wato-api.vercel.app/${itemId}`);
-    if (!res.ok) throw new Error("Failed to fetch");
-    const data = await res.json();
-
-    renderTable(data.buy_summary, buyBody);
-    renderTable(data.sell_summary, sellBody);
-  } catch (err) {
-    console.error(err);
-    buyBody.innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
-    sellBody.innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
+  async function loadOrders(itemId) {
+    try {
+      const res = await fetch(`https://wato-api.vercel.app/${itemId}`);
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      renderTable(data.buy_summary, buyBody);
+      renderTable(data.sell_summary, sellBody);
+    } catch (err) {
+      console.error(err);
+      buyBody.innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
+      sellBody.innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
+    }
   }
-}
 
-function renderTable(summary, tbody) {
-  tbody.innerHTML = "";
-  if (!summary || !summary.length) {
-    tbody.innerHTML = "<tr><td colspan='3'>No data</td></tr>";
-    return;
+  function renderTable(summary, tbody) {
+    tbody.innerHTML = "";
+    if (!summary || !summary.length) {
+      tbody.innerHTML = "<tr><td colspan='3'>No data</td></tr>";
+      return;
+    }
+    for (const row of summary) {
+      const tr = document.createElement("tr");
+      if (row.ghost) tr.classList.add("highlight-ghost");
+      tr.innerHTML = `
+        <td>${row.orders}</td>
+        <td>${row.amount}</td>
+        <td>${row.pricePerUnit.toLocaleString()}</td>
+      `;
+      tbody.appendChild(tr);
+    }
   }
-  for (const row of summary) {
-    const tr = document.createElement("tr");
-    if (row.ghost) tr.classList.add("highlight-ghost");
-    tr.innerHTML = `
-      <td>${row.orders}</td>
-      <td>${row.amount}</td>
-      <td>${row.pricePerUnit.toLocaleString()}</td>
-    `;
-    tbody.appendChild(tr);
-  }
-}
-</script>
+  </script>
 </body>
 </html>
