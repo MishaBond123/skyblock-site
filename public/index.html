@@ -150,8 +150,8 @@
   }
 
   function renderTables(buyOrders, sellOrders) {
-    const buyData = useGrouping ? groupSummary(buyOrders) : buyOrders;
-    const sellData = useGrouping ? groupSummary(sellOrders) : sellOrders;
+    const buyData = useGrouping ? groupSummary(sellOrders) : buyOrders;
+    const sellData = useGrouping ? groupSummary(buyOrders) : sellOrders;
     renderTable(buyData, document.querySelector("#buyTable tbody"), document.querySelector("#buyTable tfoot tr"));
     renderTable(sellData, document.querySelector("#sellTable tbody"), document.querySelector("#sellTable tfoot tr"));
   }
