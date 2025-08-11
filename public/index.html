@@ -130,7 +130,7 @@
         cur.orders += chunk.orders;
         cur.amount += chunk.amount;
         cur._coins += chunk._coins;
-        cur.pricePerUnit = cur._coins / (cur.amount || 1);
+        cur.pricePerUnit = round(cur._coins / (cur.amount || 1));
       } else {
         cur.amount = Math.round(cur.amount);
         out.push(({_coins, ...rest}=cur, rest));
