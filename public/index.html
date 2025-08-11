@@ -140,19 +140,36 @@
     populateDropdown(query);
   });
 
-  async function loadOrders(itemId) {
-    try {
-      const res = await fetch(`https://wato-api.vercel.app/${itemId}`);
-      if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
-      renderTable(data.buy_summary, buyBody, buyFoot);
-      renderTable(data.sell_summary, sellBody, sellFoot);
-    } catch (err) {
-      console.error(err);
-      buyBody.innerHTML = "<tr><td colspan='4'>Error loading data</td></tr>";
-      sellBody.innerHTML = "<tr><td colspan='4'>Error loading data</td></tr>";
-    }
+  async function loadOrders(id) {
+  // show a single loading row in both tables (optional)
+  const setLoading = (tbody) => { tbody.innerHTML = `<tr><td colspan="4">Loading…</td></tr>`; };
+  setLoading(buyTbody); setLoading(sellTbody);
+
+  try {
+    const res = await fetch(`https://wato-api.vercel.app/${encodeURIComponent(id)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    // ✅ Correct mapping:
+    // API buy_summary  -> BUY table
+    // API sell_summary -> SELL table
+    // ✅ Correct sort:
+    // BUY: expensive -> cheap (DESC)
+    // SELL: cheap -> expensive (ASC)
+    const buyRows = (data.buy_summary  ?? []).slice().sort((a,b) => b.pricePerUnit - a.pricePerUnit);
+    const sellRows = (data.sell_summary ?? []).slice().sort((a,b) => a.pricePerUnit - b.pricePerUnit);
+
+    renderTable(buyRows,  buyTbody,  buyTfoot);   // uses your existing renderTable
+    renderTable(sellRows, sellTbody, sellTfoot);
+  } catch (err) {
+    console.error(err);
+    const errRow = `<tr><td colspan="4">Error loading data</td></tr>`;
+    buyTbody.innerHTML  = errRow;
+    sellTbody.innerHTML = errRow;
+    buyTfoot.innerHTML  = `<td>Total:</td><td></td><td></td><td></td>`;
+    sellTfoot.innerHTML = `<td>Total:</td><td></td><td></td><td></td>`;
   }
+}
 
   function renderTable(summary, tbody, tfootRow) {
     tbody.innerHTML = "";
