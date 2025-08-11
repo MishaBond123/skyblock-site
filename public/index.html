@@ -99,109 +99,110 @@
   </div>
 
   <script>
-  const supportedItems = [
-    "BOOSTER_COOKIE",
-    "RECOMBOBULATOR_3000",
-    "ENCHANTED_DIAMOND_BLOCK",
-    "KISMET_FEATHER",
-    "SUMMONING_EYE",
-    "ESSENCE_CRIMSON",
-    "SKELETON_KEY",
-    "TITANIC_EXP_BOTTLE"
-  ];
+const buyBody  = document.querySelector("#buyTable tbody");
+const sellBody = document.querySelector("#sellTable tbody");
+const buyFoot  = document.querySelector("#buyTable tfoot tr");
+const sellFoot = document.querySelector("#sellTable tfoot tr");
+const itemInput  = document.getElementById("itemInput");
+const itemDropdown = document.getElementById("itemDropdown");
 
-  const itemInput = document.getElementById("itemInput");
-  const itemDropdown = document.getElementById("itemDropdown");
-  const buyBody = document.querySelector("#buyTable tbody");
-  const sellBody = document.querySelector("#sellTable tbody");
-  const buyFoot = document.querySelector("#buyTable tfoot tr");
-  const sellFoot = document.querySelector("#sellTable tfoot tr");
+let currentItemId = "";
+let refreshTimer = null;
 
-  function populateDropdown(query) {
-    const filtered = supportedItems.filter(id => id.toLowerCase().includes(query.toLowerCase()));
-    itemDropdown.innerHTML = "";
-    for (const id of filtered) {
-      const div = document.createElement("div");
-      div.className = "dropdown-item";
-      div.textContent = id;
-      div.onclick = () => {
-        itemInput.value = id;
-        itemDropdown.style.display = "none";
-        loadOrders(id);
-      };
-      itemDropdown.appendChild(div);
-    }
-    itemDropdown.style.display = filtered.length ? "block" : "none";
+// The only items the API supports
+const supportedItems = [
+  "BOOSTER_COOKIE",
+  "RECOMBOBULATOR_3000",
+  "ENCHANTED_DIAMOND_BLOCK",
+  "KISMET_FEATHER",
+  "SUMMONING_EYE",
+  "ESSENCE_CRIMSON",
+  "SKELETON_KEY",
+  "TITANIC_EXP_BOTTLE"
+];
+
+function populateDropdown(query){
+  const filtered = supportedItems.filter(id => id.toLowerCase().includes(query.toLowerCase()));
+  itemDropdown.innerHTML = "";
+  for (const id of filtered) {
+    const div = document.createElement("div");
+    div.className = "dropdown-item";
+    div.innerHTML = `<div>${id}</div>`;
+    div.onclick = () => {
+      itemInput.value = id;
+      itemDropdown.style.display = "none";
+      selectItem(id);
+    };
+    itemDropdown.appendChild(div);
   }
+  itemDropdown.style.display = filtered.length ? "block" : "none";
+}
 
-  itemInput.addEventListener("input", () => {
-    const query = itemInput.value.trim();
-    if (!query) { itemDropdown.style.display = "none"; return; }
-    populateDropdown(query);
-  });
+itemInput.addEventListener("input", () => {
+  const query = itemInput.value.trim();
+  if (!query) { itemDropdown.style.display = "none"; return; }
+  populateDropdown(query);
+});
 
-  async function loadOrders(id) {
-  // show a single loading row in both tables (optional)
-  const setLoading = (tbody) => { tbody.innerHTML = `<tr><td colspan="4">Loading…</td></tr>`; };
-  setLoading(buyTbody); setLoading(sellTbody);
+function selectItem(id){
+  currentItemId = id;
+  loadOrders(id);
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(() => loadOrders(currentItemId), 30000); // refresh every 30s
+}
+
+async function loadOrders(id){
+  buyBody.innerHTML  = `<tr><td colspan="4" class="muted">Loading…</td></tr>`;
+  sellBody.innerHTML = `<tr><td colspan="4" class="muted">Loading…</td></tr>`;
+  buyFoot.innerHTML  = `<td>Total:</td><td></td><td></td><td></td>`;
+  sellFoot.innerHTML = `<td>Total:</td><td></td><td></td><td></td>`;
 
   try {
-    const res = await fetch(`https://wato-api.vercel.app/${encodeURIComponent(id)}`);
+    const res = await fetch(`https://wato-api.vercel.app/${encodeURIComponent(id)}`, { cache: 'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
-    // ✅ Correct mapping:
-    // API buy_summary  -> BUY table
-    // API sell_summary -> SELL table
-    // ✅ Correct sort:
-    // BUY: expensive -> cheap (DESC)
-    // SELL: cheap -> expensive (ASC)
-    const buyRows = (data.buy_summary  ?? []).slice().sort((a,b) => b.pricePerUnit - a.pricePerUnit);
-    const sellRows = (data.sell_summary ?? []).slice().sort((a,b) => a.pricePerUnit - b.pricePerUnit);
+    // ✅ Correct sides + sorting
+    const buy = (data.buy_summary  || []).slice().sort((a,b)=> b.pricePerUnit - a.pricePerUnit); // exp → cheap
+    const sell = (data.sell_summary || []).slice().sort((a,b)=> a.pricePerUnit - b.pricePerUnit); // cheap → exp
 
-    renderTable(buyRows,  buyTbody,  buyTfoot);   // uses your existing renderTable
-    renderTable(sellRows, sellTbody, sellTfoot);
-  } catch (err) {
+    const fmt = n => Number(n ?? 0).toLocaleString();
+    const coins = (amt,ppu) => Number((amt||0) * (ppu||0));
+
+    function render(rows, tbody, tfoot){
+      if (!rows.length){
+        tbody.innerHTML = `<tr><td colspan="4" class="muted">No data</td></tr>`;
+        tfoot.innerHTML = `<td>Total:</td><td>0</td><td></td><td>0</td>`;
+        return;
+      }
+      let totAmt=0, totCoins=0;
+      const html = rows.map(r=>{
+        const amount = Math.trunc(r.amount || 0);         // whole items
+        const price  = Number(r.pricePerUnit || 0);
+        const ords   = Math.trunc(r.orders || 0);
+        const c      = coins(amount, price);
+        totAmt += amount; totCoins += c;
+        return `
+          <tr>
+            <td>${fmt(ords)}</td>
+            <td>${fmt(amount)}</td>
+            <td>${fmt(price)} coins</td>
+            <td>${fmt(c)} coins</td>
+          </tr>`;
+      }).join('');
+      tbody.innerHTML = html;
+      tfoot.innerHTML = `<td>Total:</td><td>${fmt(totAmt)}</td><td></td><td>${fmt(totCoins)} coins</td>`;
+    }
+
+    render(buy,  buyBody,  buyFoot);
+    render(sell, sellBody, sellFoot);
+
+  } catch (err){
     console.error(err);
-    const errRow = `<tr><td colspan="4">Error loading data</td></tr>`;
-    buyTbody.innerHTML  = errRow;
-    sellTbody.innerHTML = errRow;
-    buyTfoot.innerHTML  = `<td>Total:</td><td></td><td></td><td></td>`;
-    sellTfoot.innerHTML = `<td>Total:</td><td></td><td></td><td></td>`;
+    buyBody.innerHTML  = `<tr><td colspan="4" class="muted">Error loading data</td></tr>`;
+    sellBody.innerHTML = `<tr><td colspan="4" class="muted">Error loading data</td></tr>`;
   }
 }
-
-  function renderTable(summary, tbody, tfootRow) {
-    tbody.innerHTML = "";
-    if (!summary || !summary.length) {
-      tbody.innerHTML = "<tr><td colspan='4'>No data</td></tr>";
-      tfootRow.innerHTML = "<td>Total:</td><td></td><td></td><td></td>";
-      return;
-    }
-    let totalAmount = 0, totalCoins = 0;
-    for (const row of summary) {
-      const amount = Number(row.amount) || 0;
-      const price = Number(row.pricePerUnit) || 0;
-      const total = amount * price;
-      totalAmount += amount;
-      totalCoins += total;
-      const tr = document.createElement("tr");
-      if (row.ghost) tr.classList.add("highlight-ghost");
-      tr.innerHTML = `
-        <td>${row.orders}</td>
-        <td>${amount}</td>
-        <td>${price.toLocaleString()}</td>
-        <td>${total.toLocaleString()}</td>
-      `;
-      tbody.appendChild(tr);
-    }
-    tfootRow.innerHTML = `
-      <td>Total:</td>
-      <td>${totalAmount}</td>
-      <td></td>
-      <td>${totalCoins.toLocaleString()}</td>
-    `;
-  }
-  </script>
+</script>
 </body>
 </html>
