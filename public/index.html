@@ -171,8 +171,8 @@
   }
 
   function renderTables(buyOrders, sellOrders){
-    let buyData  = useGrouping ? groupSummary(buyOrders)  : buyOrders.slice();
-    let sellData = useGrouping ? groupSummary(sellOrders) : sellOrders.slice();
+    let buyData  = useGrouping ? groupSummary(sellOrders)  : sellOrders.slice();
+    let sellData = useGrouping ? groupSummary(buyOrders) : buyOrders.slice();
 
     // ALWAYS sort post-grouping:
     buyData.sort((a,b)=> b.pricePerUnit - a.pricePerUnit); // high → low
