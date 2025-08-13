@@ -1,117 +1,430 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Bazaar Orders (WATO API)</title>
-<style>
-  body { font-family: sans-serif; background: #111; color: #fff; margin: 0; padding: 20px; }
-  .panel { background: rgba(0,0,0,0.7); border-radius: 10px; padding: 16px; margin-bottom: 20px; }
-  input[type="text"] { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #555; background: #222; color: #fff; }
-  .dropdown { background: #222; border: 1px solid #555; border-radius: 6px; margin-top: 5px; display: none; }
-  .dropdown-item { padding: 8px; cursor: pointer; }
-  .dropdown-item:hover { background: #333; }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  th, td { padding: 8px; border-bottom: 1px solid #333; text-align: center; }
-  th { background: #333; }
-  .highlight-ghost { background: rgba(186,114,255,0.18); }
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bazaar Orders — Ghost Levels (DEBUG)</title>
+  <link rel="icon" type="image/jpeg" href="site-icon.png"/>
+
+  <style>
+    :root {
+      --card: rgba(0,0,0,0.65);
+      --text: #f5f7fa;
+      --muted: rgba(255,255,255,0.75);
+      --accent: #00bfff;
+      --ghost: rgba(186,114,255,0.18);
+      --warn1: rgba(255,255,0,0.15);
+      --warn2: rgba(255,80,80,0.25);
+      --hl: rgba(0,191,255,0.25);
+      --border: rgba(255,255,255,0.12);
+      --head: rgba(0,191,255,0.28);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; color: var(--text);
+      background-image: url('bgimage.jpeg');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      font-family: system-ui, Segoe UI, Roboto, sans-serif;
+    }
+    .container { max-width: 1200px; margin: 36px auto; padding: 0 16px; }
+    h1 { margin: 0 0 20px; font-weight: 700; letter-spacing: .2px; }
+
+    .panel {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px; margin-bottom: 16px;
+      backdrop-filter: saturate(120%) blur(2px);
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 920px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    label { user-select: none; cursor: pointer; display: block; margin-bottom: 6px; }
+    input[type="text"]{
+      width: 100%; padding: 12px 12px; border-radius: 10px; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06); color: var(--text); font-size: 15px; outline: none;
+    }
+    input[type="checkbox"] { transform: translateY(1px); }
+    .row { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+    .muted { color: var(--muted); font-size: 14px; }
+
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 12px; }
+    thead th {
+      background: var(--head); padding: 10px; text-align: center; font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody td { padding: 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px; }
+    tfoot td { padding: 10px; font-weight: 700; background: rgba(255,255,255,0.07); }
+    tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+
+    .highlight-yellow { background: var(--warn1) !important; }
+    .highlight-red    { background: var(--warn2) !important; }
+    .highlight-blue   { background: var(--hl) !important; }
+    .highlight-ghost  { background: var(--ghost) !important; }
+
+    .dropdown {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 6px; max-height: 320px; overflow-y: auto; display: none; margin-top: 6px;
+    }
+    .dropdown-item {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 8px 10px; border-radius: 8px; cursor: pointer;
+    }
+    .dropdown-item:hover { background: rgba(255,255,255,0.06); }
+    .pill { background: goldenrod; color: black; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 12px; }
+
+    .volume { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+    .volume strong { font-weight: 700; }
+    .spread { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.15); }
+  </style>
 </head>
 <body>
-<div class="panel">
-  <label>Item ID</label>
-  <input id="itemInput" type="text" placeholder="Enter Item ID"/>
-  <div id="itemDropdown" class="dropdown"></div>
-</div>
+  <div class="container">
+    <h1>Bazaar Orders</h1>
 
-<div class="panel">
-  <h2>Buy Orders</h2>
-  <table id="buyTable">
-    <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th></tr></thead>
-    <tbody></tbody>
-  </table>
-</div>
+    <div class="panel">
+      <div class="volume" id="volumeBox"></div>
+      <div class="spread" id="spreadBox"></div>
+    </div>
 
-<div class="panel">
-  <h2>Sell Orders</h2>
-  <table id="sellTable">
-    <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th></tr></thead>
-    <tbody></tbody>
-  </table>
-</div>
+    <div class="panel">
+      <div class="row">
+        <div style="flex:1 1 380px; min-width:280px;">
+          <label>Item ID</label>
+          <input id="itemInput" type="text" placeholder="Enter Item ID (e.g., BOOSTER_COOKIE)"/>
+          <div id="itemDropdown" class="dropdown"></div>
+          <div class="muted" id="chartLink" style="margin-top:6px;"></div>
+        </div>
+        <div style="flex:1 1 320px; min-width:260px;">
+          <label>Track Order By Price</label>
+          <input id="trackInput" type="text" placeholder="Enter price to track"/>
+          <label class="muted" style="margin-top:6px;"><input id="groupToggle" type="checkbox"/> Group live prices within ±0.15%</label>
+        </div>
+      </div>
+      <div class="muted" style="margin-top:8px;">Ghosts are exact price levels (0.1 precision), shown below live orders.</div>
+    </div>
 
-<script>
-const supportedItems = [
-  "BOOSTER_COOKIE",
-  "RECOMBOBULATOR_3000",
-  "ENCHANTED_DIAMOND_BLOCK",
-  "KISMET_FEATHER",
-  "SUMMONING_EYE",
-  "ESSENCE_CRIMSON",
-  "SKELETON_KEY",
-  "TITANIC_EXP_BOTTLE"
-];
+    <div id="orderInfo" class="panel" style="display:none;"></div>
 
-const itemInput = document.getElementById("itemInput");
+    <div class="grid-2">
+      <div class="panel">
+        <h2 style="margin:0 0 10px;">Buy Orders (expensive → cheapest)</h2>
+        <table id="buyTable">
+          <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr></thead>
+          <tbody></tbody>
+          <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
+        </table>
+      </div>
+      <div class="panel">
+        <h2 style="margin:0 0 10px;">Sell Orders (cheapest → expensive)</h2>
+        <table id="sellTable">
+          <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr></thead>
+          <tbody></tbody>
+          <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+const GROUP_PCT = 0.15;
+const POLL_MS = 3000;
+
+const itemInput  = document.getElementById("itemInput");
 const itemDropdown = document.getElementById("itemDropdown");
-const buyBody = document.querySelector("#buyTable tbody");
-const sellBody = document.querySelector("#sellTable tbody");
+const chartLink  = document.getElementById("chartLink");
+const trackInput = document.getElementById("trackInput");
+const groupToggle = document.getElementById("groupToggle");
 
-function populateDropdown(query) {
-  const filtered = supportedItems.filter(id => id.toLowerCase().includes(query.toLowerCase()));
+const buyBody  = document.querySelector("#buyTable tbody");
+const sellBody = document.querySelector("#sellTable tbody");
+const buyFoot  = document.querySelector("#buyTable tfoot tr");
+const sellFoot = document.querySelector("#sellTable tfoot tr");
+
+const orderInfo = document.getElementById("orderInfo");
+const volumeBox = document.getElementById("volumeBox");
+const spreadBox = document.getElementById("spreadBox");
+
+let currentItemId = "";
+let allItems = [];
+let latestBuySummary = [];
+let latestSellSummary = [];
+let lastHourlyBuyVolume  = 0;
+let lastHourlySellVolume = 0;
+let useGrouping = false;
+
+let prevBuySortedDesc = [];
+let prevSellSortedAsc = [];
+
+const EPS = 1e-9;
+function dbg(...args){console.log(`[${new Date().toISOString()}] [GHOST DEBUG]`,...args);}
+function keyPrice(p){ return Math.round(p * 10) / 10; }
+function sameLevel(a, b){ return keyPrice(a) === keyPrice(b); }
+function storageKey(itemId, side){ return `remembered:${itemId}:${side}`; }
+function readRemembered(itemId, side){
+  try { return JSON.parse(localStorage.getItem(storageKey(itemId,side)) || "[]"); } catch { return []; }
+}
+function writeRemembered(itemId, side, arr){
+  try { localStorage.setItem(storageKey(itemId,side), JSON.stringify(arr)); } catch {}
+  dbg(`STORAGE WRITE ${side}`, storageKey(itemId,side), arr);
+}
+function addGhost(itemId, side, price, amount, orders){
+  const arr = readRemembered(itemId, side);
+  const k = keyPrice(price);
+  if (!arr.some(x => sameLevel(x.price, k))) {
+    dbg("ADD GHOST", {side,price:k,amount,orders});
+    arr.push({ price: k, amount: amount ?? 0, orders: orders ?? 1, ts: Date.now() });
+    writeRemembered(itemId, side, arr);
+  }
+}
+function crossed(side, price, bestBid, bestAsk){
+  return side==="buy" ? price >= bestAsk - EPS : price <= bestBid + EPS;
+}
+function groupSummary(summary, pct = GROUP_PCT) {
+  if (!Array.isArray(summary) || summary.length === 0) return [];
+  const tol = pct / 100;
+  const arr = [...summary];
+  const out = [];
+  let cur = null;
+  const pushCur = () => { if (cur){ delete cur._coins; out.push(cur); } };
+  for (const row of arr) {
+    const base = { ...row, _coins: row.amount * row.pricePerUnit };
+    if (!cur) { cur = base; continue; }
+    const rel = Math.abs(row.pricePerUnit - cur.pricePerUnit) / (cur.pricePerUnit || 1);
+    if (rel <= tol) {
+      cur.orders += row.orders;
+      cur.amount += row.amount;
+      cur._coins += row.amount * row.pricePerUnit;
+      cur.pricePerUnit = cur._coins / cur.amount;
+    } else {
+      pushCur();
+      cur = base;
+    }
+  }
+  pushCur();
+  return out;
+}
+function buildDisplaysWithGhosts(apiSellSummary, apiBuySummary) {
+  const buyGhosts = readRemembered(currentItemId, "buy")
+    .filter(r => !apiSellSummary.some(x => sameLevel(x.pricePerUnit, r.price)))
+    .map(r => ({ orders: r.orders ?? 1, amount: r.amount ?? 0, pricePerUnit: keyPrice(r.price), ghost: true }));
+  const sellGhosts = readRemembered(currentItemId, "sell")
+    .filter(r => !apiBuySummary.some(x => sameLevel(x.pricePerUnit, r.price)))
+    .map(r => ({ orders: r.orders ?? 1, amount: r.amount ?? 0, pricePerUnit: keyPrice(r.price), ghost: true }));
+  const apiSellGrouped = useGrouping ? groupSummary(apiSellSummary) : [...apiSellSummary];
+  const apiBuyGrouped  = useGrouping ? groupSummary(apiBuySummary)  : [...apiBuySummary];
+  const buyCombined  = [...apiSellGrouped, ...buyGhosts].sort((a,b)=>{
+    if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1;
+    return b.pricePerUnit - a.pricePerUnit;
+  });
+  const sellCombined = [...apiBuyGrouped,  ...sellGhosts].sort((a,b)=>{
+    if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1;
+    return a.pricePerUnit - b.pricePerUnit;
+  });
+  return { buyDisplay: buyCombined, sellDisplay: sellCombined };
+}
+function renderTable(summary, tbody, tfootRow, hourlyVolume){
+  tbody.innerHTML = "";
+  let totalAmount=0, totalCoins=0;
+  for (const row of summary) {
+    const total = row.amount * row.pricePerUnit;
+    totalAmount += row.amount; totalCoins += total;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.orders}</td>
+      <td>${row.amount}</td>
+      <td>${row.pricePerUnit.toLocaleString()} coins</td>
+      <td>${total.toLocaleString()} coins</td>
+    `;
+    if (row.ghost) tr.classList.add("highlight-ghost");
+    else {
+      if (row.amount > hourlyVolume * 5) tr.classList.add("highlight-red");
+      else if (row.amount > hourlyVolume) tr.classList.add("highlight-yellow");
+    }
+    tbody.appendChild(tr);
+  }
+  tfootRow.innerHTML = `
+    <td>Total:</td>
+    <td>${totalAmount}</td>
+    <td></td>
+    <td>${totalCoins.toLocaleString()} coins</td>
+  `;
+}
+function renderCurrentTables() {
+  const { buyDisplay, sellDisplay } = buildDisplaysWithGhosts(latestBuySummary, latestSellSummary);
+  renderTable(buyDisplay,  buyBody,  buyFoot,  lastHourlyBuyVolume);
+  renderTable(sellDisplay, sellBody, sellFoot, lastHourlySellVolume);
+  const tracked = parseFloat((trackInput.value || "").replace(/,/g, ''));
+  highlightTrackedOrder(tracked, buyDisplay, sellDisplay);
+}
+function highlightTrackedOrder(price, buyShown, sellShown){
+  orderInfo.style.display = "none";
+  orderInfo.innerHTML = "";
+  if (!price || isNaN(price)) return;
+  [...buyBody.children, ...sellBody.children].forEach(r => r.classList.remove("highlight-blue"));
+  for (const [summary, body] of [[buyShown, buyBody], [sellShown, sellBody]]) {
+    let coinsBetween=0, itemsBetween=0, priority=1;
+    for (let i=0;i<summary.length;i++){
+      const row = summary[i];
+      const unit = parseFloat(keyPrice(row.pricePerUnit).toFixed(1));
+      if (Math.abs(unit - price) < 0.1) {
+        const tr = body.children[i];
+        if (tr) tr.classList.add("highlight-blue");
+        orderInfo.style.display = "block";
+        orderInfo.innerHTML = `
+          <strong>Tracked Order Info</strong><br/>
+          Priority position: ${priority}<br/>
+          Items between: ${itemsBetween}<br/>
+          Coin gap: ${Math.round(coinsBetween).toLocaleString()} coins<br/>
+          Items left in order: ${row.amount}
+        `;
+        return;
+      }
+      itemsBetween += row.amount;
+      coinsBetween += row.amount * row.pricePerUnit;
+      priority++;
+    }
+  }
+}
+function rememberVanishedOutsideTop13(curBuyDesc, curSellAsc) {
+  const curBuyKeys  = new Set(curBuyDesc.map(r => keyPrice(r.pricePerUnit)));
+  const curSellKeys = new Set(curSellAsc.map(r => keyPrice(r.pricePerUnit)));
+  prevBuySortedDesc.forEach((r, idx) => {
+    if (idx >= 13) {
+      const k = keyPrice(r.pricePerUnit);
+      if (!curBuyKeys.has(k)) { dbg("VANISHED BUY",r); addGhost(currentItemId, "buy", k, r.amount, r.orders); }
+    }
+  });
+  prevSellSortedAsc.forEach((r, idx) => {
+    if (idx >= 13) {
+      const k = keyPrice(r.pricePerUnit);
+      if (!curSellKeys.has(k)) { dbg("VANISHED SELL",r); addGhost(currentItemId, "sell", k, r.amount, r.orders); }
+    }
+  });
+}
+function cleanGhostsAgainstCurrent(curBuyDesc, curSellAsc) {
+  const buyLevels  = curBuyDesc.map(r => keyPrice(r.pricePerUnit));
+  const sellLevels = curSellAsc.map(r => keyPrice(r.pricePerUnit));
+  const bestSell = Math.min(...curBuyDesc.map(r => r.pricePerUnit || Infinity));
+  const bestBuy  = Math.max(...curSellAsc.map(r => r.pricePerUnit || -Infinity));
+  let keptBuy = [];
+  for (const g of readRemembered(currentItemId, "buy")) {
+    const k = keyPrice(g.price);
+    if (buyLevels.includes(k)) continue;
+    if (crossed("buy", k, bestBuy, bestSell)) { dbg("REMOVE buy",g); continue; }
+    keptBuy.push(g);
+  }
+  writeRemembered(currentItemId, "buy", keptBuy);
+  let keptSell = [];
+  for (const g of readRemembered(currentItemId, "sell")) {
+    const k = keyPrice(g.price);
+    if (sellLevels.includes(k)) continue;
+    if (crossed("sell", k, bestBuy, bestSell)) { dbg("REMOVE sell",g); continue; }
+    keptSell.push(g);
+  }
+  writeRemembered(currentItemId, "sell", keptSell);
+}
+async function getApiKey(){ return ""; }
+async function fetchAllItems(){
+  const key = await getApiKey();
+  const url = key ? `https://api.hypixel.net/skyblock/bazaar?key=${key}` : `https://api.hypixel.net/skyblock/bazaar`;
+  const res = await fetch(url);
+  const json = await res.json();
+  const products = json.products || {};
+  allItems = Object.keys(products).map(id => {
+    const q = products[id].quick_status;
+    const price = q.sellPrice > 1e6 ? (q.sellPrice/1e6).toFixed(2)+'M' :
+                  q.sellPrice > 1e3 ? (q.sellPrice/1e3).toFixed(1)+'k' :
+                  q.sellPrice.toFixed(1);
+    return { id, name: id.replace(/_/g,' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()), price };
+  });
+}
+function populateDropdown(query){
+  const filtered = allItems.filter(i => i.name.toLowerCase().includes(query) || i.id.toLowerCase().includes(query));
   itemDropdown.innerHTML = "";
-  for (const id of filtered) {
+  for (const item of filtered.slice(0, 60)) {
     const div = document.createElement("div");
     div.className = "dropdown-item";
-    div.textContent = id;
+    div.innerHTML = `<div>${item.name}</div><div class="pill">${item.price} /bz</div>`;
     div.onclick = () => {
-      itemInput.value = id;
+      itemInput.value = item.id;
       itemDropdown.style.display = "none";
-      loadOrders(id);
+      selectItem(item.id);
     };
     itemDropdown.appendChild(div);
   }
   itemDropdown.style.display = filtered.length ? "block" : "none";
 }
-
 itemInput.addEventListener("input", () => {
-  const query = itemInput.value.trim();
+  const query = itemInput.value.trim().toLowerCase();
   if (!query) { itemDropdown.style.display = "none"; return; }
-  populateDropdown(query);
+  if (allItems.length === 0) { fetchAllItems().then(() => populateDropdown(query)); }
+  else { populateDropdown(query); }
 });
-
-async function loadOrders(itemId) {
-  try {
-    const res = await fetch(`https://wato-api.vercel.app/${itemId}`);
-    if (!res.ok) throw new Error("Failed to fetch");
-    const data = await res.json();
-
-    renderTable(data.buy_summary, buyBody);
-    renderTable(data.sell_summary, sellBody);
-  } catch (err) {
-    console.error(err);
-    buyBody.innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
-    sellBody.innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
-  }
+function selectItem(id){
+  currentItemId = id;
+  prevBuySortedDesc = [];
+  prevSellSortedAsc = [];
+  chartLink.innerHTML = `Chart: <a href="https://skyblock.finance/items/${id}/chart" target="_blank" style="color:var(--accent);">skyblock.finance/items/${id}/chart</a>`;
+  loadData(id);
+  const url = new URL(window.location);
+  url.searchParams.set("item", id);
+  history.replaceState({}, "", url);
 }
-
-function renderTable(summary, tbody) {
-  tbody.innerHTML = "";
-  if (!summary || !summary.length) {
-    tbody.innerHTML = "<tr><td colspan='3'>No data</td></tr>";
-    return;
-  }
-  for (const row of summary) {
-    const tr = document.createElement("tr");
-    if (row.ghost) tr.classList.add("highlight-ghost");
-    tr.innerHTML = `
-      <td>${row.orders}</td>
-      <td>${row.amount}</td>
-      <td>${row.pricePerUnit.toLocaleString()}</td>
-    `;
-    tbody.appendChild(tr);
-  }
+trackInput.addEventListener("change", () => {
+  const tracked = parseFloat((trackInput.value||"").replace(/,/g,''));
+  const { buyDisplay, sellDisplay } = buildDisplaysWithGhosts(latestBuySummary, latestSellSummary);
+  highlightTrackedOrder(tracked, buyDisplay, sellDisplay);
+});
+groupToggle.addEventListener("change", () => {
+  useGrouping = groupToggle.checked;
+  renderCurrentTables();
+});
+async function loadData(itemId){
+  const key = await getApiKey();
+  const url = key ? `https://api.hypixel.net/skyblock/bazaar?key=${key}` : `https://api.hypixel.net/skyblock/bazaar`;
+  const res = await fetch(url);
+  const json = await res.json();
+  const data = json.products?.[itemId];
+  if (!data) return;
+  const avgInstabuys  = data.quick_status.buyMovingWeek  / 168;
+  const avgInstasells = data.quick_status.sellMovingWeek / 168;
+  latestBuySummary  = data.sell_summary ?? [];
+  latestSellSummary = data.buy_summary  ?? [];
+  lastHourlyBuyVolume  = avgInstasells;
+  lastHourlySellVolume = avgInstabuys;
+  const avgSellOrder = averageAmount(latestBuySummary);
+  const avgBuyOrder  = averageAmount(latestSellSummary);
+  volumeBox.innerHTML = `
+    <div><strong>Avg instabuys/hour:</strong> ${avgInstabuys.toFixed(1)}</div>
+    <div><strong>Avg instasells/hour:</strong> ${avgInstasells.toFixed(1)}</div>
+    <div><strong>Avg sell-order amount:</strong> ${avgSellOrder.toFixed(1)}</div>
+    <div><strong>Avg buy-order amount:</strong> ${avgBuyOrder.toFixed(1)}</div>
+  `;
+  const cheapestAsk = Math.min(...latestBuySummary.map(r=>r.pricePerUnit || Infinity));
+  const highestBid  = Math.max(...latestSellSummary.map(r=>r.pricePerUnit || -Infinity));
+  const spreadPct = ((highestBid - cheapestAsk) / cheapestAsk) * 100;
+  spreadBox.innerHTML = `<strong>Market spread:</strong> ${isFinite(spreadPct) ? spreadPct.toFixed(2)+'%' : 'N/A'}`;
+  const curBuySortedDesc = [...latestBuySummary].sort((a,b)=> b.pricePerUnit - a.pricePerUnit);
+  const curSellSortedAsc = [...latestSellSummary].sort((a,b)=> a.pricePerUnit - b.pricePerUnit);
+  if (prevBuySortedDesc.length || prevSellSortedAsc.length) rememberVanishedOutsideTop13(curBuySortedDesc, curSellSortedAsc);
+  cleanGhostsAgainstCurrent(curBuySortedDesc, curSellSortedAsc);
+  renderCurrentTables();
+  prevBuySortedDesc = curBuySortedDesc;
+  prevSellSortedAsc = curSellSortedAsc;
 }
+function averageAmount(summary){
+  if (!summary.length) return 0;
+  return summary.reduce((s,r)=>s+r.amount,0) / summary.length;
+}
+const urlParams = new URLSearchParams(location.search);
+const preItem = urlParams.get("item");
+const preTrack = urlParams.get("track");
+if (preItem) { itemInput.value = preItem; selectItem(preItem); }
+if (preTrack) trackInput.value = preTrack;
+setInterval(() => { if (currentItemId) loadData(currentItemId); }, POLL_MS);
+fetchAllItems();
 </script>
 </body>
 </html>
