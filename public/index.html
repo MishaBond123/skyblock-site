@@ -3,20 +3,21 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WATO</title>
-  <link rel="icon" type="image/jpeg" href="site-icon.png"/>
+  <title>Bazaar Orders — WATO API</title>
+  <link rel="icon" type="image/png" href="site-icon.png"/>
 
   <style>
     :root {
       --card: rgba(0,0,0,0.65);
       --text: #f5f7fa;
-      --muted: rgba(255,255,255,0.75);
-      --accent: #00bfff;
       --border: rgba(255,255,255,0.12);
       --head: rgba(0,191,255,0.28);
+      --ghost: rgba(186,114,255,0.18);
     }
+    * { box-sizing: border-box; }
     body {
-      margin: 0; color: var(--text);
+      margin: 0;
+      color: var(--text);
       background-image: url('bgimage.jpeg');
       background-size: cover;
       background-attachment: fixed;
@@ -24,53 +25,70 @@
       font-family: system-ui, Segoe UI, Roboto, sans-serif;
     }
     .container { max-width: 1200px; margin: 36px auto; padding: 0 16px; }
-    h1 { margin: 0 0 20px; font-weight: 700; }
     .panel {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 14px; padding: 16px; margin-bottom: 16px;
       backdrop-filter: saturate(120%) blur(2px);
     }
+    label { display: block; margin-bottom: 6px; font-weight: bold; }
+    input[type="text"] {
+      width: 100%; padding: 12px; border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-size: 15px;
+    }
+    .dropdown {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 6px; max-height: 320px;
+      overflow-y: auto; display: none; margin-top: 6px;
+    }
+    .dropdown-item {
+      padding: 8px 10px; border-radius: 8px; cursor: pointer;
+    }
+    .dropdown-item:hover { background: rgba(255,255,255,0.06); }
+
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     @media (max-width: 920px) { .grid-2 { grid-template-columns: 1fr; } }
-    label { user-select: none; cursor: pointer; display: block; margin-bottom: 6px; }
-    input[type="text"]{
-      width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
-      background: rgba(255,255,255,0.06); color: var(--text); font-size: 15px;
+
+    table {
+      width: 100%; border-collapse: collapse;
+      border-radius: 12px; overflow: hidden;
     }
-    table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; }
     thead th {
-      background: var(--head); padding: 10px; text-align: center; font-weight: 700;
+      background: var(--head); padding: 10px; text-align: center;
       border-bottom: 1px solid var(--border);
     }
-    tbody td { padding: 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px; }
-    tfoot td { padding: 10px; font-weight: 700; background: rgba(255,255,255,0.07); }
+    tbody td, tfoot td {
+      padding: 10px; text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 14px;
+    }
     tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+    tfoot td { font-weight: bold; background: rgba(255,255,255,0.07); }
+    .highlight-ghost { background: var(--ghost) !important; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Bazaar Orders</h1>
-
     <div class="panel">
       <label>Item ID</label>
-      <input id="itemInput" type="text" placeholder="Enter Item ID (e.g., BOOSTER_COOKIE)"/>
-      <div class="muted" style="margin-top:6px;">Only supported WATO API items will appear.</div>
-      <label style="margin-top:10px;">
-        <input type="checkbox" id="groupToggle"> Group orders within ±0.1%
-      </label>
+      <input id="itemInput" type="text" placeholder="Enter Item ID"/>
+      <div id="itemDropdown" class="dropdown"></div>
     </div>
 
     <div class="grid-2">
       <div class="panel">
-        <h2 style="margin:0 0 10px;">Buy Orders (expensive → cheapest)</h2>
+        <h2>Buy Orders</h2>
         <table id="buyTable">
           <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr></thead>
           <tbody></tbody>
           <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
         </table>
       </div>
+
       <div class="panel">
-        <h2 style="margin:0 0 10px;">Sell Orders (cheapest → expensive)</h2>
+        <h2>Sell Orders</h2>
         <table id="sellTable">
           <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr></thead>
           <tbody></tbody>
@@ -81,103 +99,110 @@
   </div>
 
   <script>
-  const API_BASE = "https://wato-api.vercel.app";
-  const SUPPORTED_ITEMS = [
-    "BOOSTER_COOKIE",
-    "RECOMBOBULATOR_3000",
-    "ENCHANTED_DIAMOND_BLOCK",
-    "KISMET_FEATHER",
-    "SUMMONING_EYE",
-    "ESSENCE_CRIMSON",
-    "SKELETON_KEY",
-    "TITANIC_EXP_BOTTLE"
-  ];
+const buyBody  = document.querySelector("#buyTable tbody");
+const sellBody = document.querySelector("#sellTable tbody");
+const buyFoot  = document.querySelector("#buyTable tfoot tr");
+const sellFoot = document.querySelector("#sellTable tfoot tr");
+const itemInput  = document.getElementById("itemInput");
+const itemDropdown = document.getElementById("itemDropdown");
 
-  const GROUP_PCT = 0.1; // percent
-  let useGrouping = false;
-  let latestBuy = [], latestSell = [];
+let currentItemId = "";
+let refreshTimer = null;
 
-  document.getElementById("groupToggle").addEventListener("change", () => {
-    useGrouping = document.getElementById("groupToggle").checked;
-    if (latestBuy.length && latestSell.length) renderTables(latestBuy, latestSell);
-  });
+// The only items the API supports
+const supportedItems = [
+  "BOOSTER_COOKIE",
+  "RECOMBOBULATOR_3000",
+  "ENCHANTED_DIAMOND_BLOCK",
+  "KISMET_FEATHER",
+  "SUMMONING_EYE",
+  "ESSENCE_CRIMSON",
+  "SKELETON_KEY",
+  "TITANIC_EXP_BOTTLE"
+];
 
-  document.getElementById("itemInput").addEventListener("change", () => {
-    const item = document.getElementById("itemInput").value.trim().toUpperCase();
-    if (SUPPORTED_ITEMS.includes(item)) {
-      fetchOrders(item);
-      setInterval(() => fetchOrders(item), 30000); // refresh every 30s
-    } else {
-      alert("Item not supported by WATO API");
-    }
-  });
+function populateDropdown(query){
+  const filtered = supportedItems.filter(id => id.toLowerCase().includes(query.toLowerCase()));
+  itemDropdown.innerHTML = "";
+  for (const id of filtered) {
+    const div = document.createElement("div");
+    div.className = "dropdown-item";
+    div.innerHTML = `<div>${id}</div>`;
+    div.onclick = () => {
+      itemInput.value = id;
+      itemDropdown.style.display = "none";
+      selectItem(id);
+    };
+    itemDropdown.appendChild(div);
+  }
+  itemDropdown.style.display = filtered.length ? "block" : "none";
+}
 
-  function groupSummary(summary, pct = GROUP_PCT) {
-    if (!Array.isArray(summary) || summary.length === 0) return [];
-    const tol = pct / 100;
-    const arr = [...summary];
-    const out = [];
-    let cur = null;
-    const pushCur = () => { if (cur){ delete cur._coins; out.push(cur); } };
-    for (const row of arr) {
-      const base = { ...row, _coins: row.amount * row.pricePerUnit };
-      if (!cur) { cur = base; continue; }
-      const rel = Math.abs(row.pricePerUnit - cur.pricePerUnit) / (cur.pricePerUnit || 1);
-      if (rel <= tol) {
-        cur.orders += row.orders;
-        cur.amount += row.amount;
-        cur._coins += row.amount * row.pricePerUnit;
-        cur.pricePerUnit = cur._coins / cur.amount;
-      } else {
-        pushCur();
-        cur = base;
+itemInput.addEventListener("input", () => {
+  const query = itemInput.value.trim();
+  if (!query) { itemDropdown.style.display = "none"; return; }
+  populateDropdown(query);
+});
+
+function selectItem(id){
+  currentItemId = id;
+  loadOrders(id);
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(() => loadOrders(currentItemId), 30000); // refresh every 30s
+}
+
+async function loadOrders(id){
+  buyBody.innerHTML  = `<tr><td colspan="4" class="muted">Loading…</td></tr>`;
+  sellBody.innerHTML = `<tr><td colspan="4" class="muted">Loading…</td></tr>`;
+  buyFoot.innerHTML  = `<td>Total:</td><td></td><td></td><td></td>`;
+  sellFoot.innerHTML = `<td>Total:</td><td></td><td></td><td></td>`;
+
+  try {
+    const res = await fetch(`https://wato-api.vercel.app/${encodeURIComponent(id)}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    // ✅ Correct sides + sorting
+    const buy = (data.sell_summary  || []).slice().sort((a,b)=> b.pricePerUnit - a.pricePerUnit); // exp → cheap
+    const sell = (data.buy_summary || []).slice().sort((a,b)=> a.pricePerUnit - b.pricePerUnit); // cheap → exp
+
+    const fmt = n => Number(n ?? 0).toLocaleString();
+    const coins = (amt,ppu) => Number((amt||0) * (ppu||0));
+
+    function render(rows, tbody, tfoot){
+      if (!rows.length){
+        tbody.innerHTML = `<tr><td colspan="4" class="muted">No data</td></tr>`;
+        tfoot.innerHTML = `<td>Total:</td><td>0</td><td></td><td>0</td>`;
+        return;
       }
+      let totAmt=0, totCoins=0;
+      const html = rows.map(r=>{
+        const amount = Math.trunc(r.amount || 0);         // whole items
+        const price  = Number(r.pricePerUnit || 0);
+        const ords   = Math.trunc(r.orders || 0);
+        const c      = coins(amount, price);
+        totAmt += amount; totCoins += c;
+        return `
+          <tr>
+            <td>${fmt(ords)}</td>
+            <td>${fmt(amount)}</td>
+            <td>${fmt(price)} coins</td>
+            <td>${fmt(c)} coins</td>
+          </tr>`;
+      }).join('');
+      tbody.innerHTML = html;
+      tfoot.innerHTML = `<td>Total:</td><td>${fmt(totAmt)}</td><td></td><td>${fmt(totCoins)} coins</td>`;
     }
-    pushCur();
-    return out;
-  }
 
-  async function fetchOrders(item) {
-    try {
-      const res = await fetch(`${API_BASE}/${item}`);
-      const data = await res.json();
-      latestBuy = data.buy_summary || [];
-      latestSell = data.sell_summary || [];
-      renderTables(latestBuy, latestSell);
-    } catch (err) {
-      console.error("Error loading data", err);
-    }
-  }
+    render(buy,  buyBody,  buyFoot);
+    render(sell, sellBody, sellFoot);
 
-  function renderTables(buyOrders, sellOrders) {
-    const buyData = useGrouping ? groupSummary(buyOrders) : buyOrders;
-    const sellData = useGrouping ? groupSummary(sellOrders) : sellOrders;
-    renderTable(buyData, document.querySelector("#buyTable tbody"), document.querySelector("#buyTable tfoot tr"));
-    renderTable(sellData, document.querySelector("#sellTable tbody"), document.querySelector("#sellTable tfoot tr"));
+  } catch (err){
+    console.error(err);
+    buyBody.innerHTML  = `<tr><td colspan="4" class="muted">Error loading data</td></tr>`;
+    sellBody.innerHTML = `<tr><td colspan="4" class="muted">Error loading data</td></tr>`;
   }
-
-  function renderTable(data, tbody, tfootRow) {
-    tbody.innerHTML = "";
-    let totalAmount=0, totalCoins=0;
-    for (const row of data) {
-      const total = row.amount * row.pricePerUnit;
-      totalAmount += row.amount; totalCoins += total;
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${row.orders}</td>
-        <td>${row.amount}</td>
-        <td>${row.pricePerUnit.toLocaleString()}</td>
-        <td>${total.toLocaleString()}</td>
-      `;
-      tbody.appendChild(tr);
-    }
-    tfootRow.innerHTML = `
-      <td>Total:</td>
-      <td>${totalAmount}</td>
-      <td></td>
-      <td>${totalCoins.toLocaleString()}</td>
-    `;
-  }
-  </script>
+}
+</script>
 </body>
 </html>
