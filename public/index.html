@@ -130,15 +130,19 @@
         cur.orders += chunk.orders;
         cur.amount += chunk.amount;
         cur._coins += chunk._coins;
-        cur.pricePerUnit = round(cur._coins / (cur.amount || 1));
+        cur.pricePerUnit = cur._coins / (cur.amount || 1);
       } else {
         cur.amount = Math.round(cur.amount);
+        cur.pricePerUnit = Math.round(cur.pricePerUnit);
         out.push(({_coins, ...rest}=cur, rest));
         cur = {...chunk};
       }
     }
-    if (cur){ cur.amount = Math.round(cur.amount); out.push(({_coins, ...rest}=cur, rest)); }
-    return out;
+    if (cur) {
+  cur.amount = Math.round(cur.amount);
+  cur.pricePerUnit = Math.round(cur.pricePerUnit); // ← same here
+  out.push(({_coins, ...rest}=cur, rest));
+}
   }
 
   function renderTable(rows, tbody, tfootRow){
