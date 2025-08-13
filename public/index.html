@@ -163,8 +163,8 @@ async function loadOrders(id){
     const data = await res.json();
 
     // ✅ Correct sides + sorting
-    const buy = (data.sell_summary  || []).slice().sort((a,b)=> b.pricePerUnit - a.pricePerUnit); // exp → cheap
-    const sell = (data.buy_summary || []).slice().sort((a,b)=> a.pricePerUnit - b.pricePerUnit); // cheap → exp
+    const buy = (data.buy_summary  || []).slice().sort((a,b)=> b.pricePerUnit - a.pricePerUnit); // exp → cheap
+    const sell = (data.sell_summary || []).slice().sort((a,b)=> a.pricePerUnit - b.pricePerUnit); // cheap → exp
 
     const fmt = n => Number(n ?? 0).toLocaleString();
     const coins = (amt,ppu) => Number((amt||0) * (ppu||0));
