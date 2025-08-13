@@ -24,7 +24,7 @@
       background-position: center;
       font-family: system-ui, Segoe UI, Roboto, sans-serif;
     }
-    .container { max-width: 1200px; margin: 36px auto; padding: 0 16px; }
+    .container { max-width: 900px; margin: 36px auto; padding: 0 16px; }
     .panel {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 14px; padding: 16px; margin-bottom: 16px;
@@ -47,10 +47,6 @@
       padding: 8px 10px; border-radius: 8px; cursor: pointer;
     }
     .dropdown-item:hover { background: rgba(255,255,255,0.06); }
-
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 920px) { .grid-2 { grid-template-columns: 1fr; } }
-
     table {
       width: 100%; border-collapse: collapse;
       border-radius: 12px; overflow: hidden;
@@ -59,13 +55,12 @@
       background: var(--head); padding: 10px; text-align: center;
       border-bottom: 1px solid var(--border);
     }
-    tbody td, tfoot td {
+    tbody td {
       padding: 10px; text-align: center;
       border-bottom: 1px solid rgba(255,255,255,0.06);
       font-size: 14px;
     }
     tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
-    tfoot td { font-weight: bold; background: rgba(255,255,255,0.07); }
     .highlight-ghost { background: var(--ghost) !important; }
   </style>
 </head>
@@ -77,24 +72,20 @@
       <div id="itemDropdown" class="dropdown"></div>
     </div>
 
-    <div class="grid-2">
-      <div class="panel">
-        <h2>Buy Orders</h2>
-        <table id="buyTable">
-          <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr></thead>
-          <tbody></tbody>
-          <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
-        </table>
-      </div>
+    <div class="panel">
+      <h2>Buy Orders</h2>
+      <table id="buyTable">
+        <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-      <div class="panel">
-        <h2>Sell Orders</h2>
-        <table id="sellTable">
-          <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th><th>Coin Equivalent</th></tr></thead>
-          <tbody></tbody>
-          <tfoot><tr><td>Total:</td><td></td><td></td><td></td></tr></tfoot>
-        </table>
-      </div>
+    <div class="panel">
+      <h2>Sell Orders</h2>
+      <table id="sellTable">
+        <thead><tr><th>Orders</th><th>Amount</th><th>Unit Price</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
   </div>
 
@@ -114,8 +105,6 @@
   const itemDropdown = document.getElementById("itemDropdown");
   const buyBody = document.querySelector("#buyTable tbody");
   const sellBody = document.querySelector("#sellTable tbody");
-  const buyFoot = document.querySelector("#buyTable tfoot tr");
-  const sellFoot = document.querySelector("#sellTable tfoot tr");
 
   function populateDropdown(query) {
     const filtered = supportedItems.filter(id => id.toLowerCase().includes(query.toLowerCase()));
@@ -145,45 +134,31 @@
       const res = await fetch(`https://wato-api.vercel.app/${itemId}`);
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
-      renderTable(data.buy_summary, buyBody, buyFoot);
-      renderTable(data.sell_summary, sellBody, sellFoot);
+      renderTable(data.buy_summary, buyBody);
+      renderTable(data.sell_summary, sellBody);
     } catch (err) {
       console.error(err);
-      buyBody.innerHTML = "<tr><td colspan='4'>Error loading data</td></tr>";
-      sellBody.innerHTML = "<tr><td colspan='4'>Error loading data</td></tr>";
+      buyBody.innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
+      sellBody.innerHTML = "<tr><td colspan='3'>Error loading data</td></tr>";
     }
   }
 
-  function renderTable(summary, tbody, tfootRow) {
+  function renderTable(summary, tbody) {
     tbody.innerHTML = "";
     if (!summary || !summary.length) {
-      tbody.innerHTML = "<tr><td colspan='4'>No data</td></tr>";
-      tfootRow.innerHTML = "<td>Total:</td><td></td><td></td><td></td>";
+      tbody.innerHTML = "<tr><td colspan='3'>No data</td></tr>";
       return;
     }
-    let totalAmount = 0, totalCoins = 0;
     for (const row of summary) {
-      const amount = Number(row.amount) || 0;
-      const price = Number(row.pricePerUnit) || 0;
-      const total = amount * price;
-      totalAmount += amount;
-      totalCoins += total;
       const tr = document.createElement("tr");
       if (row.ghost) tr.classList.add("highlight-ghost");
       tr.innerHTML = `
         <td>${row.orders}</td>
-        <td>${amount}</td>
-        <td>${price.toLocaleString()}</td>
-        <td>${total.toLocaleString()}</td>
+        <td>${row.amount}</td>
+        <td>${row.pricePerUnit.toLocaleString()}</td>
       `;
       tbody.appendChild(tr);
     }
-    tfootRow.innerHTML = `
-      <td>Total:</td>
-      <td>${totalAmount}</td>
-      <td></td>
-      <td>${totalCoins.toLocaleString()}</td>
-    `;
   }
   </script>
 </body>
