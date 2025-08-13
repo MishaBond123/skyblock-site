@@ -141,48 +141,34 @@
     return out;
   }
 
-  function renderTable(rows, tbody, tfootRow) {
-  tbody.innerHTML = '';
-  if (!rows.length) {
-    const tr = document.createElement('tr');
-    const td = document.createElement('td');
-    td.colSpan = 4;
-    td.className = 'muted';
-    td.textContent = 'No data';
-    tr.appendChild(td);
-    tbody.appendChild(tr);
-    tfootRow.innerHTML = '<td>Total:</td><td></td><td></td><td></td>';
-    return;
+  function renderTable(rows, tbody, tfootRow){
+    tbody.innerHTML = '';
+    if (!rows.length){
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 4; td.className='muted'; td.textContent='No data';
+      tr.appendChild(td); tbody.appendChild(tr);
+      tfootRow.innerHTML = '<td>Total:</td><td></td><td></td><td></td>';
+      return;
+    }
+    let totalAmt=0, totalCoins=0;
+    for(const r of rows){
+      const amount = Math.round(Number(r.amount)||0);
+      const price  = Number(r.pricePerUnit)||0;
+      const orders = Number(r.orders ?? r.orders_count ?? 0);
+      const coins  = amount*price;
+      totalAmt += amount; totalCoins += coins;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${orders}</td>
+        <td>${amount.toLocaleString()}</td>
+        <td>${asCoins(price)}</td>
+        <td>${asCoins(coins)}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+    tfootRow.innerHTML = `<td>Total:</td><td>${totalAmt.toLocaleString()}</td><td></td><td>${asCoins(totalCoins)}</td>`;
   }
-
-  let totalAmt = 0, totalCoins = 0;
-  for (const r of rows) {
-    const amount = Math.round(Number(r.amount) || 0);
-    const priceRaw = Number(r.pricePerUnit) || 0;
-    const priceDisplay = useGrouping ? Math.round(priceRaw) : priceRaw; // ✅ Round only if grouping
-    const orders = Number(r.orders ?? r.orders_count ?? 0);
-    const coins = amount * priceRaw;
-
-    totalAmt += amount;
-    totalCoins += coins;
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${orders}</td>
-      <td>${amount.toLocaleString()}</td>
-      <td>${asCoins(priceDisplay)}</td>
-      <td>${asCoins(coins)}</td>
-    `;
-    tbody.appendChild(tr);
-  }
-
-  tfootRow.innerHTML = `
-    <td>Total:</td>
-    <td>${totalAmt.toLocaleString()}</td>
-    <td></td>
-    <td>${asCoins(totalCoins)}</td>
-  `;
-}
 
   function renderTables(buyOrders, sellOrders){
     let buyData  = useGrouping ? groupSummary(sellOrders)  : sellOrders.slice();
