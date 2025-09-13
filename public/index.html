@@ -189,7 +189,7 @@ let prevBidsAsc = [];
 const prevMetrics = new Map();
 
 // Tolerances for “unchanged”
-const REL_EPS = 1e-6; // 0.0001% relative tolerance (robust for big numbers)
+const REL_EPS = 1e-7; // 0.0001% relative tolerance (robust for big numbers)
 
 const fmt = {
   coins(n){ if (!isFinite(n)) return '—'; return Math.round(n).toLocaleString(); },
