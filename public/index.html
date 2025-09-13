@@ -480,8 +480,8 @@ function renderTopStats(){
     statTile('Avg Instasells / hr', `${fmt.sig(avgInstasellsPerHr, 6)} ${deltaSpan('vSell', avgInstasellsPerHr)}`),
     statTile('Avg Sell-Order Amount', `${fmt.sig(avgSellOrder, 6)} ${deltaSpan('avgSellOrder', avgSellOrder)}`),
     statTile('Avg Buy-Order Amount', `${fmt.sig(avgBuyOrder, 6)} ${deltaSpan('avgBuyOrder', avgBuyOrder)}`),
-    statTile('Top-of-Book Size (Ask)', `${fmt.coins(tobAsk)} ${deltaSpan('topAskSize', tobAsk)}`),
     statTile('Top-of-Book Size (Bid)', `${fmt.coins(tobBid)} ${deltaSpan('topBidSize', tobBid)}`),
+    statTile('Top-of-Book Size (Ask)', `${fmt.coins(tobAsk)} ${deltaSpan('topAskSize', tobAsk)}`),
     statTile('Mid Price', `${fmt.price(mid)} ${deltaSpan('mid', mid)}`),
     statTile('Depth (±0.5%)', `${fmt.coins(depth05)} ${deltaSpan('depth05', depth05)}`),
   ].join('');
