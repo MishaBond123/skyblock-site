@@ -152,7 +152,6 @@
 
   <script type="module">
 const GROUP_PCT = 0.15;
-// Change this if you like; deltas now persist between polls.
 const POLL_MS = 3000;
 
 const itemInput  = document.getElementById("itemInput");
@@ -189,7 +188,7 @@ let prevBidsAsc = [];
 const prevMetrics = new Map();
 
 // Tolerances for “unchanged”
-const REL_EPS = 1e-7; // 0.0001% relative tolerance (robust for big numbers)
+const REL_EPS = 1e-6; // relative tolerance
 
 const fmt = {
   coins(n){ if (!isFinite(n)) return '—'; return Math.round(n).toLocaleString(); },
@@ -205,7 +204,7 @@ function nearlyEqual(a,b){
 }
 
 // ---------- Helpers ----------
-function keyPrice(p){ return Math.round(p * 10) / 10; }
+function keyPrice(p){ return Math.round(p * 10) / 10; } // 0.1 tick
 function sameLevel(a, b){ return keyPrice(a) === keyPrice(b); }
 function storageKey(itemId, side){ return `remembered:${itemId}:${side}`; }
 function readRemembered(itemId, side){ try { return JSON.parse(localStorage.getItem(storageKey(itemId,side)) || "[]"); } catch { return []; } }
@@ -385,20 +384,17 @@ function cleanGhostsAgainstCurrent(curAsksDesc, curBidsAsc) {
   writeRemembered(currentItemId, "buy", keptBuy);
 }
 
-// ---------- Persistent deltas (no 0% reset between polls) ----------
+// ---------- Persistent deltas ----------
 function deltaSpan(key, newVal){
   const rec = prevMetrics.get(key);
-  // If we have a previous reading and *effectively* nothing changed, reuse old delta
   if (rec && isFinite(newVal) && isFinite(rec.val) && nearlyEqual(newVal, rec.val)) {
     return rec.deltaHtml || `<span class="delta delta-flat">(—)</span>`;
   }
-  // First observation (or invalid numbers): store and show neutral
   if (!rec || !isFinite(newVal) || !isFinite(rec.val)) {
     const html = `<span class="delta delta-flat">(—)</span>`;
     prevMetrics.set(key, { val: newVal, deltaHtml: html });
     return html;
   }
-  // Compute percent change vs previous value and persist it until the value changes again
   const diffPct = ((newVal - rec.val) / (Math.abs(rec.val) || 1)) * 100;
   const cls = Math.abs(diffPct) < 1e-6 ? 'delta-flat' : (diffPct > 0 ? 'delta-up' : 'delta-down');
   const sign = diffPct > 0 ? '+' : (diffPct < 0 ? '−' : '');
@@ -413,19 +409,32 @@ function statTile(label, valueHtml){
   return `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${valueHtml}</div></div>`;
 }
 
+// ---------- Top-of-book sizes with 0.1 tick & min band ----------
 function topLevelAmount(summary, side){
   if (!summary.length) return 0;
-  const bestAsk = safeMinPrice(asksSummary);
-  const bestBid = safeMaxPrice(bidsSummary);
-  const mid = (bestAsk + bestBid) / 2;
-  if (!isFinite(mid) || mid <= 0) return 0;
 
-  // Allowed band = ±0.3% around mid
-  const band = 0.003;
-  const lo = mid * (1 - band);
-  const hi = mid * (1 + band);
+  // Reference: best price on this side
+  const refRaw = side === 'ask'
+    ? Math.min(...summary.map(r=>r.pricePerUnit))
+    : Math.max(...summary.map(r=>r.pricePerUnit));
 
-  // Use keyPrice (0.1 increments)
+  if (!isFinite(refRaw) || refRaw <= 0) return 0;
+
+  // Quantize reference to 0.1 tick
+  const ref = keyPrice(refRaw);
+
+  // Band = max(±0.3% of ref, ±0.1 coin)
+  const pctBand = 0.003;
+  const absBand = 0.1;
+  const halfWidth = Math.max(ref * pctBand, absBand);
+
+  // Side-constrained band:
+  //  - Asks: [ref, ref + halfWidth]
+  //  - Bids: [ref - halfWidth, ref]
+  const lo = side === 'ask' ? ref : ref - halfWidth;
+  const hi = side === 'ask' ? ref + halfWidth : ref;
+
+  // Include orders inside the band, comparing on 0.1-quantized prices
   const levels = summary.filter(r => {
     const kp = keyPrice(r.pricePerUnit);
     return kp >= lo && kp <= hi;
@@ -458,6 +467,10 @@ function renderTopStats(){
   const avgSellOrder = averageAmount(asksSummary);
   const avgBuyOrder  = averageAmount(bidsSummary);
 
+  const tobAsk = topLevelAmount(asksSummary,'ask');
+  const tobBid = topLevelAmount(bidsSummary,'bid');
+  const depth05 = depthNotional(bidsSummary, asksSummary, 0.5);
+
   topStats.innerHTML = [
     statTile('Best Ask', `${fmt.price(bestAsk)} ${deltaSpan('bestAsk', bestAsk)}`),
     statTile('Best Bid', `${fmt.price(bestBid)} ${deltaSpan('bestBid', bestBid)}`),
@@ -468,9 +481,9 @@ function renderTopStats(){
     statTile('Avg Instasells / hr', `${fmt.sig(avgInstasellsPerHr, 6)} ${deltaSpan('vSell', avgInstasellsPerHr)}`),
     statTile('Avg Sell-Order Amount', `${fmt.sig(avgSellOrder, 6)} ${deltaSpan('avgSellOrder', avgSellOrder)}`),
     statTile('Avg Buy-Order Amount', `${fmt.sig(avgBuyOrder, 6)} ${deltaSpan('avgBuyOrder', avgBuyOrder)}`),
-    statTile('Top-of-Book Size (Ask)', `${fmt.coins(topLevelAmount(asksSummary,'ask'))} ${deltaSpan('topAskSize', topLevelAmount(asksSummary,'ask'))}`),
-    statTile('Top-of-Book Size (Bid)', `${fmt.coins(topLevelAmount(bidsSummary,'bid'))} ${deltaSpan('topBidSize', topLevelAmount(bidsSummary,'bid'))}`),
-    statTile('Depth (±0.5%)', `${fmt.coins(depthNotional(bidsSummary, asksSummary, 0.5))} ${deltaSpan('depth05', depthNotional(bidsSummary, asksSummary, 0.5))}`),
+    statTile('Top-of-Book Size (Ask)', `${fmt.coins(tobAsk)} ${deltaSpan('topAskSize', tobAsk)}`),
+    statTile('Top-of-Book Size (Bid)', `${fmt.coins(tobBid)} ${deltaSpan('topBidSize', tobBid)}`),
+    statTile('Depth (±0.5%)', `${fmt.coins(depth05)} ${deltaSpan('depth05', depth05)}`),
   ].join('');
 }
 
@@ -496,14 +509,12 @@ function chooseSides(data){
   const bidB = safeMaxPrice(sells);
   const spreadB = askB - bidB;
 
-  // Prefer any non-negative spread; break ties by smaller spread
   if (isFinite(spreadA) && spreadA >= 0 && (!isFinite(spreadB) || spreadB < 0 || spreadA <= spreadB)) {
     return { asks: sells, bids: buys };
   }
   if (isFinite(spreadB) && spreadB >= 0) {
     return { asks: buys, bids: sells }; // swapped
   }
-  // Fallback: least-wrong pair by |spread|
   return Math.abs(spreadA) <= Math.abs(spreadB)
     ? { asks: sells, bids: buys }
     : { asks: buys,  bids: sells };
@@ -593,7 +604,7 @@ async function loadData(itemId){
   updateLastUpdated();
 
   // For ghost maintenance, create sorted snapshots
-  const curAsksDesc = [...asksSummary].sort((a,b)=> b.pricePerUnit - a.pricePerUnit); // asks high→low for sweep-out detection
+  const curAsksDesc = [...asksSummary].sort((a,b)=> b.pricePerUnit - a.pricePerUnit); // asks high→low
   const curBidsAsc  = [...bidsSummary].sort((a,b)=> a.pricePerUnit - b.pricePerUnit); // bids low→high
   if (prevAsksDesc.length || prevBidsAsc.length) rememberVanishedOutsideTop13(curAsksDesc, curBidsAsc);
   cleanGhostsAgainstCurrent(curAsksDesc, curBidsAsc);
@@ -607,7 +618,6 @@ const preTrack = urlParams.get("track");
 if (preItem) { itemInput.value = preItem; selectItem(preItem); }
 if (preTrack) trackInput.value = preTrack;
 
-// One poller only; deltas persist between renders
 setInterval(() => { if (currentItemId) loadData(currentItemId); }, POLL_MS);
 fetchAllItems();
   </script>
