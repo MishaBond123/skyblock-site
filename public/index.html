@@ -172,16 +172,19 @@ const orderInfo = document.getElementById("orderInfo");
 
 let currentItemId = "";
 let allItems = [];
-let latestBuySummary = [];
-let latestSellSummary = [];
-let lastHourlyBuyVolume  = 0;  // avg instasells per hour
-let lastHourlySellVolume = 0;  // avg instabuys per hour
+
+// We'll keep these names intuitive now
+let asksSummary = []; // sell orders
+let bidsSummary = []; // buy orders
+
+let avgInstabuysPerHr  = 0; // buyMovingWeek/168
+let avgInstasellsPerHr = 0; // sellMovingWeek/168
 let useGrouping = false;
 
-let prevBuySortedDesc = [];
-let prevSellSortedAsc = [];
+let prevAsksDesc = [];
+let prevBidsAsc = [];
 
-// store previous metric values to compute percentage deltas
+// previous metric values for percentage deltas
 const prevMetrics = new Map();
 const EPS = 1e-9;
 
@@ -192,24 +195,13 @@ const fmt = {
   pct(n, s=2){ if (!isFinite(n)) return '—'; return `${Math.abs(Number(n).toFixed(s))}%`; },
 };
 
-function deltaSpan(key, newVal){
-  const oldVal = prevMetrics.has(key) ? prevMetrics.get(key) : null;
-  prevMetrics.set(key, newVal);
-  if (oldVal === null || !isFinite(newVal) || !isFinite(oldVal)) {
-    return `<span class="delta delta-flat">(—)</span>`;
-  }
-  const diffPct = ((newVal - oldVal) / (Math.abs(oldVal) || 1)) * 100;
-  if (Math.abs(diffPct) < 1e-6) return `<span class="delta delta-flat">(0%)</span>`;
-  const cls = diffPct > 0 ? 'delta-up' : 'delta-down';
-  const sign = diffPct > 0 ? '+' : '−';
-  return `<span class="delta ${cls}">(${sign}${Math.abs(diffPct).toFixed(2)}%)</span>`;
-}
-
+// ---------- Helpers ----------
 function keyPrice(p){ return Math.round(p * 10) / 10; }
 function sameLevel(a, b){ return keyPrice(a) === keyPrice(b); }
 function storageKey(itemId, side){ return `remembered:${itemId}:${side}`; }
 function readRemembered(itemId, side){ try { return JSON.parse(localStorage.getItem(storageKey(itemId,side)) || "[]"); } catch { return []; } }
 function writeRemembered(itemId, side, arr){ try { localStorage.setItem(storageKey(itemId,side), JSON.stringify(arr)); } catch {} }
+
 function addGhost(itemId, side, price, amount, orders){
   const arr = readRemembered(itemId, side);
   const k = keyPrice(price);
@@ -218,10 +210,15 @@ function addGhost(itemId, side, price, amount, orders){
     writeRemembered(itemId, side, arr);
   }
 }
+
 function crossed(side, price, bestBid, bestAsk){
   return side==="buy" ? price >= bestAsk - EPS : price <= bestBid + EPS;
 }
 
+function safeMinPrice(arr){ return arr.length ? Math.min(...arr.map(r=>r.pricePerUnit)) : Infinity; }
+function safeMaxPrice(arr){ return arr.length ? Math.max(...arr.map(r=>r.pricePerUnit)) : -Infinity; }
+
+// Group within ±pct of the running anchor
 function groupSummary(summary, pct = GROUP_PCT) {
   if (!Array.isArray(summary) || summary.length === 0) return [];
   const tol = pct / 100;
@@ -244,17 +241,29 @@ function groupSummary(summary, pct = GROUP_PCT) {
   return out;
 }
 
-function buildDisplaysWithGhosts(apiSellSummary, apiBuySummary) {
+// Build table displays (bids on left, asks on right), ghosts appended after live
+function buildDisplaysWithGhosts(asks, bids) {
   const buyGhosts = readRemembered(currentItemId, "buy")
-    .filter(r => !apiSellSummary.some(x => sameLevel(x.pricePerUnit, r.price)))
+    .filter(r => !bids.some(x => sameLevel(x.pricePerUnit, r.price)))
     .map(r => ({ orders: r.orders ?? 1, amount: r.amount ?? 0, pricePerUnit: keyPrice(r.price), ghost: true }));
+
   const sellGhosts = readRemembered(currentItemId, "sell")
-    .filter(r => !apiBuySummary.some(x => sameLevel(x.pricePerUnit, r.price)))
+    .filter(r => !asks.some(x => sameLevel(x.pricePerUnit, r.price)))
     .map(r => ({ orders: r.orders ?? 1, amount: r.amount ?? 0, pricePerUnit: keyPrice(r.price), ghost: true }));
-  const apiSellGrouped = useGrouping ? groupSummary(apiSellSummary) : [...apiSellSummary];
-  const apiBuyGrouped  = useGrouping ? groupSummary(apiBuySummary)  : [...apiBuySummary];
-  const buyCombined  = [...apiSellGrouped, ...buyGhosts].sort((a,b)=> (!!a.ghost !== !!b.ghost) ? (a.ghost ? 1 : -1) : (b.pricePerUnit - a.pricePerUnit));
-  const sellCombined = [...apiBuyGrouped,  ...sellGhosts].sort((a,b)=> (!!a.ghost !== !!b.ghost) ? (a.ghost ? 1 : -1) : (a.pricePerUnit - b.pricePerUnit));
+
+  const bidsGrouped = useGrouping ? groupSummary(bids) : [...bids];
+  const asksGrouped = useGrouping ? groupSummary(asks) : [...asks];
+
+  const buyCombined  = [...bidsGrouped, ...buyGhosts].sort((a,b)=>{
+    if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1;
+    return b.pricePerUnit - a.pricePerUnit; // bids high→low
+  });
+
+  const sellCombined = [...asksGrouped, ...sellGhosts].sort((a,b)=>{
+    if (!!a.ghost !== !!b.ghost) return a.ghost ? 1 : -1;
+    return a.pricePerUnit - b.pricePerUnit; // asks low→high
+  });
+
   return { buyDisplay: buyCombined, sellDisplay: sellCombined };
 }
 
@@ -287,9 +296,9 @@ function renderTable(summary, tbody, tfootRow, hourlyVolume){
 }
 
 function renderCurrentTables() {
-  const { buyDisplay, sellDisplay } = buildDisplaysWithGhosts(latestBuySummary, latestSellSummary);
-  renderTable(buyDisplay,  buyBody,  buyFoot,  lastHourlyBuyVolume);
-  renderTable(sellDisplay, sellBody, sellFoot, lastHourlySellVolume);
+  const { buyDisplay, sellDisplay } = buildDisplaysWithGhosts(asksSummary, bidsSummary);
+  renderTable(buyDisplay,  buyBody,  buyFoot,  avgInstabuysPerHr);
+  renderTable(sellDisplay, sellBody, sellFoot, avgInstasellsPerHr);
   const tracked = parseFloat((trackInput.value || "").replace(/,/g, ''));
   highlightTrackedOrder(tracked, buyDisplay, sellDisplay);
 }
@@ -324,65 +333,96 @@ function highlightTrackedOrder(price, buyShown, sellShown){
   }
 }
 
-function rememberVanishedOutsideTop13(curBuyDesc, curSellAsc) {
-  const curBuyKeys  = new Set(curBuyDesc.map(r => keyPrice(r.pricePerUnit)));
-  const curSellKeys = new Set(curSellAsc.map(r => keyPrice(r.pricePerUnit)));
-  prevBuySortedDesc.forEach((r, idx) => {
+function rememberVanishedOutsideTop13(curAsksDesc, curBidsAsc) {
+  const curAskKeys  = new Set(curAsksDesc.map(r => keyPrice(r.pricePerUnit)));
+  const curBidKeys  = new Set(curBidsAsc.map(r  => keyPrice(r.pricePerUnit)));
+  prevAsksDesc.forEach((r, idx) => {
     if (idx >= 13) {
       const k = keyPrice(r.pricePerUnit);
-      if (!curBuyKeys.has(k)) { addGhost(currentItemId, "buy", k, r.amount, r.orders); }
+      if (!curAskKeys.has(k)) addGhost(currentItemId, "sell", k, r.amount, r.orders);
     }
   });
-  prevSellSortedAsc.forEach((r, idx) => {
+  prevBidsAsc.forEach((r, idx) => {
     if (idx >= 13) {
       const k = keyPrice(r.pricePerUnit);
-      if (!curSellKeys.has(k)) { addGhost(currentItemId, "sell", k, r.amount, r.orders); }
+      if (!curBidKeys.has(k)) addGhost(currentItemId, "buy", k, r.amount, r.orders);
     }
   });
 }
 
-function cleanGhostsAgainstCurrent(curBuyDesc, curSellAsc) {
-  const buyLevels  = curBuyDesc.map(r => keyPrice(r.pricePerUnit));
-  const sellLevels = curSellAsc.map(r => keyPrice(r.pricePerUnit));
-  const bestAsk = Math.min(...curBuyDesc.map(r => r.pricePerUnit || Infinity)); // top-of-book ask
-  const bestBid = Math.max(...curSellAsc.map(r => r.pricePerUnit || -Infinity)); // top-of-book bid
-  let keptBuy = [];
-  for (const g of readRemembered(currentItemId, "buy")) {
-    const k = keyPrice(g.price);
-    if (buyLevels.includes(k)) continue;
-    if (crossed("buy", k, bestBid, bestAsk)) { continue; }
-    keptBuy.push(g);
-  }
-  writeRemembered(currentItemId, "buy", keptBuy);
+function cleanGhostsAgainstCurrent(curAsksDesc, curBidsAsc) {
+  const askLevels  = curAsksDesc.map(r => keyPrice(r.pricePerUnit));
+  const bidLevels  = curBidsAsc.map(r  => keyPrice(r.pricePerUnit));
+  const bestAsk = safeMinPrice(curAsksDesc);
+  const bestBid = safeMaxPrice(curBidsAsc);
+  // sell ghosts
   let keptSell = [];
   for (const g of readRemembered(currentItemId, "sell")) {
     const k = keyPrice(g.price);
-    if (sellLevels.includes(k)) continue;
-    if (crossed("sell", k, bestBid, bestAsk)) { continue; }
+    if (askLevels.includes(k)) continue;
+    if (crossed("sell", k, bestBid, bestAsk)) continue;
     keptSell.push(g);
   }
   writeRemembered(currentItemId, "sell", keptSell);
+  // buy ghosts
+  let keptBuy = [];
+  for (const g of readRemembered(currentItemId, "buy")) {
+    const k = keyPrice(g.price);
+    if (bidLevels.includes(k)) continue;
+    if (crossed("buy", k, bestBid, bestAsk)) continue;
+    keptBuy.push(g);
+  }
+  writeRemembered(currentItemId, "buy", keptBuy);
 }
 
-// ---- Top stats (with correct top-of-book + positive % spread) ----
+// ---------- Deltas ----------
+function deltaSpan(key, newVal){
+  const oldVal = prevMetrics.has(key) ? prevMetrics.get(key) : null;
+  prevMetrics.set(key, newVal);
+  if (oldVal === null || !isFinite(newVal) || !isFinite(oldVal)) return `<span class="delta delta-flat">(—)</span>`;
+  const diffPct = ((newVal - oldVal) / (Math.abs(oldVal) || 1)) * 100;
+  if (Math.abs(diffPct) < 1e-6) return `<span class="delta delta-flat">(0%)</span>`;
+  const cls = diffPct > 0 ? 'delta-up' : 'delta-down';
+  const sign = diffPct > 0 ? '+' : '−';
+  return `<span class="delta ${cls}">(${sign}${Math.abs(diffPct).toFixed(2)}%)</span>`;
+}
+
 function statTile(label, valueHtml){
   return `<div class="stat"><div class="stat-label">${label}</div><div class="stat-value">${valueHtml}</div></div>`;
 }
 
+function topLevelAmount(summary, side){
+  if (!summary.length) return 0;
+  const bestPrice = side === 'ask'
+    ? Math.min(...summary.map(r=>r.pricePerUnit))
+    : Math.max(...summary.map(r=>r.pricePerUnit));
+  const lvl = summary.filter(r => Math.abs(r.pricePerUnit - bestPrice) < 1e-9);
+  return lvl.reduce((s,r)=>s+r.amount,0);
+}
+
+function depthNotional(bids, asks, pctBand){
+  if (!bids.length || !asks.length) return 0;
+  const bestAsk = Math.min(...asks.map(r=>r.pricePerUnit));
+  const bestBid = Math.max(...bids.map(r=>r.pricePerUnit));
+  const mid = (bestAsk + bestBid)/2; if (!isFinite(mid) || mid<=0) return 0;
+  const lo = mid*(1 - pctBand/100), hi = mid*(1 + pctBand/100);
+  const asksIn = asks.filter(r => r.pricePerUnit >= lo && r.pricePerUnit <= hi).slice(0,20);
+  const bidsIn = bids.filter(r => r.pricePerUnit >= lo && r.pricePerUnit <= hi).slice(0,20);
+  const notional = asksIn.reduce((s,r)=>s + r.amount*r.pricePerUnit, 0)
+                   + bidsIn.reduce((s,r)=>s + r.amount*r.pricePerUnit, 0);
+  return notional;
+}
+
 function renderTopStats(){
-  // IMPORTANT: Hypixel API: data.sell_summary = asks (people selling) => cheapest is top-of-book ask
-  //            data.buy_summary  = bids (people buying) => highest is top-of-book bid
-  const bestAsk = Math.min(...latestBuySummary.map(r=>r.pricePerUnit || Infinity));
-  const bestBid = Math.max(...latestSellSummary.map(r=>r.pricePerUnit || -Infinity));
+  const bestAsk = safeMinPrice(asksSummary);
+  const bestBid = safeMaxPrice(bidsSummary);
+
   const mid = (bestAsk + bestBid) / 2;
-  const spreadCoins = bestAsk - bestBid;
-  const spreadPct = (isFinite(mid) && mid > 0) ? Math.abs(spreadCoins / mid) * 100 : NaN; // always positive
+  const spreadCoins = bestAsk - bestBid;           // can be 0+, by construction
+  const spreadPct = (isFinite(mid) && mid > 0) ? Math.abs(spreadCoins / mid) * 100 : NaN;
 
-  const vBuy  = lastHourlySellVolume; // avg instabuys/hour (players buying instantly from asks)
-  const vSell = lastHourlyBuyVolume;  // avg instasells/hour (players selling instantly to bids)
-
-  const avgSellOrder = averageAmount(latestBuySummary);
-  const avgBuyOrder  = averageAmount(latestSellSummary);
+  const avgSellOrder = averageAmount(asksSummary);
+  const avgBuyOrder  = averageAmount(bidsSummary);
 
   topStats.innerHTML = [
     statTile('Best Ask', `${fmt.price(bestAsk)} ${deltaSpan('bestAsk', bestAsk)}`),
@@ -390,25 +430,50 @@ function renderTopStats(){
     statTile('Mid Price', `${fmt.price(mid)} ${deltaSpan('mid', mid)}`),
     statTile('Spread (coins)', `${fmt.coins(spreadCoins)} coins ${deltaSpan('spreadCoins', spreadCoins)}`),
     statTile('Spread %', `${fmt.pct(spreadPct, 3)} ${deltaSpan('spreadPct', spreadPct)}`),
-    statTile('Avg Instabuys / hr', `${fmt.sig(vBuy, 6)} ${deltaSpan('vBuy', vBuy)}`),
-    statTile('Avg Instasells / hr', `${fmt.sig(vSell, 6)} ${deltaSpan('vSell', vSell)}`),
+    statTile('Avg Instabuys / hr', `${fmt.sig(avgInstabuysPerHr, 6)} ${deltaSpan('vBuy', avgInstabuysPerHr)}`),
+    statTile('Avg Instasells / hr', `${fmt.sig(avgInstasellsPerHr, 6)} ${deltaSpan('vSell', avgInstasellsPerHr)}`),
     statTile('Avg Sell-Order Amount', `${fmt.sig(avgSellOrder, 6)} ${deltaSpan('avgSellOrder', avgSellOrder)}`),
     statTile('Avg Buy-Order Amount', `${fmt.sig(avgBuyOrder, 6)} ${deltaSpan('avgBuyOrder', avgBuyOrder)}`),
+    statTile('Top-of-Book Size (Ask)', `${fmt.coins(topLevelAmount(asksSummary,'ask'))} ${deltaSpan('topAskSize', topLevelAmount(asksSummary,'ask'))}`),
+    statTile('Top-of-Book Size (Bid)', `${fmt.coins(topLevelAmount(bidsSummary,'bid'))} ${deltaSpan('topBidSize', topLevelAmount(bidsSummary,'bid'))}`),
+    statTile('Depth (±0.5%)', `${fmt.coins(depthNotional(bidsSummary, asksSummary, 0.5))} ${deltaSpan('depth05', depthNotional(bidsSummary, asksSummary, 0.5))}`),
   ].join('');
 }
 
-function averageAmount(summary){
-  if (!summary.length) return 0;
-  return summary.reduce((s,r)=>s+r.amount,0) / summary.length;
-}
+function averageAmount(summary){ if (!summary.length) return 0; return summary.reduce((s,r)=>s+r.amount,0) / summary.length; }
 
 function updateLastUpdated(){
   const d = new Date();
   lastUpdated.textContent = `Updated ${d.toLocaleTimeString()} (every ${Math.round(POLL_MS/1000)}s)`;
 }
 
-// ---- Search + selection ----
 async function getApiKey(){ return ""; }
+
+// Choose correct sides; swap if spread negative, as requested
+function chooseSides(data){
+  const sells = data.sell_summary ?? [];
+  const buys  = data.buy_summary  ?? [];
+
+  const askA = safeMinPrice(sells);
+  const bidA = safeMaxPrice(buys);
+  const spreadA = askA - bidA;
+
+  const askB = safeMinPrice(buys);
+  const bidB = safeMaxPrice(sells);
+  const spreadB = askB - bidB;
+
+  // Prefer any non-negative spread; break ties by smaller spread
+  if (isFinite(spreadA) && spreadA >= 0 && (!isFinite(spreadB) || spreadB < 0 || spreadA <= spreadB)) {
+    return { asks: sells, bids: buys };
+  }
+  if (isFinite(spreadB) && spreadB >= 0) {
+    return { asks: buys, bids: sells }; // swapped
+  }
+  // Fallback: pick the least-wrong pair by |spread|
+  return Math.abs(spreadA) <= Math.abs(spreadB)
+    ? { asks: sells, bids: buys }
+    : { asks: buys,  bids: sells };
+}
 
 async function fetchAllItems(){
   const key = await getApiKey();
@@ -447,8 +512,8 @@ itemInput.addEventListener("input", () => {
 
 function selectItem(id){
   currentItemId = id;
-  prevBuySortedDesc = [];
-  prevSellSortedAsc = [];
+  prevAsksDesc = [];
+  prevBidsAsc = [];
   prevMetrics.clear(); // reset deltas when switching items
   chartLink.innerHTML = `Chart: <a href="https://skyblock.finance/items/${id}/chart" target="_blank" style="color:var(--accent);">skyblock.finance/items/${id}/chart</a>`;
   loadData(id);
@@ -459,7 +524,7 @@ function selectItem(id){
 
 trackInput.addEventListener("change", () => {
   const tracked = parseFloat((trackInput.value||"").replace(/,/g,''));
-  const { buyDisplay, sellDisplay } = buildDisplaysWithGhosts(latestBuySummary, latestSellSummary);
+  const { buyDisplay, sellDisplay } = buildDisplaysWithGhosts(asksSummary, bidsSummary);
   highlightTrackedOrder(tracked, buyDisplay, sellDisplay);
 });
 
@@ -469,7 +534,7 @@ groupToggle.addEventListener("change", () => {
   renderTopStats();
 });
 
-// ---- Data load / poll ----
+// ------------ Load / Poll ------------
 async function loadData(itemId){
   const key = await getApiKey();
   const url = key ? `https://api.hypixel.net/skyblock/bazaar?key=${key}` : `https://api.hypixel.net/skyblock/bazaar`;
@@ -479,28 +544,26 @@ async function loadData(itemId){
   if (!data) return;
 
   // Hourly estimates (moving week / 168)
-  const avgInstabuys  = data.quick_status.buyMovingWeek  / 168;
-  const avgInstasells = data.quick_status.sellMovingWeek / 168;
+  avgInstabuysPerHr  = data.quick_status.buyMovingWeek  / 168;
+  avgInstasellsPerHr = data.quick_status.sellMovingWeek / 168;
 
-  // SELL summary are the ask orders (people selling). BUY summary are bid orders (people buying).
-  latestBuySummary  = data.sell_summary ?? []; // asks
-  latestSellSummary = data.buy_summary  ?? []; // bids
-
-  lastHourlyBuyVolume  = avgInstasells;
-  lastHourlySellVolume = avgInstabuys;
+  // Side detection (swap if needed)
+  const { asks, bids } = chooseSides(data);
+  asksSummary = asks ?? [];
+  bidsSummary = bids ?? [];
 
   // Render tables + top stats
   renderCurrentTables();
   renderTopStats();
   updateLastUpdated();
 
-  // Maintain ghost memory
-  const curBuySortedDesc = [...latestBuySummary].sort((a,b)=> b.pricePerUnit - a.pricePerUnit);
-  const curSellSortedAsc = [...latestSellSummary].sort((a,b)=> a.pricePerUnit - b.pricePerUnit);
-  if (prevBuySortedDesc.length || prevSellSortedAsc.length) rememberVanishedOutsideTop13(curBuySortedDesc, curSellSortedAsc);
-  cleanGhostsAgainstCurrent(curBuySortedDesc, curSellSortedAsc);
-  prevBuySortedDesc = curBuySortedDesc;
-  prevSellSortedAsc = curSellSortedAsc;
+  // For ghost maintenance, create sorted snapshots
+  const curAsksDesc = [...asksSummary].sort((a,b)=> b.pricePerUnit - a.pricePerUnit); // asks high→low for sweep-out detection
+  const curBidsAsc  = [...bidsSummary].sort((a,b)=> a.pricePerUnit - b.pricePerUnit); // bids low→high
+  if (prevAsksDesc.length || prevBidsAsc.length) rememberVanishedOutsideTop13(curAsksDesc, curBidsAsc);
+  cleanGhostsAgainstCurrent(curAsksDesc, curBidsAsc);
+  prevAsksDesc = curAsksDesc;
+  prevBidsAsc  = curBidsAsc;
 }
 
 const urlParams = new URLSearchParams(location.search);
