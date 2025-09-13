@@ -472,9 +472,8 @@ function renderTopStats(){
   const depth05 = depthNotional(bidsSummary, asksSummary, 0.5);
 
   topStats.innerHTML = [
-    statTile('Best Ask', `${fmt.price(bestAsk)} ${deltaSpan('bestAsk', bestAsk)}`),
     statTile('Best Bid', `${fmt.price(bestBid)} ${deltaSpan('bestBid', bestBid)}`),
-    statTile('Mid Price', `${fmt.price(mid)} ${deltaSpan('mid', mid)}`),
+    statTile('Best Ask', `${fmt.price(bestAsk)} ${deltaSpan('bestAsk', bestAsk)}`),
     statTile('Spread (coins)', `${fmt.coins(spreadCoins)} coins ${deltaSpan('spreadCoins', spreadCoins)}`),
     statTile('Spread %', `${fmt.pct(spreadPct, 3)} ${deltaSpan('spreadPct', spreadPct)}`),
     statTile('Avg Instabuys / hr', `${fmt.sig(avgInstabuysPerHr, 6)} ${deltaSpan('vBuy', avgInstabuysPerHr)}`),
@@ -483,6 +482,7 @@ function renderTopStats(){
     statTile('Avg Buy-Order Amount', `${fmt.sig(avgBuyOrder, 6)} ${deltaSpan('avgBuyOrder', avgBuyOrder)}`),
     statTile('Top-of-Book Size (Ask)', `${fmt.coins(tobAsk)} ${deltaSpan('topAskSize', tobAsk)}`),
     statTile('Top-of-Book Size (Bid)', `${fmt.coins(tobBid)} ${deltaSpan('topBidSize', tobBid)}`),
+    statTile('Mid Price', `${fmt.price(mid)} ${deltaSpan('mid', mid)}`),
     statTile('Depth (±0.5%)', `${fmt.coins(depth05)} ${deltaSpan('depth05', depth05)}`),
   ].join('');
 }
