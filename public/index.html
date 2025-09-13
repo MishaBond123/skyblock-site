@@ -152,6 +152,7 @@
 
   <script type="module">
 const GROUP_PCT = 0.15;
+// Change this if you like; deltas now persist between polls.
 const POLL_MS = 3000;
 
 const itemInput  = document.getElementById("itemInput");
@@ -173,9 +174,9 @@ const orderInfo = document.getElementById("orderInfo");
 let currentItemId = "";
 let allItems = [];
 
-// We'll keep these names intuitive now
-let asksSummary = []; // sell orders
-let bidsSummary = []; // buy orders
+// asks = sell orders; bids = buy orders
+let asksSummary = [];
+let bidsSummary = [];
 
 let avgInstabuysPerHr  = 0; // buyMovingWeek/168
 let avgInstasellsPerHr = 0; // sellMovingWeek/168
@@ -184,9 +185,11 @@ let useGrouping = false;
 let prevAsksDesc = [];
 let prevBidsAsc = [];
 
-// previous metric values for percentage deltas
+// Persisted metrics for deltas (value + last rendered delta)
 const prevMetrics = new Map();
-const EPS = 1e-9;
+
+// Tolerances for “unchanged”
+const REL_EPS = 1e-6; // 0.0001% relative tolerance (robust for big numbers)
 
 const fmt = {
   coins(n){ if (!isFinite(n)) return '—'; return Math.round(n).toLocaleString(); },
@@ -194,6 +197,12 @@ const fmt = {
   sig(n, s=6){ if (!isFinite(n)) return '—'; return Number(n).toPrecision(s); },
   pct(n, s=2){ if (!isFinite(n)) return '—'; return `${Math.abs(Number(n).toFixed(s))}%`; },
 };
+
+function nearlyEqual(a,b){
+  if (!isFinite(a) || !isFinite(b)) return a === b;
+  const denom = Math.max(1, Math.abs(a), Math.abs(b));
+  return Math.abs(a - b) / denom <= REL_EPS;
+}
 
 // ---------- Helpers ----------
 function keyPrice(p){ return Math.round(p * 10) / 10; }
@@ -212,6 +221,7 @@ function addGhost(itemId, side, price, amount, orders){
 }
 
 function crossed(side, price, bestBid, bestAsk){
+  const EPS = 1e-9;
   return side==="buy" ? price >= bestAsk - EPS : price <= bestBid + EPS;
 }
 
@@ -375,16 +385,28 @@ function cleanGhostsAgainstCurrent(curAsksDesc, curBidsAsc) {
   writeRemembered(currentItemId, "buy", keptBuy);
 }
 
-// ---------- Deltas ----------
+// ---------- Persistent deltas (no 0% reset between polls) ----------
 function deltaSpan(key, newVal){
-  const oldVal = prevMetrics.has(key) ? prevMetrics.get(key) : null;
-  prevMetrics.set(key, newVal);
-  if (oldVal === null || !isFinite(newVal) || !isFinite(oldVal)) return `<span class="delta delta-flat">(—)</span>`;
-  const diffPct = ((newVal - oldVal) / (Math.abs(oldVal) || 1)) * 100;
-  if (Math.abs(diffPct) < 1e-6) return `<span class="delta delta-flat">(0%)</span>`;
-  const cls = diffPct > 0 ? 'delta-up' : 'delta-down';
-  const sign = diffPct > 0 ? '+' : '−';
-  return `<span class="delta ${cls}">(${sign}${Math.abs(diffPct).toFixed(2)}%)</span>`;
+  const rec = prevMetrics.get(key);
+  // If we have a previous reading and *effectively* nothing changed, reuse old delta
+  if (rec && isFinite(newVal) && isFinite(rec.val) && nearlyEqual(newVal, rec.val)) {
+    return rec.deltaHtml || `<span class="delta delta-flat">(—)</span>`;
+  }
+  // First observation (or invalid numbers): store and show neutral
+  if (!rec || !isFinite(newVal) || !isFinite(rec.val)) {
+    const html = `<span class="delta delta-flat">(—)</span>`;
+    prevMetrics.set(key, { val: newVal, deltaHtml: html });
+    return html;
+  }
+  // Compute percent change vs previous value and persist it until the value changes again
+  const diffPct = ((newVal - rec.val) / (Math.abs(rec.val) || 1)) * 100;
+  const cls = Math.abs(diffPct) < 1e-6 ? 'delta-flat' : (diffPct > 0 ? 'delta-up' : 'delta-down');
+  const sign = diffPct > 0 ? '+' : (diffPct < 0 ? '−' : '');
+  const html = Math.abs(diffPct) < 1e-6
+    ? `<span class="delta ${cls}">(0%)</span>`
+    : `<span class="delta ${cls}">(${sign}${Math.abs(diffPct).toFixed(2)}%)</span>`;
+  prevMetrics.set(key, { val: newVal, deltaHtml: html });
+  return html;
 }
 
 function statTile(label, valueHtml){
@@ -418,7 +440,7 @@ function renderTopStats(){
   const bestBid = safeMaxPrice(bidsSummary);
 
   const mid = (bestAsk + bestBid) / 2;
-  const spreadCoins = bestAsk - bestBid;           // can be 0+, by construction
+  const spreadCoins = bestAsk - bestBid; // non-negative when sides are correct
   const spreadPct = (isFinite(mid) && mid > 0) ? Math.abs(spreadCoins / mid) * 100 : NaN;
 
   const avgSellOrder = averageAmount(asksSummary);
@@ -449,7 +471,7 @@ function updateLastUpdated(){
 
 async function getApiKey(){ return ""; }
 
-// Choose correct sides; swap if spread negative, as requested
+// Pick correct sides; swap if spread negative (your rule)
 function chooseSides(data){
   const sells = data.sell_summary ?? [];
   const buys  = data.buy_summary  ?? [];
@@ -469,12 +491,13 @@ function chooseSides(data){
   if (isFinite(spreadB) && spreadB >= 0) {
     return { asks: buys, bids: sells }; // swapped
   }
-  // Fallback: pick the least-wrong pair by |spread|
+  // Fallback: least-wrong pair by |spread|
   return Math.abs(spreadA) <= Math.abs(spreadB)
     ? { asks: sells, bids: buys }
     : { asks: buys,  bids: sells };
 }
 
+// -------- Item search ----------
 async function fetchAllItems(){
   const key = await getApiKey();
   const url = key ? `https://api.hypixel.net/skyblock/bazaar?key=${key}` : `https://api.hypixel.net/skyblock/bazaar`;
@@ -572,6 +595,7 @@ const preTrack = urlParams.get("track");
 if (preItem) { itemInput.value = preItem; selectItem(preItem); }
 if (preTrack) trackInput.value = preTrack;
 
+// One poller only; deltas persist between renders
 setInterval(() => { if (currentItemId) loadData(currentItemId); }, POLL_MS);
 fetchAllItems();
   </script>
