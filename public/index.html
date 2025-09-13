@@ -415,11 +415,23 @@ function statTile(label, valueHtml){
 
 function topLevelAmount(summary, side){
   if (!summary.length) return 0;
-  const bestPrice = side === 'ask'
-    ? Math.min(...summary.map(r=>r.pricePerUnit))
-    : Math.max(...summary.map(r=>r.pricePerUnit));
-  const lvl = summary.filter(r => Math.abs(r.pricePerUnit - bestPrice) < 1e-9);
-  return lvl.reduce((s,r)=>s+r.amount,0);
+  const bestAsk = safeMinPrice(asksSummary);
+  const bestBid = safeMaxPrice(bidsSummary);
+  const mid = (bestAsk + bestBid) / 2;
+  if (!isFinite(mid) || mid <= 0) return 0;
+
+  // Allowed band = ±0.3% around mid
+  const band = 0.003;
+  const lo = mid * (1 - band);
+  const hi = mid * (1 + band);
+
+  // Use keyPrice (0.1 increments)
+  const levels = summary.filter(r => {
+    const kp = keyPrice(r.pricePerUnit);
+    return kp >= lo && kp <= hi;
+  });
+
+  return levels.reduce((s, r) => s + r.amount, 0);
 }
 
 function depthNotional(bids, asks, pctBand){
